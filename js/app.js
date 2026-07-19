@@ -204,37 +204,272 @@
     return '<div class="fact wide"><div class="k">' + k + '</div><div class="v"><div class="chips">' + v + '</div></div></div>';
   }
 
-  // ---- Mini-karta lokacije (canvas, ekvidistantna cilindrična projekcija) ----
-  function miniMapHTML(c) {
-    var ll = window.COORDS && window.COORDS[c.code];
-    if (!ll) return "";
-    return '<div class="fact wide map"><div class="k">' + T("fLocation") + '</div>' +
-      '<canvas class="minimap" width="720" height="360" data-lat="' + ll[0] + '" data-lng="' + ll[1] + '"></canvas></div>';
-  }
-  function drawMiniMap(cv) {
-    if (!window.WORLD_LAND) return;
-    var lat = parseFloat(cv.dataset.lat), lng = parseFloat(cv.dataset.lng);
-    var W = cv.width, H = cv.height, ctx = cv.getContext("2d");
+  // ---- Karte lokacije (svijet + približeno; ispunjena površina države) ----
+  // Okviri kontinenata [minLng, minLat, maxLng, maxLat] za zoom kontekst.
+  var CONTINENT_FRAMES = {
+    "Europa": [-25, 34, 48, 72],
+    "Azija": [25, -12, 150, 56],
+    "Afrika": [-20, -37, 55, 38],
+    "Sjeverna Amerika": [-170, 5, -50, 75],
+    "Južna Amerika": [-85, -58, -32, 15],
+    "Oceanija": [110, -50, 180, 0]
+  };
+
+  function mapTheme() {
+    // Karta je didaktički dijagram (ne UI chrome): more = plavo, kopno = zeleno,
+    // kao školski atlas — mora biti odmah jasno i osnovnoškolcima.
     var theme = document.documentElement.getAttribute("data-theme") ||
       (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     var dark = theme === "dark";
-    var ocean = dark ? "#12203a" : "#dbe8f7", land = dark ? "#37456320" : "#aebdd2", marker = dark ? "#fb7185" : "#e11d48";
-    var landFill = dark ? "#374563" : "#aebdd2";
-    var X = function (lo) { return (lo + 180) / 360 * W; };
-    var Y = function (la) { return (90 - la) / 180 * H; };
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = ocean; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = landFill;
-    window.WORLD_LAND.forEach(function (ring) {
-      ctx.beginPath();
-      ring.forEach(function (p, i) { var x = X(p[0]), y = Y(p[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
-      ctx.closePath(); ctx.fill();
-    });
-    var mx = X(lng), my = Y(lat), TAU = Math.PI * 2;
-    ctx.beginPath(); ctx.arc(mx, my, 20, 0, TAU); ctx.fillStyle = marker + "44"; ctx.fill();
-    ctx.beginPath(); ctx.arc(mx, my, 9, 0, TAU); ctx.fillStyle = marker; ctx.fill();
-    ctx.lineWidth = 3; ctx.strokeStyle = "#fff"; ctx.stroke();
+    return {
+      ocean: dark ? "#1565c0" : "#42a5f5",
+      land: dark ? "#81c784" : "#a5d6a7",
+      coast: dark ? "#2e7d32" : "#558b2f",
+      border: dark ? "rgba(15, 40, 20, 0.85)" : "rgba(20, 50, 25, 0.7)",
+      fill: "#e11d48",
+      stroke: "#9f1239"
+    };
   }
+
+  function fillLand(ctx, rings, X, Y, colors, lineWidth) {
+    ctx.fillStyle = colors.land;
+    fillRings(ctx, rings, X, Y);
+    // Obrub obale — oštra granica more/kopno
+    ctx.strokeStyle = colors.coast;
+    ctx.lineWidth = lineWidth || 1.25;
+    ctx.lineJoin = "round";
+    rings.forEach(function (ring) {
+      ctx.beginPath();
+      ring.forEach(function (p, i) {
+        var x = X(p[0]), y = Y(p[1]);
+        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+    });
+  }
+
+  // Blage granice svih država — kontekst na velikim kontinentima (Azija itd.).
+  function drawAllBorders(ctx, X, Y, colors, lineWidth) {
+    var all = window.COUNTRY_POLYS;
+    if (!all) return;
+    ctx.strokeStyle = colors.border;
+    ctx.lineWidth = lineWidth || 0.7;
+    ctx.lineJoin = "round";
+    Object.keys(all).forEach(function (code) {
+      var polys = all[code];
+      for (var i = 0; i < polys.length; i++) {
+        var poly = polys[i];
+        // Samo vanjski prsten (bez rupa) — dovoljno za orijentaciju
+        var ring = poly[0];
+        if (!ring || ring.length < 3) continue;
+        ctx.beginPath();
+        for (var j = 0; j < ring.length; j++) {
+          var p = ring[j];
+          var x = X(p[0]), y = Y(p[1]);
+          if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    });
+  }
+
+  function wrapLng(lng, center) {
+    var d = lng - center;
+    while (d > 180) d -= 360;
+    while (d < -180) d += 360;
+    return center + d;
+  }
+
+  function countryBBox(code) {
+    var polys = window.COUNTRY_POLYS && window.COUNTRY_POLYS[code];
+    if (!polys || !polys.length) return null;
+    var center = (window.COORDS && window.COORDS[code]) ? window.COORDS[code][1] : 0;
+    var minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+    polys.forEach(function (poly) {
+      poly[0].forEach(function (p) {
+        var lng = wrapLng(p[0], center);
+        if (lng < minLng) minLng = lng;
+        if (lng > maxLng) maxLng = lng;
+        if (p[1] < minLat) minLat = p[1];
+        if (p[1] > maxLat) maxLat = p[1];
+      });
+    });
+    if (!isFinite(minLng)) return null;
+    return { minLng: minLng, minLat: minLat, maxLng: maxLng, maxLat: maxLat, center: center };
+  }
+
+  function zoomViewFor(c) {
+    var bb = countryBBox(c.code);
+    if (!bb) return null;
+    var w = bb.maxLng - bb.minLng;
+    var h = bb.maxLat - bb.minLat;
+    var padLng = Math.max(w * 0.9, 8);
+    var padLat = Math.max(h * 0.9, 6);
+    var minLng = bb.minLng - padLng;
+    var maxLng = bb.maxLng + padLng;
+    var minLat = bb.minLat - padLat;
+    var maxLat = bb.maxLat + padLat;
+
+    // Proširi do dijela kontinenta ako je država mala; ne širi iznad okvira kontinenta.
+    var frame = CONTINENT_FRAMES[c.continent];
+    if (frame) {
+      var fw = frame[2] - frame[0];
+      var fh = frame[3] - frame[1];
+      var wantW = Math.min(fw * 0.55, Math.max(maxLng - minLng, fw * 0.28));
+      var wantH = Math.min(fh * 0.55, Math.max(maxLat - minLat, fh * 0.28));
+      var cx = (minLng + maxLng) / 2;
+      var cy = (minLat + maxLat) / 2;
+      minLng = cx - wantW / 2;
+      maxLng = cx + wantW / 2;
+      minLat = cy - wantH / 2;
+      maxLat = cy + wantH / 2;
+      // Drži unutar kontinenta kad stane; inače ostavi širi okvir (Rusija, SAD…).
+      if (w < fw * 0.85 && h < fh * 0.85) {
+        minLng = Math.max(minLng, frame[0]);
+        maxLng = Math.min(maxLng, frame[2]);
+        minLat = Math.max(minLat, frame[1]);
+        maxLat = Math.min(maxLat, frame[3]);
+      }
+    }
+
+    // Uskladi omjer sa canvasom 720×420
+    var aspect = 720 / 420;
+    w = maxLng - minLng;
+    h = maxLat - minLat;
+    if (w / h > aspect) {
+      var extra = (w / aspect - h) / 2;
+      minLat -= extra;
+      maxLat += extra;
+    } else {
+      var extraW = (h * aspect - w) / 2;
+      minLng -= extraW;
+      maxLng += extraW;
+    }
+    return { minLng: minLng, minLat: minLat, maxLng: maxLng, maxLat: maxLat, center: bb.center };
+  }
+
+  function projectors(view, W, H) {
+    if (!view) {
+      return {
+        X: function (lng) { return (lng + 180) / 360 * W; },
+        Y: function (lat) { return (90 - lat) / 180 * H; }
+      };
+    }
+    var spanLng = view.maxLng - view.minLng;
+    var spanLat = view.maxLat - view.minLat;
+    return {
+      X: function (lng) { return (wrapLng(lng, view.center) - view.minLng) / spanLng * W; },
+      Y: function (lat) { return (view.maxLat - lat) / spanLat * H; }
+    };
+  }
+
+  function fillRings(ctx, rings, X, Y) {
+    rings.forEach(function (ring) {
+      ctx.beginPath();
+      ring.forEach(function (p, i) {
+        var x = X(p[0]), y = Y(p[1]);
+        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fill();
+    });
+  }
+
+  function drawCountryFill(ctx, code, X, Y, colors, opts) {
+    var polys = window.COUNTRY_POLYS && window.COUNTRY_POLYS[code];
+    if (!polys) return;
+    opts = opts || {};
+
+    // Na svjetskoj karti mikrodržave bi inače bile nevidljive — blago povećaj
+    // projekciju oko središta (i dalje ispunjena površina, ne točka).
+    var scale = 1;
+    var cx = 0, cy = 0, n = 0;
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    polys.forEach(function (poly) {
+      poly[0].forEach(function (p) {
+        var x = X(p[0]), y = Y(p[1]);
+        cx += x; cy += y; n++;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      });
+    });
+    if (!n) return;
+    cx /= n; cy /= n;
+    var screenW = maxX - minX;
+    var screenH = maxY - minY;
+    if (opts.boostSmall) {
+      // Na 720×360 svjetskoj karti male države inače nestanu — uvećaj oblik.
+      var minPx = 22;
+      var span = Math.max(screenW, screenH, 0.5);
+      if (span < minPx) scale = minPx / span;
+    }
+
+    function px(p) {
+      var x = X(p[0]), y = Y(p[1]);
+      if (scale === 1) return { x: x, y: y };
+      return { x: cx + (x - cx) * scale, y: cy + (y - cy) * scale };
+    }
+
+    ctx.fillStyle = colors.fill;
+    ctx.strokeStyle = opts.boostSmall ? colors.fill : colors.stroke;
+    // Deblji obrub iste boje na svjetskoj karti = čitljiv oblik, ne točka.
+    var fat = opts.boostSmall ? Math.max(2.5, 12 / Math.max(screenW * scale, screenH * scale, 1)) : 1.5;
+    ctx.lineWidth = fat;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    polys.forEach(function (poly) {
+      ctx.beginPath();
+      poly.forEach(function (ring) {
+        ring.forEach(function (p, i) {
+          var pt = px(p);
+          if (i) ctx.lineTo(pt.x, pt.y); else ctx.moveTo(pt.x, pt.y);
+        });
+        ctx.closePath();
+      });
+      ctx.fill("evenodd");
+      ctx.stroke();
+    });
+  }
+
+  function miniMapHTML(c) {
+    if (!window.COUNTRY_POLYS || !window.COUNTRY_POLYS[c.code]) return "";
+    return '<div class="fact wide map"><div class="k">' + T("fLocation") + '</div>' +
+      '<div class="map-stack">' +
+        '<div class="map-caption">' + T("fMapWorld") + '</div>' +
+        '<canvas class="minimap" width="720" height="360" data-mode="world" data-code="' + c.code + '"></canvas>' +
+        '<div class="map-caption">' + T("fMapZoom") + '</div>' +
+        '<canvas class="minimap minimap-zoom" width="720" height="420" data-mode="zoom" data-code="' + c.code + '"></canvas>' +
+        '<div class="map-legend" aria-hidden="true">' +
+          '<span><i class="swatch ocean"></i>' + T("mapOcean") + '</span>' +
+          '<span><i class="swatch land"></i>' + T("mapLand") + '</span>' +
+          '<span><i class="swatch country"></i>' + T("mapCountry") + '</span>' +
+        '</div>' +
+      '</div></div>';
+  }
+
+  function drawMiniMap(cv) {
+    if (!window.WORLD_LAND) return;
+    var code = cv.dataset.code;
+    var mode = cv.dataset.mode || "world";
+    var W = cv.width, H = cv.height, ctx = cv.getContext("2d");
+    var colors = mapTheme();
+    var country = byCode[code];
+    var view = mode === "zoom" && country ? zoomViewFor(country) : null;
+    var proj = projectors(view, W, H);
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = colors.ocean;
+    ctx.fillRect(0, 0, W, H);
+    fillLand(ctx, window.WORLD_LAND, proj.X, proj.Y, colors, mode === "zoom" ? 1.75 : 1.1);
+    // Sve granice blago, zatim crvena ispuna tražene države
+    drawAllBorders(ctx, proj.X, proj.Y, colors, mode === "zoom" ? 1.45 : 0.75);
+    drawCountryFill(ctx, code, proj.X, proj.Y, colors, { boostSmall: mode === "world" });
+  }
+
   function drawMaps(root) {
     Array.prototype.forEach.call(root.querySelectorAll("canvas.minimap"), drawMiniMap);
   }

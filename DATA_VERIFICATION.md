@@ -8,20 +8,27 @@ a ne samo pretpostavljeni.
   `restcountries.com`): glavni grad, kontinent (regija/podregija), valuta, susjedi i
   hrvatski nazivi.
 - **[samayo/country-json](https://github.com/samayo/country-json)** — populacija i dominantna religija.
-- **Wikipedia / World Bank** (preko web pretrage) — ciljana provjera pojedinih brojki.
+- **Wikipedia / World Bank / ECB** — ciljana provjera pojedinih brojki i valuta.
+- **[Natural Earth 50m](https://www.naturalearthdata.com/)** — poligoni država za karte
+  (`js/countrypolys.js`).
 
 ## Rezultat provjere (197 država)
 
 | Polje | Rezultat |
 |-------|----------|
 | **Kontinent** | 0 neslaganja — svih 197 se poklapa, uključujući transkontinentalne (Rusija→Europa, Turska→Azija). |
-| **Glavni grad** | 56 „razlika" — sve su hrvatski/lokalni egzonimi naspram engleskog (Beč/Vienna, Rim/Rome, Peking/Beijing). Točni. |
-| **Hrvatski nazivi** | 10 razlika — provjereno s hrvatskom Wikipedijom; korišteni su standardni oblici (Fidži, Tadžikistan, Salomonski Otoci…). |
-| **Populacija** | Vrijednosti su novije (2023./24.) od zastarjelih (2018.) u `samayo`; velike razlike potvrđene pretragom (npr. Eritreja ~3,6 mil., Sirija ~24 mil.). |
-| **Religija** | 182/184 se poklapa s izvorom; Tajvan i Vijetnam („folk religion") opisani kao budizam/taoizam. |
-| **Susjedi** | Ispravljene 2 stvarne greške: **Španjolska–Maroko** (Ceuta/Melilla) i **Azerbajdžan–Turska** (egzeklava Nahičevan). |
+| **Glavni grad** | Hrvatski/lokalni egzonimi naspram engleskog (Beč/Vienna, Rim/Rome, Peking/Beijing). Točni. |
+| **Hrvatski nazivi** | Provjereno s hrvatskom Wikipedijom; korišteni su standardni oblici. |
+| **Populacija** | Zaokružene procjene (~2023./24.); 0 outliera (>2× / <0,5×) naspram mledoze. |
+| **Religija** | Uglavnom usklađeno; Tajvan i Vijetnam („folk religion") opisani kao budizam/taoizam. |
+| **Susjedi** | Ispravljene ranije greške (Španjolska–Maroko, Azerbajdžan–Turska). Namjerno: Šri Lanka bez Indije (Palkov tjesnac); bez Gibraltar/HK/Macao (nisu u skupu). |
+| **Valute (2026.)** | **Bugarska → Euro** (ECB, 1. 1. 2026.). **Zimbabve → ZiG** (umjesto starog dolara). |
+
+## Karte
+- Svjetska + približena (kontinent / dio kontinenta).
+- Država se iscrtava ispunjenom površinom (ne točkom), iz Natural Earth poligona.
 
 ## Napomena
 Podaci su na „edukacijskoj" razini točnosti. Brojka stanovništva je zaokružena
-procjena; „poznato po" je opisno polje. Za Šri Lanku je zadržano „nema kopnenih
-granica" (razdvaja je Palkov tjesnac od Indije).
+procjena; „poznato po" je opisno polje. Kodovi `eh` (Zapadna Sahara) i `gf`
+(Francuska Gvajana) pojavljuju se u susjedima, ali nemaju vlastiti zapis u bazi.

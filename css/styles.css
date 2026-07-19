@@ -172,9 +172,48 @@ select:focus, input:focus { outline: 2px solid var(--primary); outline-offset: 1
 .fact.wide .v { font-weight: 500; font-size: .9rem; line-height: 1.45; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 
-/* mini-karta lokacije */
+/* mini-karte lokacije */
 .fact.map .k { margin-bottom: 8px; }
-.minimap { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-elev); }
+.map-stack { display: flex; flex-direction: column; gap: 8px; }
+.map-caption {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.minimap {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+.minimap-zoom { margin-bottom: 2px; }
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.map-legend .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+.map-legend .swatch.ocean { background: #42a5f5; }
+.map-legend .swatch.land { background: #a5d6a7; }
+.map-legend .swatch.country { background: #e11d48; }
+[data-theme="dark"] .map-legend .swatch.ocean { background: #1565c0; }
+[data-theme="dark"] .map-legend .swatch.land { background: #81c784; }
+[data-theme="dark"] .map-legend .swatch { border-color: rgba(255,255,255,0.25); }
 
 /* kućica sličnosti */
 .fact.confuse { display: flex; flex-direction: column; gap: 12px; }
