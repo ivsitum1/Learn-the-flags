@@ -82,6 +82,7 @@
     document.documentElement.setAttribute("data-theme", theme);
     $("#themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
     store.set("theme", theme);
+    if (typeof drawMaps === "function") drawMaps(document);
   }
   $("#themeBtn").addEventListener("click", function () {
     var cur = document.documentElement.getAttribute("data-theme");
@@ -160,7 +161,10 @@
         fact("Kod", c.code.toUpperCase()) +
         factWide("Susjedi", borderNames(c, false)) +
         factWide("Poznato po", c.knownFor) +
+        miniMapHTML(c) +
+        confusablesHTML(c) +
       '</div>';
+    drawMaps($("#cardBack"));
   }
 
   function fact(k, v) {
@@ -168,6 +172,59 @@
   }
   function factWide(k, v) {
     return '<div class="fact wide"><div class="k">' + k + '</div><div class="v"><div class="chips">' + v + '</div></div></div>';
+  }
+
+  // ---- Mini-karta lokacije (canvas, ekvidistantna cilindrična projekcija) ----
+  function miniMapHTML(c) {
+    var ll = window.COORDS && window.COORDS[c.code];
+    if (!ll) return "";
+    return '<div class="fact wide map"><div class="k">📍 Lokacija na karti</div>' +
+      '<canvas class="minimap" width="720" height="360" data-lat="' + ll[0] + '" data-lng="' + ll[1] + '"></canvas></div>';
+  }
+  function drawMiniMap(cv) {
+    if (!window.WORLD_LAND) return;
+    var lat = parseFloat(cv.dataset.lat), lng = parseFloat(cv.dataset.lng);
+    var W = cv.width, H = cv.height, ctx = cv.getContext("2d");
+    var theme = document.documentElement.getAttribute("data-theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var dark = theme === "dark";
+    var ocean = dark ? "#12203a" : "#dbe8f7", land = dark ? "#37456320" : "#aebdd2", marker = dark ? "#fb7185" : "#e11d48";
+    var landFill = dark ? "#374563" : "#aebdd2";
+    var X = function (lo) { return (lo + 180) / 360 * W; };
+    var Y = function (la) { return (90 - la) / 180 * H; };
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = ocean; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = landFill;
+    window.WORLD_LAND.forEach(function (ring) {
+      ctx.beginPath();
+      ring.forEach(function (p, i) { var x = X(p[0]), y = Y(p[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+      ctx.closePath(); ctx.fill();
+    });
+    var mx = X(lng), my = Y(lat), TAU = Math.PI * 2;
+    ctx.beginPath(); ctx.arc(mx, my, 20, 0, TAU); ctx.fillStyle = marker + "44"; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, my, 9, 0, TAU); ctx.fillStyle = marker; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = "#fff"; ctx.stroke();
+  }
+  function drawMaps(root) {
+    Array.prototype.forEach.call(root.querySelectorAll("canvas.minimap"), drawMiniMap);
+  }
+
+  // ---- Kućica sa sličnostima (slična zastava / sličan naziv) ----
+  function confusablesHTML(c) {
+    if (!window.CONFUSABLES) return "";
+    var groups = window.CONFUSABLES.filter(function (g) { return g.members.indexOf(c.code) !== -1; });
+    if (!groups.length) return "";
+    var inner = groups.map(function (g) {
+      var others = g.members.filter(function (m) { return m !== c.code && byCode[m]; });
+      var icon = g.type === "flag" ? "🎌" : "🔤";
+      var label = g.type === "flag" ? "Slična zastava" : "Sličan naziv";
+      var chips = others.map(function (code) {
+        return '<span class="chip link" data-code="' + code + '">' + flagEmoji(code) + " " + byCode[code].hr + '</span>';
+      }).join("");
+      return '<div class="confuse-item"><div class="confuse-h">' + icon + " " + label + '</div>' +
+        '<div class="chips">' + chips + '</div><div class="confuse-tip">' + g.tip + '</div></div>';
+    }).join("");
+    return '<div class="fact wide confuse"><div class="k">🔍 Lako zamijeniti s</div>' + inner + '</div>';
   }
 
   function flipCard() {
@@ -494,7 +551,10 @@
         fact("Kontinent", c.continent) +
         factWide("Susjedi", borderNames(c, true)) +
         factWide("Poznato po", c.knownFor) +
+        miniMapHTML(c) +
+        confusablesHTML(c) +
       '</div>';
+    drawMaps($("#modalBody"));
     $("#modalOverlay").classList.add("open");
   }
   function closeModal() { $("#modalOverlay").classList.remove("open"); }

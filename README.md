@@ -73,3 +73,9 @@ js/app.js          # logika (kartice, kviz, enciklopedija, multiplayer)
 
 ## 📝 Napomena
 Podaci (stanovništvo, vjera, „poznato po") približni su i služe u edukacijske svrhe.
+Provjera podataka opisana je u [`DATA_VERIFICATION.md`](DATA_VERIFICATION.md).
+
+## ⚖️ Licenca i prava
+Copyright © 2026 **ivsitum1**. Sva prava pridržana. Nositelj svih prava na
+repozitorij, aplikaciju izrađenu na temelju njega te na ideju i koncept jest
+ivsitum1. Detalji u datoteci [`LICENSE`](LICENSE).
