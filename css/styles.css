@@ -80,6 +80,10 @@ a { color: var(--primary); }
 .icon-btn:hover { background: var(--primary-soft); }
 .icon-btn:active { transform: scale(.94); }
 
+.lang-select {
+  min-width: 0; width: auto; padding: 8px 10px; border-radius: 12px; font-weight: 600; font-size: .9rem;
+  background: var(--bg-elev); border: 1px solid var(--border); color: var(--text);
+}
 .tabs { display: flex; gap: 6px; }
 .tab {
   border: 1px solid transparent; background: transparent; color: var(--text-soft);

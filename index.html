@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nauči zastave — edukacijska igra za učenje zastava svijeta</title>
-  <meta name="description" content="Zabavno naučite zastave svih država svijeta: kartice s razinama težine, kviz i enciklopedija s glavnim gradovima, valutama, vjerom, stanovništvom i susjedima." />
+  <meta name="description" content="Zabavno naučite zastave svih država svijeta: kartice s razinama težine, kviz za 1–6 igrača, enciklopedija, karta lokacije i savjeti za razlikovanje sličnih zastava. Na 5 jezika." />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>" />
 </head>
@@ -13,15 +13,16 @@
     <div class="inner">
       <div class="brand">
         <span class="globe">🌍</span>
-        <span>Nauči zastave</span>
+        <span data-i18n="appName">Nauči zastave</span>
       </div>
       <nav class="tabs">
-        <button class="tab active" data-view="flash">🃏 Kartice</button>
-        <button class="tab" data-view="quiz">❓ Kviz</button>
-        <button class="tab" data-view="enc">📚 Enciklopedija</button>
+        <button class="tab active" data-view="flash" data-i18n="tabCards">🃏 Kartice</button>
+        <button class="tab" data-view="quiz" data-i18n="tabQuiz">❓ Kviz</button>
+        <button class="tab" data-view="enc" data-i18n="tabEnc">📚 Enciklopedija</button>
       </nav>
       <span class="spacer"></span>
-      <button class="icon-btn" id="themeBtn" title="Promijeni temu">🌙</button>
+      <select id="langSelect" class="lang-select" aria-label="Language"></select>
+      <button class="icon-btn" id="themeBtn" data-i18n-title="theme" title="Promijeni temu">🌙</button>
     </div>
   </header>
 
@@ -30,113 +31,96 @@
     <section class="view active" id="view-flash">
       <div class="controls">
         <div class="control-group">
-          <label>Težina</label>
+          <label data-i18n="difficulty">Težina</label>
           <div class="seg" id="diffSeg">
-            <button data-diff="easy">Lako · kontinent</button>
-            <button data-diff="normal" class="on">Normalno · država</button>
-            <button data-diff="hard">Teško · glavni grad</button>
+            <button data-diff="easy" data-i18n="diffEasy">Lako · kontinent</button>
+            <button data-diff="normal" class="on" data-i18n="diffNormal">Normalno · država</button>
+            <button data-diff="hard" data-i18n="diffHard">Teško · glavni grad</button>
           </div>
         </div>
         <div class="control-group">
-          <label>Kontinent</label>
+          <label data-i18n="continent">Kontinent</label>
           <select id="flashContinent"></select>
         </div>
         <div class="stats">
-          <span class="pill good">Rezultat: <span class="n" id="flashScore">0</span></span>
+          <span class="pill good"><span data-i18n="score">Rezultat:</span> <span class="n" id="flashScore">0</span></span>
           <span class="pill"><span class="n" id="flashCount">0 / 0</span></span>
         </div>
       </div>
 
       <div class="flash-wrap">
         <div class="progress"><span id="flashProgress" style="width:0%"></span></div>
-
         <div class="card" id="flashCard">
           <div class="card-inner">
             <div class="card-face card-front" id="cardFront"></div>
             <div class="card-face card-back" id="cardBack"></div>
           </div>
         </div>
-
         <div class="flash-actions">
-          <button class="btn" id="btnFlip">🔄 Okreni</button>
-          <button class="btn good" id="btnKnew">✅ Znao/la sam</button>
-          <button class="btn bad" id="btnDidnt">❌ Nisam znao/la</button>
-          <button class="btn ghost" id="btnSkip">⏭️ Preskoči</button>
+          <button class="btn" id="btnFlip" data-i18n="flip">🔄 Okreni</button>
+          <button class="btn good" id="btnKnew" data-i18n="knew">✅ Znao/la sam</button>
+          <button class="btn bad" id="btnDidnt" data-i18n="didnt">❌ Nisam znao/la</button>
+          <button class="btn ghost" id="btnSkip" data-i18n="skip">⏭️ Preskoči</button>
         </div>
         <div class="flash-actions">
-          <button class="btn ghost" id="btnShuffle">🎲 Promiješaj</button>
-          <button class="btn ghost" id="btnResetScore">↺ Poništi rezultat</button>
+          <button class="btn ghost" id="btnShuffle" data-i18n="shuffle">🎲 Promiješaj</button>
+          <button class="btn ghost" id="btnResetScore" data-i18n="resetScore">↺ Poništi rezultat</button>
         </div>
       </div>
     </section>
 
     <!-- ============================= KVIZ ============================= -->
     <section class="view" id="view-quiz">
-
-      <!-- ---- POSTAVA IGRE ---- -->
       <div id="quizSetup" class="setup-card">
-        <h2 class="setup-title">🎮 Nova igra</h2>
-        <p class="setup-sub">Igraj sam za vježbu ili se natječi s prijateljima — dodajte igrače i redom pogađajte zastave na istom uređaju.</p>
+        <h2 class="setup-title" data-i18n="newGame">🎮 Nova igra</h2>
+        <p class="setup-sub" data-i18n="newGameSub">Igraj sam za vježbu ili se natječi s prijateljima — dodajte igrače i redom pogađajte zastave na istom uređaju.</p>
 
         <div class="setup-row">
-          <label>Broj igrača</label>
+          <label data-i18n="players">Broj igrača</label>
           <div class="seg" id="playerCountSeg">
-            <button data-n="1" class="on">1</button>
-            <button data-n="2">2</button>
-            <button data-n="3">3</button>
-            <button data-n="4">4</button>
-            <button data-n="5">5</button>
-            <button data-n="6">6</button>
+            <button data-n="1" class="on">1</button><button data-n="2">2</button><button data-n="3">3</button>
+            <button data-n="4">4</button><button data-n="5">5</button><button data-n="6">6</button>
           </div>
         </div>
-
         <div class="setup-row">
-          <label>Imena igrača</label>
+          <label data-i18n="playerNames">Imena igrača</label>
           <div id="playerNames" class="player-names"></div>
         </div>
-
         <div class="setup-row">
-          <label>Težina</label>
+          <label data-i18n="difficulty">Težina</label>
           <div class="seg" id="quizDiffSeg">
-            <button data-diff="easy">Lako · kontinent</button>
-            <button data-diff="normal" class="on">Normalno · država</button>
-            <button data-diff="hard">Teško · glavni grad</button>
+            <button data-diff="easy" data-i18n="diffEasy">Lako · kontinent</button>
+            <button data-diff="normal" class="on" data-i18n="diffNormal">Normalno · država</button>
+            <button data-diff="hard" data-i18n="diffHard">Teško · glavni grad</button>
           </div>
         </div>
-
         <div class="setup-row">
-          <label>Kontinent</label>
+          <label data-i18n="continent">Kontinent</label>
           <select id="quizContinent"></select>
         </div>
-
         <div class="setup-row">
-          <label>Broj rundi <span class="hint-inline">(pitanja po igraču)</span></label>
+          <label><span data-i18n="rounds">Broj rundi</span> <span class="hint-inline" data-i18n="roundsHint">(pitanja po igraču)</span></label>
           <div class="seg" id="quizRoundsSeg">
-            <button data-r="5" class="on">5</button>
-            <button data-r="10">10</button>
-            <button data-r="15">15</button>
-            <button data-r="0">Bez kraja</button>
+            <button data-r="5" class="on">5</button><button data-r="10">10</button>
+            <button data-r="15">15</button><button data-r="0" data-i18n="endless">Bez kraja</button>
           </div>
         </div>
-
-        <button class="btn primary big" id="quizStart">▶️ Započni igru</button>
+        <button class="btn primary big" id="quizStart" data-i18n="startGame">▶️ Započni igru</button>
       </div>
 
-      <!-- ---- IGRA U TIJEKU ---- -->
       <div id="quizGame" hidden>
         <div class="scoreboard" id="scoreboard"></div>
-
         <div class="quiz-wrap">
           <div class="turn-banner" id="turnBanner"></div>
           <div class="quiz-card">
-            <div class="quiz-q" id="quizQuestion">Koja je ovo država?</div>
+            <div class="quiz-q" id="quizQuestion"></div>
             <div id="quizFlag"></div>
             <div class="options" id="quizOptions"></div>
             <div class="quiz-feedback" id="quizFeedback" style="margin-top:16px"></div>
           </div>
           <div class="flash-actions">
-            <button class="btn primary" id="quizNext" style="visibility:hidden">Dalje →</button>
-            <button class="btn ghost" id="quizEnd">🏁 Završi igru</button>
+            <button class="btn primary" id="quizNext" style="visibility:hidden"></button>
+            <button class="btn ghost" id="quizEnd" data-i18n="endGame">🏁 Završi igru</button>
           </div>
         </div>
       </div>
@@ -146,15 +130,15 @@
     <section class="view" id="view-enc">
       <div class="controls">
         <div class="control-group">
-          <label>Pretraga</label>
-          <input type="text" id="encSearch" placeholder="🔍 Ime države ili glavni grad…" />
+          <label data-i18n="search">Pretraga</label>
+          <input type="text" id="encSearch" data-i18n-ph="searchPlaceholder" placeholder="🔍 Ime države ili glavni grad…" />
         </div>
         <div class="control-group">
-          <label>Kontinent</label>
+          <label data-i18n="continent">Kontinent</label>
           <select id="encContinent"></select>
         </div>
         <div class="stats">
-          <span class="pill"><span class="n" id="encCount">0</span> država</span>
+          <span class="pill"><span class="n" id="encCount">0</span> <span data-i18n="countWord">država</span></span>
         </div>
       </div>
       <div class="grid" id="encGrid"></div>
@@ -162,14 +146,14 @@
   </main>
 
   <footer>
-    🌍 <strong>Nauči zastave</strong> — <span id="totalCountries">0</span> država svijeta ·
-    Kartice · Kviz · Enciklopedija. Podaci su približni i služe u edukacijske svrhe.
+    🌍 <strong data-i18n="appName">Nauči zastave</strong> — <span id="totalCountries">0</span>
+    <span data-i18n="footerCountries">država svijeta</span> · <span data-i18n="footerModes">Kartice · Kviz · Enciklopedija.</span>
+    <span data-i18n="footerNote">Podaci su približni i služe u edukacijske svrhe.</span>
   </footer>
 
-  <!-- Modal detalja države -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
-      <button class="icon-btn close-x" id="modalClose" title="Zatvori">✕</button>
+      <button class="icon-btn close-x" id="modalClose" data-i18n-title="close" title="Zatvori">✕</button>
       <div id="modalBody"></div>
     </div>
   </div>
@@ -178,6 +162,9 @@
   <script src="js/coords.js"></script>
   <script src="js/worldmap.js"></script>
   <script src="js/confusables.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-names.js"></script>
+  <script src="js/i18n-knownfor.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

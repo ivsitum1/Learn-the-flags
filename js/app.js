@@ -30,9 +30,9 @@
   }
 
   function fmtPopulation(n) {
-    if (n >= 1e9) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + " mlrd.";
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + " mil.";
-    if (n >= 1e3) return Math.round(n / 1e3) + " tis.";
+    if (n >= 1e9) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + " " + T("popB");
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + " " + T("popM");
+    if (n >= 1e3) return Math.round(n / 1e3) + " " + T("popK");
     return String(n);
   }
 
@@ -49,10 +49,10 @@
     var out = country.borders
       .map(function (b) { return byCode[b]; })
       .filter(Boolean);
-    if (out.length === 0) return '<span class="chip">Nema kopnenih granica (otok/izolirana)</span>';
+    if (out.length === 0) return '<span class="chip">' + T("noBorders") + '</span>';
     return out.map(function (c) {
       return '<span class="chip' + (asLinks ? " link" : "") + '" data-code="' + c.code + '">' +
-        flagEmoji(c.code) + " " + c.hr + "</span>";
+        flagEmoji(c.code) + " " + nameOf(c) + "</span>";
     }).join("");
   }
 
@@ -64,6 +64,39 @@
     get: function (k, d) { try { var v = localStorage.getItem("ntz_" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set: function (k, v) { try { localStorage.setItem("ntz_" + k, JSON.stringify(v)); } catch (e) {} }
   };
+
+  // ---- Jezik i prijevodi ----------------------------------------------------
+  var lang = store.get("lang", "hr");
+  function T(key) { var u = window.I18N.ui[lang] || window.I18N.ui.hr; return (u[key] !== undefined) ? u[key] : (window.I18N.ui.hr[key] || key); }
+  function contLabel(canon) { if (lang === "hr") return canon; var m = window.I18N.continent[canon]; return (m && m[lang]) || canon; }
+  function nameOf(c) { if (lang === "hr") return c.hr; var n = window.I18N_NAMES && window.I18N_NAMES[c.code]; return (n && n[lang]) || c.en || c.hr; }
+  function continentOf(c) { return contLabel(c.continent); }
+  function capitalOf(c) { if (lang === "hr") return c.capital; var n = window.I18N_NAMES && window.I18N_NAMES[c.code]; return (n && n.cap) || c.capital; }
+  function currencyOf(c) { if (lang === "hr") return c.currency; return window.I18N.currency[c.currency] || c.currency; }
+  function religionOf(c) {
+    if (lang === "hr") return c.religion;
+    return c.religion.split("/").map(function (t) { t = t.trim(); var m = window.I18N.religion[t]; return (m && m[lang]) || t; }).join(" / ");
+  }
+  function knownForOf(c) { if (lang === "hr") return c.knownFor; var m = window.I18N_KNOWNFOR && window.I18N_KNOWNFOR[c.code]; return (m && m[lang]) || c.knownFor; }
+  function tipOf(g) { return (g.tip && g.tip[lang]) || (g.tip && g.tip.hr) || ""; }
+
+  function applyStaticUi() {
+    document.documentElement.setAttribute("lang", lang);
+    $$("[data-i18n]").forEach(function (el) { el.textContent = T(el.getAttribute("data-i18n")); });
+    $$("[data-i18n-ph]").forEach(function (el) { el.setAttribute("placeholder", T(el.getAttribute("data-i18n-ph"))); });
+    $$("[data-i18n-title]").forEach(function (el) { el.setAttribute("title", T(el.getAttribute("data-i18n-title"))); });
+  }
+  function setLanguage(code) {
+    lang = code; store.set("lang", code);
+    applyStaticUi();
+    fillContinentSelect($("#flashContinent"), flash.continent);
+    fillContinentSelect($("#quizContinent"), quiz.continent);
+    fillContinentSelect($("#encContinent"), $("#encContinent").value || "sve");
+    renderFlash();
+    if ($("#quizGame").hidden) { renderPlayerNames(); }
+    else if (quiz.current) { renderQuestion(quiz.current); }
+    renderEncyclopedia();
+  }
 
   // ===========================================================================
   //  NAVIGACIJA
@@ -115,16 +148,13 @@
     renderFlash();
   }
 
-  var taskText = {
-    easy: "Na kojem je kontinentu?",
-    normal: "Koja je ovo država?",
-    hard: "Koji je glavni grad?"
-  };
-
+  function taskLabel() {
+    return T(flash.difficulty === "easy" ? "taskEasy" : flash.difficulty === "hard" ? "taskHard" : "taskNormal");
+  }
   function currentAnswer(c) {
-    if (flash.difficulty === "easy") return c.continent;
-    if (flash.difficulty === "hard") return c.capital;
-    return c.hr;
+    if (flash.difficulty === "easy") return continentOf(c);
+    if (flash.difficulty === "hard") return capitalOf(c);
+    return nameOf(c);
   }
 
   function renderFlash() {
@@ -143,24 +173,24 @@
     var answer = currentAnswer(c);
 
     $("#cardFront").innerHTML =
-      '<div class="task-label">' + taskText[flash.difficulty] + '</div>' +
+      '<div class="task-label">' + taskLabel() + '</div>' +
       flagHTML(c.code) +
-      '<div class="tap-hint">Klikni karticu da vidiš odgovor</div>';
+      '<div class="tap-hint">' + T("tapHint") + '</div>';
 
     $("#cardBack").innerHTML =
-      '<div class="task-label">' + taskText[flash.difficulty] + '</div>' +
+      '<div class="task-label">' + taskLabel() + '</div>' +
       '<div class="answer-name">' + answer + '</div>' +
       flagHTML(c.code, "answer-flag") +
-      '<div class="answer-name" style="font-size:1.05rem;color:var(--text-soft);margin-top:-6px">' + c.hr + '</div>' +
+      '<div class="answer-name" style="font-size:1.05rem;color:var(--text-soft);margin-top:-6px">' + nameOf(c) + '</div>' +
       '<div class="facts">' +
-        fact("Kontinent", c.continent) +
-        fact("Glavni grad", c.capital) +
-        fact("Valuta", c.currency) +
-        fact("Vjera", c.religion) +
-        fact("Stanovništvo", fmtPopulation(c.population)) +
-        fact("Kod", c.code.toUpperCase()) +
-        factWide("Susjedi", borderNames(c, false)) +
-        factWide("Poznato po", c.knownFor) +
+        fact(T("continent"), continentOf(c)) +
+        fact(T("fCapital"), capitalOf(c)) +
+        fact(T("fCurrency"), currencyOf(c)) +
+        fact(T("fReligion"), religionOf(c)) +
+        fact(T("fPopulation"), fmtPopulation(c.population)) +
+        fact(T("fCode"), c.code.toUpperCase()) +
+        factWide(T("fNeighbors"), borderNames(c, false)) +
+        factWide(T("fKnownFor"), knownForOf(c)) +
         miniMapHTML(c) +
         confusablesHTML(c) +
       '</div>';
@@ -178,7 +208,7 @@
   function miniMapHTML(c) {
     var ll = window.COORDS && window.COORDS[c.code];
     if (!ll) return "";
-    return '<div class="fact wide map"><div class="k">📍 Lokacija na karti</div>' +
+    return '<div class="fact wide map"><div class="k">' + T("fLocation") + '</div>' +
       '<canvas class="minimap" width="720" height="360" data-lat="' + ll[0] + '" data-lng="' + ll[1] + '"></canvas></div>';
   }
   function drawMiniMap(cv) {
@@ -217,14 +247,14 @@
     var inner = groups.map(function (g) {
       var others = g.members.filter(function (m) { return m !== c.code && byCode[m]; });
       var icon = g.type === "flag" ? "🎌" : "🔤";
-      var label = g.type === "flag" ? "Slična zastava" : "Sličan naziv";
+      var label = g.type === "flag" ? T("confuseFlag") : T("confuseName");
       var chips = others.map(function (code) {
-        return '<span class="chip link" data-code="' + code + '">' + flagEmoji(code) + " " + byCode[code].hr + '</span>';
+        return '<span class="chip link" data-code="' + code + '">' + flagEmoji(code) + " " + nameOf(byCode[code]) + '</span>';
       }).join("");
       return '<div class="confuse-item"><div class="confuse-h">' + icon + " " + label + '</div>' +
-        '<div class="chips">' + chips + '</div><div class="confuse-tip">' + g.tip + '</div></div>';
+        '<div class="chips">' + chips + '</div><div class="confuse-tip">' + tipOf(g) + '</div></div>';
     }).join("");
-    return '<div class="fact wide confuse"><div class="k">🔍 Lako zamijeniti s</div>' + inner + '</div>';
+    return '<div class="fact wide confuse"><div class="k">' + T("fConfuse") + '</div>' + inner + '</div>';
   }
 
   function flipCard() {
@@ -287,16 +317,12 @@
       ? COUNTRIES
       : COUNTRIES.filter(function (c) { return c.continent === quiz.continent; });
   }
-  function quizValue(c) {
-    if (quiz.difficulty === "easy") return c.continent;
-    if (quiz.difficulty === "hard") return c.capital;
-    return c.hr;
+  // Opis odgovora za državu: jedinstveni ključ (za usporedbu) + prikaz (za jezik)
+  function answerFor(country) {
+    if (quiz.difficulty === "easy") return { key: country.continent, label: contLabel(country.continent) };
+    if (quiz.difficulty === "hard") { var cap = capitalOf(country); return { key: cap, label: cap }; }
+    return { key: country.code, label: nameOf(country) };
   }
-  var quizQuestion = {
-    easy: "Na kojem se kontinentu nalazi ova država?",
-    normal: "Koja je ovo država?",
-    hard: "Koji je glavni grad ove države?"
-  };
 
   // ---- Postava: broj igrača i imena ----
   function renderPlayerNames() {
@@ -305,7 +331,7 @@
     $$("#playerNames input").forEach(function (inp, i) { existing[i] = inp.value; });
     box.innerHTML = "";
     if (quiz.playerCount === 1) {
-      box.innerHTML = '<span class="solo-note">Solo vježba — samo ti protiv zastava. 🎯</span>';
+      box.innerHTML = '<span class="solo-note">' + T("soloNote") + '</span>';
       return;
     }
     for (var i = 0; i < quiz.playerCount; i++) {
@@ -313,7 +339,7 @@
       wrap.className = "player-name-input";
       var dot = '<span class="pdot" style="background:' + playerColor(i) + '"></span>';
       wrap.innerHTML = dot + '<input type="text" maxlength="14" value="' +
-        (existing[i] || "Igrač " + (i + 1)) + '" placeholder="Igrač ' + (i + 1) + '">';
+        (existing[i] || T("player") + " " + (i + 1)) + '" placeholder="' + T("player") + " " + (i + 1) + '">';
       box.appendChild(wrap);
     }
   }
@@ -346,10 +372,10 @@
   function startGame() {
     quiz.players = [];
     if (quiz.playerCount === 1) {
-      quiz.players.push({ name: "Ti", score: 0 });
+      quiz.players.push({ name: T("you"), score: 0 });
     } else {
       $$("#playerNames input").forEach(function (inp, i) {
-        var nm = inp.value.trim() || ("Igrač " + (i + 1));
+        var nm = inp.value.trim() || (T("player") + " " + (i + 1));
         quiz.players.push({ name: nm, score: 0 });
       });
     }
@@ -376,41 +402,38 @@
         p.name + ' <b>' + p.score + '</b></span>';
     }).join("");
     $("#scoreboard").innerHTML = html + '<span class="round-tag">' +
-      (multi ? "Više igrača" : "Solo") + rnd + '</span>';
+      (multi ? T("multi") : T("solo")) + rnd + '</span>';
 
     var banner = $("#turnBanner");
     if (multi) {
       banner.style.display = "";
       banner.innerHTML = '<span class="pdot" style="background:' +
-        playerColor(quiz.turn % quiz.players.length) + '"></span> Na redu: <strong>' + cur.name + '</strong>';
+        playerColor(quiz.turn % quiz.players.length) + '"></span> ' + T("turn") + ' <strong>' + cur.name + '</strong>';
     } else {
       banner.style.display = "none";
     }
   }
 
-  function nextQuestion() {
-    if (gameOver()) { showResults(); return; }
-    var pool = quizPool();
-    var country = pool[Math.floor(Math.random() * pool.length)];
+  function renderQuestion(country) {
     quiz.current = country;
     quiz.answered = false;
-
-    var correct = quizValue(country);
-    var options = [correct];
+    var correct = answerFor(country);
+    var options;
     if (quiz.difficulty === "easy") {
-      options = CONTINENTS.slice();
+      options = CONTINENTS.map(function (cn) { return { key: cn, label: contLabel(cn) }; });
     } else {
-      var others = shuffle(COUNTRIES.filter(function (c) { return quizValue(c) !== correct; }));
-      var i = 0;
-      while (options.length < 4 && i < others.length) {
-        var v = quizValue(others[i]); i++;
-        if (options.indexOf(v) === -1) options.push(v);
+      options = [correct];
+      var keys = {}; keys[correct.key] = 1;
+      var others = shuffle(COUNTRIES.filter(function (c) { return c.code !== country.code; }));
+      for (var i = 0; i < others.length && options.length < 4; i++) {
+        var a = answerFor(others[i]);
+        if (!keys[a.key]) { keys[a.key] = 1; options.push(a); }
       }
     }
     options = shuffle(options);
 
     renderScoreboard();
-    $("#quizQuestion").textContent = quizQuestion[quiz.difficulty];
+    $("#quizQuestion").textContent = T(quiz.difficulty === "easy" ? "qEasy" : quiz.difficulty === "hard" ? "qHard" : "qNormal");
     $("#quizFlag").innerHTML = flagHTML(country.code);
     $("#quizFeedback").textContent = ""; $("#quizFeedback").className = "quiz-feedback";
     $("#quizNext").style.visibility = "hidden";
@@ -420,33 +443,40 @@
     options.forEach(function (opt) {
       var b = document.createElement("button");
       b.className = "option";
-      b.textContent = opt;
-      b.addEventListener("click", function () { answerQuiz(b, opt, correct); });
+      b.textContent = opt.label;
+      b.dataset.key = opt.key;
+      b.addEventListener("click", function () { answerQuiz(b, opt.key, correct); });
       box.appendChild(b);
     });
   }
 
-  function answerQuiz(btn, chosen, correct) {
+  function nextQuestion() {
+    if (gameOver()) { showResults(); return; }
+    var pool = quizPool();
+    renderQuestion(pool[Math.floor(Math.random() * pool.length)]);
+  }
+
+  function answerQuiz(btn, chosenKey, correct) {
     if (quiz.answered) return;
     quiz.answered = true;
-    var ok = chosen === correct;
+    var ok = chosenKey === correct.key;
     if (ok) currentPlayer().score += 1;
 
     $$("#quizOptions .option").forEach(function (b) {
       b.disabled = true;
-      if (b.textContent === correct) b.classList.add("correct");
+      if (b.dataset.key === correct.key) b.classList.add("correct");
       else if (b === btn) b.classList.add("wrong");
     });
 
     var fb = $("#quizFeedback");
-    if (ok) { fb.textContent = "Točno! 🎉  (" + quiz.current.hr + ")"; fb.className = "quiz-feedback ok"; }
-    else { fb.textContent = "Netočno — točno: " + correct + " (" + quiz.current.hr + ")"; fb.className = "quiz-feedback no"; }
+    if (ok) { fb.textContent = T("correct") + "  (" + nameOf(quiz.current) + ")"; fb.className = "quiz-feedback ok"; }
+    else { fb.textContent = T("wrongPrefix") + " " + correct.label + " (" + nameOf(quiz.current) + ")"; fb.className = "quiz-feedback no"; }
 
     quiz.turn += 1;
     renderScoreboard();
     var btnNext = $("#quizNext");
-    btnNext.textContent = gameOver() ? "🏁 Rezultati" :
-      (quiz.players.length > 1 ? "Predaj uređaj → " + currentPlayer().name : "Sljedeće pitanje →");
+    btnNext.textContent = gameOver() ? T("results") :
+      (quiz.players.length > 1 ? T("handTo") + currentPlayer().name : T("nextQ"));
     btnNext.style.visibility = "visible";
   }
 
@@ -469,20 +499,20 @@
     var title, sub;
     if (multi) {
       var winners = ranked.filter(function (p) { return p.score === top; });
-      title = winners.length > 1 ? "Neriješeno! 🤝" : "Pobjednik: " + winners[0].name + " 🏆";
-      sub = "Konačni poredak nakon " + (quiz.rounds > 0 ? quiz.rounds + " rundi" : currentRound() - 1 + " rundi");
+      title = winners.length > 1 ? T("tie") : T("winnerPrefix") + winners[0].name + " 🏆";
+      sub = T("finalAfter") + (quiz.rounds > 0 ? quiz.rounds : currentRound() - 1) + " " + T("roundsWord");
     } else {
       var totalQ = quiz.turn;
-      title = "Rezultat: " + top + " / " + totalQ + " 🎯";
-      sub = top === totalQ && totalQ > 0 ? "Savršeno! Sve točno! 🌟" : "Odlično napredovanje — probaj opet!";
+      title = T("scoreResult") + top + " / " + totalQ + " 🎯";
+      sub = top === totalQ && totalQ > 0 ? T("perfect") : T("keepGoing");
     }
 
     $("#modalBody").innerHTML =
       '<div class="result-head"><h2>' + title + '</h2><div class="sub">' + sub + '</div></div>' +
       '<div class="result-list">' + rows + '</div>' +
       '<div class="result-actions">' +
-        '<button class="btn primary" id="playAgain">🔁 Igraj ponovno</button>' +
-        '<button class="btn ghost" id="newSetup">⚙️ Nova postava</button>' +
+        '<button class="btn primary" id="playAgain">' + T("playAgain") + '</button>' +
+        '<button class="btn ghost" id="newSetup">' + T("newSetup") + '</button>' +
       '</div>';
     $("#modalOverlay").classList.add("open");
 
@@ -509,19 +539,21 @@
     var list = COUNTRIES.filter(function (c) {
       if (cont !== "sve" && c.continent !== cont) return false;
       if (!q) return true;
-      return c.hr.toLowerCase().indexOf(q) !== -1 ||
+      return nameOf(c).toLowerCase().indexOf(q) !== -1 ||
+             c.hr.toLowerCase().indexOf(q) !== -1 ||
              c.en.toLowerCase().indexOf(q) !== -1 ||
+             capitalOf(c).toLowerCase().indexOf(q) !== -1 ||
              c.capital.toLowerCase().indexOf(q) !== -1;
-    }).sort(function (a, b) { return a.hr.localeCompare(b.hr, "hr"); });
+    }).sort(function (a, b) { return nameOf(a).localeCompare(nameOf(b), lang); });
 
     $("#encCount").textContent = list.length;
     var grid = $("#encGrid");
-    if (list.length === 0) { grid.innerHTML = '<div class="empty">Nema rezultata za tvoju pretragu.</div>'; return; }
+    if (list.length === 0) { grid.innerHTML = '<div class="empty">' + T("noResults") + '</div>'; return; }
     grid.innerHTML = list.map(function (c) {
       return '<div class="country-card" data-code="' + c.code + '">' +
         flagHTML(c.code) +
-        '<div class="cname">' + c.hr + '</div>' +
-        '<div class="ccont">' + c.continent + '</div>' +
+        '<div class="cname">' + nameOf(c) + '</div>' +
+        '<div class="ccont">' + continentOf(c) + '</div>' +
         '</div>';
     }).join("");
   }
@@ -540,17 +572,17 @@
     $("#modalBody").innerHTML =
       '<div class="modal-head">' +
         flagHTML(c.code) +
-        '<div><h2>' + c.hr + '</h2><div class="sub">' + c.en + ' · ' + c.continent + '</div></div>' +
+        '<div><h2>' + nameOf(c) + '</h2><div class="sub">' + c.en + ' · ' + continentOf(c) + '</div></div>' +
       '</div>' +
       '<div class="facts">' +
-        fact("Glavni grad", c.capital) +
-        fact("Valuta", c.currency) +
-        fact("Dominantna vjera", c.religion) +
-        fact("Stanovništvo", fmtPopulation(c.population)) +
-        fact("ISO kod", c.code.toUpperCase()) +
-        fact("Kontinent", c.continent) +
-        factWide("Susjedi", borderNames(c, true)) +
-        factWide("Poznato po", c.knownFor) +
+        fact(T("fCapital"), capitalOf(c)) +
+        fact(T("fCurrency"), currencyOf(c)) +
+        fact(T("fReligionDom"), religionOf(c)) +
+        fact(T("fPopulation"), fmtPopulation(c.population)) +
+        fact(T("fCodeIso"), c.code.toUpperCase()) +
+        fact(T("continent"), continentOf(c)) +
+        factWide(T("fNeighbors"), borderNames(c, true)) +
+        factWide(T("fKnownFor"), knownForOf(c)) +
         miniMapHTML(c) +
         confusablesHTML(c) +
       '</div>';
@@ -569,10 +601,20 @@
   // ===========================================================================
   //  INICIJALIZACIJA
   // ===========================================================================
-  function fillContinentSelect(sel, includeAll) {
-    var html = includeAll ? '<option value="sve">Svi kontinenti</option>' : "";
-    CONTINENTS.forEach(function (c) { html += '<option value="' + c + '">' + c + '</option>'; });
+  function fillContinentSelect(sel, selected) {
+    var html = '<option value="sve">' + T("allContinents") + '</option>';
+    CONTINENTS.forEach(function (c) { html += '<option value="' + c + '">' + contLabel(c) + '</option>'; });
     sel.innerHTML = html;
+    if (selected) sel.value = selected;
+  }
+
+  function fillLangSelect() {
+    var sel = $("#langSelect");
+    sel.innerHTML = window.I18N.langs.map(function (l) {
+      return '<option value="' + l.code + '">' + l.flag + " " + l.label + '</option>';
+    }).join("");
+    sel.value = lang;
+    sel.addEventListener("change", function () { setLanguage(this.value); });
   }
 
   function init() {
@@ -581,10 +623,14 @@
     if (savedTheme) applyTheme(savedTheme);
     else $("#themeBtn").textContent = window.matchMedia("(prefers-color-scheme: dark)").matches ? "☀️" : "🌙";
 
+    // jezik
+    applyStaticUi();
+    fillLangSelect();
+
     // continent selecti
-    fillContinentSelect($("#flashContinent"), true);
-    fillContinentSelect($("#quizContinent"), true);
-    fillContinentSelect($("#encContinent"), true);
+    fillContinentSelect($("#flashContinent"), flash.continent);
+    fillContinentSelect($("#quizContinent"), quiz.continent);
+    fillContinentSelect($("#encContinent"), "sve");
 
     // težina početno
     $$("#diffSeg button").forEach(function (x) { x.classList.toggle("on", x.dataset.diff === flash.difficulty); });
