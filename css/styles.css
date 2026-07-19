@@ -135,35 +135,41 @@ select:focus, input:focus { outline: 2px solid var(--primary); outline-offset: 1
 
 /* ---------- Flashcard ---------- */
 .flash-wrap { display: flex; flex-direction: column; align-items: center; gap: 22px; }
-.progress { width: 100%; max-width: 460px; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.progress { width: 100%; max-width: 680px; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
 .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width .3s; }
 
 .card {
-  width: 100%; max-width: 460px; height: 340px; perspective: 1600px; cursor: pointer;
+  width: 100%; max-width: 680px; height: min(78vh, 720px); perspective: 1600px; cursor: pointer;
 }
 .card-inner { position: relative; width: 100%; height: 100%; transition: transform .55s cubic-bezier(.4,.2,.2,1); transform-style: preserve-3d; }
 .card.flipped .card-inner { transform: rotateY(180deg); }
 .card-face {
   position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 22px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px; text-align: center;
+  box-shadow: var(--shadow); padding: 28px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 18px; text-align: center;
 }
-.card-back { transform: rotateY(180deg); justify-content: flex-start; overflow-y: auto; align-items: stretch; }
-.task-label { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-soft); font-weight: 800; }
+.card-back { transform: rotateY(180deg); justify-content: flex-start; overflow-y: auto; align-items: stretch; padding: 22px 26px 28px; }
+.task-label { font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-soft); font-weight: 800; }
 .flag {
   position: relative;
-  width: 220px; max-width: 70%; aspect-ratio: 3/2; border-radius: 10px; overflow: hidden;
+  width: 360px; max-width: 88%; aspect-ratio: 3/2; border-radius: 12px; overflow: hidden;
   box-shadow: var(--shadow-sm); background: var(--primary-soft); display: grid; place-items: center;
   border: 1px solid var(--border);
 }
-.flag img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.flag .emoji { font-size: 5rem; line-height: 1; }
-.tap-hint { font-size: .82rem; color: var(--text-soft); }
+.flag img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; transition: opacity .12s ease;
+}
+.flag img.ready { opacity: 1; }
+/* Emoji sakriven dok SVG nije pao — sprječava bljesak ISO koda na Windowsu */
+.flag .emoji { font-size: 7.5rem; line-height: 1; opacity: 0; }
+.flag.fallback .emoji { opacity: 1; }
+.tap-hint { font-size: .88rem; color: var(--text-soft); }
 
-.answer-name { font-size: 1.7rem; font-weight: 800; letter-spacing: -.3px; }
-.answer-flag { width: 96px; aspect-ratio: 3/2; margin: 0 auto; }
-.answer-flag .emoji { font-size: 2.4rem; }
+.answer-name { font-size: 1.85rem; font-weight: 800; letter-spacing: -.3px; }
+.answer-flag { width: 160px; aspect-ratio: 3/2; margin: 0 auto; }
+.answer-flag .emoji { font-size: 4rem; }
 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .fact { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 9px 11px; text-align: left; }
 .fact .k { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); font-weight: 800; }
@@ -230,6 +236,9 @@ select:focus, input:focus { outline: 2px solid var(--primary); outline-offset: 1
 .quiz-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .quiz-card { width: 100%; max-width: 480px; background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; text-align: center; }
 .quiz-q { font-weight: 700; color: var(--text-soft); margin-bottom: 14px; }
+#quizFlag .flag { width: 240px; max-width: 85%; margin: 0 auto 16px; }
+#quizFlag .flag .emoji { font-size: 5rem; }
+.quiz-flag-loading { background: var(--bg); min-height: 0; }
 .options { display: grid; gap: 10px; margin-top: 18px; }
 .option { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 600; font-size: 1rem; transition: background .12s; }
 .option:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-soft); }
@@ -299,20 +308,66 @@ select:focus, input:focus { outline: 2px solid var(--primary); outline-offset: 1
 .empty { text-align: center; color: var(--text-soft); padding: 40px; }
 
 /* ---------- Modal ---------- */
-.modal-overlay { position: fixed; inset: 0; background: rgba(10,12,25,.55); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 50; padding: 18px; }
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(10,12,25,.55); backdrop-filter: blur(3px);
+  display: none; align-items: center; justify-content: center; z-index: 50; padding: 12px;
+}
 .modal-overlay.open { display: flex; animation: fade .2s; }
-.modal { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); max-width: 460px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 24px; }
-.modal-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
-.modal-head .flag { width: 84px; margin: 0; }
-.modal-head h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.4px; }
-.modal-head .sub { color: var(--text-soft); font-size: .9rem; font-weight: 600; }
-.close-x { position: sticky; top: 0; margin-left: auto; }
+.modal {
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); max-width: min(1000px, 96vw); width: 100%;
+  max-height: 94vh; overflow-y: auto; padding: 18px 22px 20px;
+}
+.modal-head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+.modal-head .flag { width: 72px; margin: 0; }
+.modal-head h2 { margin: 0; font-size: 1.45rem; letter-spacing: -.4px; }
+.modal-head .sub { color: var(--text-soft); font-size: .88rem; font-weight: 600; }
+.close-x { position: sticky; top: 0; margin-left: auto; z-index: 2; }
+
+/* Gušći layout u modalu — manje scrollanja */
+.modal .facts {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+.modal .fact { padding: 7px 10px; }
+.modal .fact .k { font-size: .62rem; }
+.modal .fact .v { font-size: .9rem; }
+.modal .fact.wide .v { font-size: .85rem; line-height: 1.35; }
+.modal .map-stack {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+  align-items: start;
+}
+.modal .map-stack > :nth-child(1) { grid-column: 1; grid-row: 1; } /* Svijet */
+.modal .map-stack > :nth-child(2) { grid-column: 1; grid-row: 2; }
+.modal .map-stack > :nth-child(3) { grid-column: 2; grid-row: 1; } /* Približeno */
+.modal .map-stack > :nth-child(4) { grid-column: 2; grid-row: 2; }
+.modal .map-stack > :nth-child(5) { grid-column: 1 / -1; grid-row: 3; } /* legenda */
+.modal .minimap { max-height: 26vh; width: 100%; }
+.modal .map-legend { margin-top: 2px; font-size: .8rem; gap: 10px 14px; }
+.modal .fact.confuse { gap: 8px; }
+.modal .confuse-item { padding: 8px 10px; }
 
 footer { text-align: center; color: var(--text-soft); font-size: .82rem; padding: 30px 18px 50px; }
 
 @media (max-width: 560px) {
   .brand span.full { display: none; }
   .tabs .tab { padding: 8px 10px; font-size: .85rem; }
-  .card { height: 320px; }
+  .card { height: min(75vh, 640px); max-width: 100%; }
+  .flag { width: 100%; max-width: 92%; }
+  .flag .emoji { font-size: 5.5rem; }
+  .answer-flag { width: 130px; }
+  .answer-flag .emoji { font-size: 3.2rem; }
   .stats { width: 100%; margin-left: 0; }
+  .modal .facts { grid-template-columns: 1fr 1fr; }
+  .modal .map-stack {
+    grid-template-columns: 1fr;
+  }
+  .modal .map-stack > :nth-child(n) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .modal .minimap { max-height: none; }
 }

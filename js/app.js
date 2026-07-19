@@ -17,15 +17,16 @@
     });
   }
 
-  // Vraća HTML zastave: emoji je uvijek prikazan u pozadini, a preko njega se
-  // (kad ima mreže) učitava oštra SVG zastava s flagcdn. Ako slika ne uspije
-  // (offline / blokirano), uklanja se i ostaje emoji — nikad prazno polje.
+  // Vraća HTML zastave: SVG s flagcdn. Emoji je rezervni prikaz (offline),
+  // ali ostaje skriven dok se slika ne učita — inače Windows često na trenutak
+  // pokaže ISO slova (HR, SV…) umjesto zastave i odaje odgovor u kvizu.
   function flagHTML(code, cls) {
     var emoji = flagEmoji(code);
     return '<span class="flag ' + (cls || "") + '">' +
-      '<span class="emoji">' + emoji + '</span>' +
-      '<img src="https://flagcdn.com/' + code + '.svg" alt="" loading="lazy" ' +
-      'onerror="this.remove()">' +
+      '<span class="emoji" aria-hidden="true">' + emoji + '</span>' +
+      '<img src="https://flagcdn.com/' + code + '.svg" alt="" decoding="async" ' +
+      'onload="this.classList.add(\'ready\')" ' +
+      'onerror="this.parentNode.classList.add(\'fallback\');this.remove()">' +
       '</span>';
   }
 
@@ -231,48 +232,87 @@
     };
   }
 
-  function fillLand(ctx, rings, X, Y, colors, lineWidth) {
+  // Kopno crtamo iz poligona država (ne WORLD_LAND) — inače antimeridijan
+  // stvara vodoravne trake preko karte (posebno na zoomu Kariba/Pacifika).
+  function ringSegments(ring, X, Y, maxJump) {
+    var jump = maxJump || 1e9;
+    var segs = [];
+    var cur = [];
+    var px = 0, py = 0;
+    for (var i = 0; i < ring.length; i++) {
+      var x = X(ring[i][0]), y = Y(ring[i][1]);
+      if (cur.length && (Math.abs(x - px) > jump || Math.abs(y - py) > jump)) {
+        if (cur.length >= 3) segs.push(cur);
+        cur = [];
+      }
+      cur.push([x, y]);
+      px = x;
+      py = y;
+    }
+    if (cur.length >= 3) segs.push(cur);
+    return segs;
+  }
+
+  function fillScreenRing(ctx, pts) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function fillAllCountryLand(ctx, X, Y, colors, maxJump) {
+    var all = window.COUNTRY_POLYS;
+    if (!all) return;
     ctx.fillStyle = colors.land;
-    fillRings(ctx, rings, X, Y);
-    // Obrub obale — oštra granica more/kopno
-    ctx.strokeStyle = colors.coast;
-    ctx.lineWidth = lineWidth || 1.25;
-    ctx.lineJoin = "round";
-    rings.forEach(function (ring) {
-      ctx.beginPath();
-      ring.forEach(function (p, i) {
-        var x = X(p[0]), y = Y(p[1]);
-        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    Object.keys(all).forEach(function (code) {
+      all[code].forEach(function (poly) {
+        var ring = poly[0];
+        if (!ring || ring.length < 3) return;
+        ringSegments(ring, X, Y, maxJump).forEach(function (seg) {
+          fillScreenRing(ctx, seg);
+        });
       });
-      ctx.closePath();
-      ctx.stroke();
     });
   }
 
-  // Blage granice svih država — kontekst na velikim kontinentima (Azija itd.).
-  function drawAllBorders(ctx, X, Y, colors, lineWidth) {
+  function drawAllBorders(ctx, X, Y, colors, lineWidth, maxJump) {
     var all = window.COUNTRY_POLYS;
     if (!all) return;
     ctx.strokeStyle = colors.border;
     ctx.lineWidth = lineWidth || 0.7;
     ctx.lineJoin = "round";
     Object.keys(all).forEach(function (code) {
-      var polys = all[code];
-      for (var i = 0; i < polys.length; i++) {
-        var poly = polys[i];
-        // Samo vanjski prsten (bez rupa) — dovoljno za orijentaciju
+      all[code].forEach(function (poly) {
         var ring = poly[0];
-        if (!ring || ring.length < 3) continue;
-        ctx.beginPath();
-        for (var j = 0; j < ring.length; j++) {
-          var p = ring[j];
-          var x = X(p[0]), y = Y(p[1]);
-          if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
+        if (!ring || ring.length < 3) return;
+        strokeRingSafe(ctx, ring, X, Y, maxJump);
+      });
     });
+  }
+
+  function strokeRingSafe(ctx, ring, X, Y, maxJump) {
+    if (!ring || ring.length < 2) return;
+    var jump = maxJump || 1e9;
+    var started = false;
+    var px = 0, py = 0;
+    for (var i = 0; i < ring.length; i++) {
+      var x = X(ring[i][0]), y = Y(ring[i][1]);
+      if (!started) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        started = true;
+      } else if (Math.abs(x - px) > jump || Math.abs(y - py) > jump) {
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+      px = x;
+      py = y;
+    }
+    if (started) ctx.stroke();
   }
 
   function wrapLng(lng, center) {
@@ -305,28 +345,40 @@
     if (!bb) return null;
     var w = bb.maxLng - bb.minLng;
     var h = bb.maxLat - bb.minLat;
-    var padLng = Math.max(w * 0.9, 8);
-    var padLat = Math.max(h * 0.9, 6);
-    var minLng = bb.minLng - padLng;
-    var maxLng = bb.maxLng + padLng;
-    var minLat = bb.minLat - padLat;
-    var maxLat = bb.maxLat + padLat;
-
-    // Proširi do dijela kontinenta ako je država mala; ne širi iznad okvira kontinenta.
     var frame = CONTINENT_FRAMES[c.continent];
-    if (frame) {
-      var fw = frame[2] - frame[0];
-      var fh = frame[3] - frame[1];
-      var wantW = Math.min(fw * 0.55, Math.max(maxLng - minLng, fw * 0.28));
-      var wantH = Math.min(fh * 0.55, Math.max(maxLat - minLat, fh * 0.28));
-      var cx = (minLng + maxLng) / 2;
-      var cy = (minLat + maxLat) / 2;
-      minLng = cx - wantW / 2;
-      maxLng = cx + wantW / 2;
-      minLat = cy - wantH / 2;
-      maxLat = cy + wantH / 2;
-      // Drži unutar kontinenta kad stane; inače ostavi širi okvir (Rusija, SAD…).
-      if (w < fw * 0.85 && h < fh * 0.85) {
+    var fw = frame ? (frame[2] - frame[0]) : 360;
+    var fh = frame ? (frame[3] - frame[1]) : 180;
+
+    var minLng, maxLng, minLat, maxLat;
+
+    // Velike / transkontinentalne države (RU, US, CA, CN…): pokaži cijelu
+    // državu + mali rub. Inače bi „dio kontinenta" prestrogo zumirao
+    // (npr. Rusija u europskom okviru).
+    var isHuge = w > 50 || h > 32 || w > fw * 0.65 || h > fh * 0.65;
+    if (isHuge) {
+      var padLng = Math.max(w * 0.1, 6);
+      var padLat = Math.max(h * 0.14, 4);
+      minLng = bb.minLng - padLng;
+      maxLng = bb.maxLng + padLng;
+      minLat = Math.max(-85, bb.minLat - padLat);
+      maxLat = Math.min(85, bb.maxLat + padLat);
+    } else {
+      var padLng = Math.max(w * 0.9, 8);
+      var padLat = Math.max(h * 0.9, 6);
+      minLng = bb.minLng - padLng;
+      maxLng = bb.maxLng + padLng;
+      minLat = bb.minLat - padLat;
+      maxLat = bb.maxLat + padLat;
+
+      if (frame) {
+        var wantW = Math.min(fw * 0.55, Math.max(maxLng - minLng, fw * 0.28));
+        var wantH = Math.min(fh * 0.55, Math.max(maxLat - minLat, fh * 0.28));
+        var cx = (minLng + maxLng) / 2;
+        var cy = (minLat + maxLat) / 2;
+        minLng = cx - wantW / 2;
+        maxLng = cx + wantW / 2;
+        minLat = cy - wantH / 2;
+        maxLat = cy + wantH / 2;
         minLng = Math.max(minLng, frame[0]);
         maxLng = Math.min(maxLng, frame[2]);
         minLat = Math.max(minLat, frame[1]);
@@ -365,22 +417,11 @@
     };
   }
 
-  function fillRings(ctx, rings, X, Y) {
-    rings.forEach(function (ring) {
-      ctx.beginPath();
-      ring.forEach(function (p, i) {
-        var x = X(p[0]), y = Y(p[1]);
-        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
-      });
-      ctx.closePath();
-      ctx.fill();
-    });
-  }
-
   function drawCountryFill(ctx, code, X, Y, colors, opts) {
     var polys = window.COUNTRY_POLYS && window.COUNTRY_POLYS[code];
     if (!polys) return;
     opts = opts || {};
+    var jump = opts.maxJump || 1e9;
 
     // Na svjetskoj karti mikrodržave bi inače bile nevidljive — blago povećaj
     // projekciju oko središta (i dalje ispunjena površina, ne točka).
@@ -401,8 +442,8 @@
     cx /= n; cy /= n;
     var screenW = maxX - minX;
     var screenH = maxY - minY;
-    if (opts.boostSmall) {
-      // Na 720×360 svjetskoj karti male države inače nestanu — uvećaj oblik.
+    // Ako bbox prelazi antimeridijan, ne skaliraj (screenW bi bio cijela karta)
+    if (opts.boostSmall && screenW < jump && screenH < jump) {
       var minPx = 22;
       var span = Math.max(screenW, screenH, 0.5);
       if (span < minPx) scale = minPx / span;
@@ -416,19 +457,30 @@
 
     ctx.fillStyle = colors.fill;
     ctx.strokeStyle = opts.boostSmall ? colors.fill : colors.stroke;
-    // Deblji obrub iste boje na svjetskoj karti = čitljiv oblik, ne točka.
-    var fat = opts.boostSmall ? Math.max(2.5, 12 / Math.max(screenW * scale, screenH * scale, 1)) : 1.5;
+    var fat = opts.boostSmall ? Math.max(2.5, 12 / Math.max(Math.min(screenW, jump) * scale, Math.min(screenH, jump) * scale, 1)) : 1.5;
     ctx.lineWidth = fat;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     polys.forEach(function (poly) {
       ctx.beginPath();
       poly.forEach(function (ring) {
-        ring.forEach(function (p, i) {
-          var pt = px(p);
-          if (i) ctx.lineTo(pt.x, pt.y); else ctx.moveTo(pt.x, pt.y);
-        });
-        ctx.closePath();
+        var started = false;
+        var ptx = 0, pty = 0;
+        for (var i = 0; i < ring.length; i++) {
+          var pt = px(ring[i]);
+          if (!started) {
+            ctx.moveTo(pt.x, pt.y);
+            started = true;
+          } else if (Math.abs(pt.x - ptx) > jump || Math.abs(pt.y - pty) > jump) {
+            ctx.closePath();
+            ctx.moveTo(pt.x, pt.y);
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ptx = pt.x;
+          pty = pt.y;
+        }
+        if (started) ctx.closePath();
       });
       ctx.fill("evenodd");
       ctx.stroke();
@@ -452,7 +504,7 @@
   }
 
   function drawMiniMap(cv) {
-    if (!window.WORLD_LAND) return;
+    if (!window.COUNTRY_POLYS) return;
     var code = cv.dataset.code;
     var mode = cv.dataset.mode || "world";
     var W = cv.width, H = cv.height, ctx = cv.getContext("2d");
@@ -460,14 +512,14 @@
     var country = byCode[code];
     var view = mode === "zoom" && country ? zoomViewFor(country) : null;
     var proj = projectors(view, W, H);
+    var maxJump = W * 0.35;
 
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = colors.ocean;
     ctx.fillRect(0, 0, W, H);
-    fillLand(ctx, window.WORLD_LAND, proj.X, proj.Y, colors, mode === "zoom" ? 1.75 : 1.1);
-    // Sve granice blago, zatim crvena ispuna tražene države
-    drawAllBorders(ctx, proj.X, proj.Y, colors, mode === "zoom" ? 1.45 : 0.75);
-    drawCountryFill(ctx, code, proj.X, proj.Y, colors, { boostSmall: mode === "world" });
+    fillAllCountryLand(ctx, proj.X, proj.Y, colors, maxJump);
+    drawAllBorders(ctx, proj.X, proj.Y, colors, mode === "zoom" ? 1.45 : 0.75, maxJump);
+    drawCountryFill(ctx, code, proj.X, proj.Y, colors, { boostSmall: mode === "world", maxJump: maxJump });
   }
 
   function drawMaps(root) {
@@ -669,9 +721,25 @@
 
     renderScoreboard();
     $("#quizQuestion").textContent = T(quiz.difficulty === "easy" ? "qEasy" : quiz.difficulty === "hard" ? "qHard" : "qNormal");
-    $("#quizFlag").innerHTML = flagHTML(country.code);
     $("#quizFeedback").textContent = ""; $("#quizFeedback").className = "quiz-feedback";
     $("#quizNext").style.visibility = "hidden";
+
+    // Prikaži zastavu tek kad je SVG spreman — bez bljeska ISO slova na Windowsu
+    var flagBox = $("#quizFlag");
+    flagBox.innerHTML = '<span class="flag quiz-flag-loading" aria-hidden="true"></span>';
+    var pre = new Image();
+    pre.onload = function () {
+      if (quiz.current !== country) return;
+      flagBox.innerHTML = flagHTML(country.code);
+      var el = flagBox.querySelector("img");
+      if (el) el.classList.add("ready");
+    };
+    pre.onerror = function () {
+      if (quiz.current !== country) return;
+      flagBox.innerHTML = '<span class="flag fallback">' +
+        '<span class="emoji" aria-hidden="true">' + flagEmoji(country.code) + '</span></span>';
+    };
+    pre.src = "https://flagcdn.com/" + country.code + ".svg";
 
     var box = $("#quizOptions");
     box.innerHTML = "";
