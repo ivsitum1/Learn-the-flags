@@ -1,7 +1,8 @@
 name: Deploy to GitHub Pages
 
 # Objavljuje statičnu aplikaciju na GitHub Pages.
-# Radi kad je ova grana zadana (default) grana repozitorija ili nakon spajanja u nju.
+# Jednokratno u repo postavkama: Settings → Pages → Source = GitHub Actions
+# (GITHUB_TOKEN ne smije sam kreirati Pages site — zato nema enablement: true.)
 on:
   push:
     branches:
@@ -31,13 +32,16 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
+      - name: Prepare site files
+        run: |
+          mkdir -p _site
+          cp index.html LICENSE README.md DATA_VERIFICATION.md _site/
+          cp -r css js _site/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
