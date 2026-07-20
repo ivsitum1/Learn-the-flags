@@ -3,11 +3,14 @@ name: Deploy to GitHub Pages
 # Objavljuje statičnu aplikaciju na GitHub Pages.
 # Jednokratno u repo postavkama: Settings → Pages → Source = GitHub Actions
 # (GITHUB_TOKEN ne smije sam kreirati Pages site — zato nema enablement: true.)
+#
+# NAPOMENA: objavljuje se samo s radne grane. Grana „main" NIJE ovdje jer
+# okruženje „github-pages" još ne dopušta objavu s nje (svaka bi objava odmah
+# pala i slala e-mail). Kad se main postavi kao zadana grana i dopusti u
+# Settings → Environments → github-pages, tada ga dodaj natrag u okidače.
 on:
   push:
     branches:
-      - main
-      - master
       - claude/flags-learning-app-plan-tpos3s
   workflow_dispatch:
 
