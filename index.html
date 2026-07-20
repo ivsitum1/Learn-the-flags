@@ -7,6 +7,16 @@
   <meta name="description" content="Zabavno naučite zastave svih država svijeta: kartice s razinama težine, kviz za 1–6 igrača, enciklopedija, karta lokacije i savjeti za razlikovanje sličnih zastava. Na 5 jezika." />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>" />
+
+  <!-- PWA: instalacija na početni zaslon + rad offline -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#4f46e5" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1220" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Zastave" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 </head>
 <body>
   <header class="app-header">
@@ -21,6 +31,7 @@
         <button class="tab" data-view="enc" data-i18n="tabEnc">📚 Enciklopedija</button>
       </nav>
       <span class="spacer"></span>
+      <button class="btn install-btn" id="installBtn" hidden data-i18n="install">⬇️ Instaliraj</button>
       <select id="langSelect" class="lang-select" aria-label="Language"></select>
       <button class="icon-btn" id="themeBtn" data-i18n-title="theme" title="Promijeni temu">🌙</button>
     </div>
@@ -159,6 +170,12 @@
     <span data-i18n="footerCountries">država svijeta</span> · <span data-i18n="footerModes">Kartice · Kviz · Enciklopedija.</span>
     <span data-i18n="footerNote">Podaci su približni i služe u edukacijske svrhe.</span>
   </footer>
+
+  <div class="ios-install-hint" id="iosInstallHint" hidden>
+    <span class="ios-hint-icon">📲</span>
+    <span data-i18n="iosInstall">Dodaj na početni zaslon: dodirni Podijeli, pa „Dodaj na početni zaslon".</span>
+    <button class="ios-hint-close" id="iosInstallClose" data-i18n-title="close" title="Zatvori">✕</button>
+  </div>
 
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">

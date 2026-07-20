@@ -86,6 +86,31 @@ a { color: var(--primary); }
   min-width: 0; width: auto; padding: 8px 10px; border-radius: 12px; font-weight: 600; font-size: .9rem;
   background: var(--bg-elev); border: 1px solid var(--border); color: var(--text);
 }
+/* Gumb za instalaciju (PWA) — pojavi se kad preglednik ponudi instalaciju */
+.install-btn {
+  padding: 8px 14px; font-size: .9rem; border-radius: 12px;
+  background: var(--primary); color: #fff; border-color: transparent;
+  box-shadow: var(--shadow-sm); white-space: nowrap;
+}
+.install-btn:hover { box-shadow: var(--shadow); }
+.install-btn[hidden] { display: none; }
+
+/* Uputa za instalaciju na iOS-u (Safari nema automatsku ponudu) */
+.ios-install-hint {
+  position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow); padding: 12px 14px; font-size: .92rem; font-weight: 600;
+  max-width: 520px; margin: 0 auto;
+}
+.ios-install-hint[hidden] { display: none; }
+.ios-hint-icon { font-size: 1.3rem; }
+.ios-hint-close {
+  margin-left: auto; border: none; background: transparent; color: var(--text-soft);
+  font-size: 1rem; cursor: pointer; padding: 4px 6px; border-radius: 8px; flex: 0 0 auto;
+}
+.ios-hint-close:hover { background: var(--primary-soft); color: var(--text); }
+
 .tabs { display: flex; gap: 6px; }
 .tab {
   border: 1px solid transparent; background: transparent; color: var(--text-soft);
@@ -398,6 +423,8 @@ footer { text-align: center; color: var(--text-soft); font-size: .82rem; padding
 @media (max-width: 560px) {
   .brand span.full { display: none; }
   .tabs .tab { padding: 8px 10px; font-size: .85rem; }
+  .app-header .inner { flex-wrap: wrap; gap: 8px 10px; }
+  .install-btn { padding: 7px 11px; font-size: .82rem; }
   .card { height: min(75vh, 640px); max-width: 100%; }
   .flag { width: 100%; max-width: 94%; }
   .flag .emoji { font-size: 5.5rem; }
@@ -442,6 +469,38 @@ footer { text-align: center; color: var(--text-soft); font-size: .82rem; padding
   .card { max-width: 760px; }
   .card-front .flag { width: 480px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 16px; }
+}
+
+/* ---------- Desktop / veliki ekran: bogatiji prikaz kartice i enciklopedije ---------- */
+@media (min-width: 1024px) {
+  /* Flashcard: veća kartica i zastava, manje scrollanja na poleđini */
+  .card { max-width: 900px; }
+  .card-front .flag { width: 540px; }
+  .answer-flag { width: 220px; }
+
+  /* Poleđina: činjenice u 3 stupca, karte jedna do druge (kao u modalu) */
+  .card-back .facts { grid-template-columns: repeat(3, 1fr); }
+  .card-back .fact.wide { grid-column: 1 / -1; }
+  .card-back .map-stack {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; align-items: start;
+  }
+  .card-back .map-stack > :nth-child(1) { grid-column: 1; grid-row: 1; }
+  .card-back .map-stack > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .card-back .map-stack > :nth-child(3) { grid-column: 2; grid-row: 1; }
+  .card-back .map-stack > :nth-child(4) { grid-column: 2; grid-row: 2; }
+  .card-back .map-stack > :nth-child(5) { grid-column: 1 / -1; grid-row: 3; }
+
+  /* Kviz: udobniji, širi raspored */
+  .quiz-card { max-width: 920px; }
+  #quizFlag .flag { max-width: 380px; }
+  .option { font-size: 1.12rem; padding: 16px 20px; }
+
+  /* Enciklopedija: veće pločice i zastave */
+  .grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; }
+  .country-card { padding: 16px; }
+  .country-card .flag { width: 104px; }
+  .country-card .cname { font-size: 1.02rem; }
+  .country-card .ccont { font-size: .82rem; }
 }
 
 /* ---------- Položeni (landscape) mobitel: jednako pregledno kao uspravno ----------

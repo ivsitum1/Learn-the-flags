@@ -1023,6 +1023,64 @@
     sel.addEventListener("change", function () { setLanguage(this.value); });
   }
 
+  // ===========================================================================
+  //  PWA — instalacija na početni zaslon + offline (service worker)
+  // ===========================================================================
+  function isStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+  }
+
+  function initPWA() {
+    // Registriraj service worker (relativno — radi i pod /Learn-the-flags/)
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+
+    var installBtn = $("#installBtn");
+    var deferredPrompt = null;
+
+    // Android/desktop Chrome: ponudi vlastiti gumb „Instaliraj"
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isStandalone()) installBtn.hidden = false;
+    });
+
+    installBtn.addEventListener("click", function () {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(function () {
+        deferredPrompt = null;
+        installBtn.hidden = true;
+      });
+    });
+
+    window.addEventListener("appinstalled", function () {
+      installBtn.hidden = true;
+      deferredPrompt = null;
+      var hint = $("#iosInstallHint");
+      if (hint) hint.hidden = true;
+    });
+
+    // iOS Safari nema beforeinstallprompt — pokaži kratku uputu (jednom)
+    var ua = window.navigator.userAgent || "";
+    var isIOS = /iphone|ipad|ipod/i.test(ua);
+    var isSafari = /^((?!chrome|crios|fxios|android).)*safari/i.test(ua);
+    if (isIOS && isSafari && !isStandalone() && !store.get("iosHintDismissed", false)) {
+      var hint = $("#iosInstallHint");
+      if (hint) {
+        hint.hidden = false;
+        $("#iosInstallClose").addEventListener("click", function () {
+          hint.hidden = true;
+          store.set("iosHintDismissed", true);
+        });
+      }
+    }
+  }
+
   function init() {
     // tema
     var savedTheme = store.get("theme", null);
@@ -1050,6 +1108,7 @@
     renderEncyclopedia();
 
     showView(store.get("lastView", "flash"));
+    initPWA();
   }
 
   init();

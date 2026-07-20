@@ -20,6 +20,7 @@ window.I18N.ui = {
   hr: {
     appName: "Nauči zastave", tabCards: "🃏 Kartice", tabQuiz: "❓ Kviz", tabEnc: "📚 Enciklopedija",
     theme: "Promijeni temu", language: "Jezik",
+    install: "⬇️ Instaliraj", iosInstall: "Dodaj na početni zaslon: dodirni Podijeli, pa „Dodaj na početni zaslon”.",
     difficulty: "Težina", diffEasy: "Lako · kontinent", diffNormal: "Normalno · država", diffHard: "Teško · glavni grad",
     continent: "Kontinent", allContinents: "Svi kontinenti", score: "Rezultat:",
     taskEasy: "Na kojem je kontinentu?", taskNormal: "Koja je ovo država?", taskHard: "Koji je glavni grad?",
@@ -52,6 +53,7 @@ window.I18N.ui = {
   en: {
     appName: "Learn the Flags", tabCards: "🃏 Cards", tabQuiz: "❓ Quiz", tabEnc: "📚 Encyclopedia",
     theme: "Toggle theme", language: "Language",
+    install: "⬇️ Install", iosInstall: "Add to home screen: tap Share, then “Add to Home Screen”.",
     difficulty: "Difficulty", diffEasy: "Easy · continent", diffNormal: "Normal · country", diffHard: "Hard · capital",
     continent: "Continent", allContinents: "All continents", score: "Score:",
     taskEasy: "Which continent is it on?", taskNormal: "Which country is this?", taskHard: "What is the capital?",
@@ -84,6 +86,7 @@ window.I18N.ui = {
   de: {
     appName: "Lerne die Flaggen", tabCards: "🃏 Karten", tabQuiz: "❓ Quiz", tabEnc: "📚 Enzyklopädie",
     theme: "Thema wechseln", language: "Sprache",
+    install: "⬇️ Installieren", iosInstall: "Zum Startbildschirm: auf Teilen tippen, dann „Zum Home-Bildschirm“.",
     difficulty: "Schwierigkeit", diffEasy: "Leicht · Kontinent", diffNormal: "Normal · Land", diffHard: "Schwer · Hauptstadt",
     continent: "Kontinent", allContinents: "Alle Kontinente", score: "Punkte:",
     taskEasy: "Auf welchem Kontinent liegt es?", taskNormal: "Welches Land ist das?", taskHard: "Wie heißt die Hauptstadt?",
@@ -116,6 +119,7 @@ window.I18N.ui = {
   it: {
     appName: "Impara le bandiere", tabCards: "🃏 Carte", tabQuiz: "❓ Quiz", tabEnc: "📚 Enciclopedia",
     theme: "Cambia tema", language: "Lingua",
+    install: "⬇️ Installa", iosInstall: "Aggiungi alla schermata Home: tocca Condividi, poi “Aggiungi a Home”.",
     difficulty: "Difficoltà", diffEasy: "Facile · continente", diffNormal: "Normale · Paese", diffHard: "Difficile · capitale",
     continent: "Continente", allContinents: "Tutti i continenti", score: "Punteggio:",
     taskEasy: "In quale continente si trova?", taskNormal: "Qual è questo Paese?", taskHard: "Qual è la capitale?",
@@ -148,6 +152,7 @@ window.I18N.ui = {
   es: {
     appName: "Aprende las banderas", tabCards: "🃏 Tarjetas", tabQuiz: "❓ Cuestionario", tabEnc: "📚 Enciclopedia",
     theme: "Cambiar tema", language: "Idioma",
+    install: "⬇️ Instalar", iosInstall: "Añadir a la pantalla de inicio: toca Compartir y “Añadir a inicio”.",
     difficulty: "Dificultad", diffEasy: "Fácil · continente", diffNormal: "Normal · país", diffHard: "Difícil · capital",
     continent: "Continente", allContinents: "Todos los continentes", score: "Puntos:",
     taskEasy: "¿En qué continente está?", taskNormal: "¿Qué país es este?", taskHard: "¿Cuál es la capital?",
