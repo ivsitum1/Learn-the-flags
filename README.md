@@ -28,6 +28,15 @@ za **do 6 igrača** na istom uređaju:
 - odabir broja rundi (5 / 10 / 15 / bez kraja),
 - završni poredak s medaljama 🥇🥈🥉 i pobjednikom.
 
+Prilagođeno najmlađima (od ~7 g.):
+
+- **💡 Pomoć** — natuknica (kontinent i prvo slovo) za svako pitanje,
+- **📍 karta ispravne države** pojavi se odmah nakon odgovora,
+- **🔊 Pročitaj naglas** — klik na ime države pročita ga (nježno potiče čitanje),
+- zastave nisu odrezane (cijela zastava vidljiva), krupnija slova,
+- **bez ponavljanja** država dok se ne prođe cijeli špil,
+- jednako pregledno uspravno i položeno (portrait / landscape).
+
 ### 📚 Enciklopedija
 Pregled svih država (pretraga po imenu ili glavnom gradu, filter po kontinentu).
 Klikom na državu otvara se kartica s punim detaljima; susjedi su klikabilni.
