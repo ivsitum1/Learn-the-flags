@@ -193,7 +193,7 @@
         fact(T("fReligion"), religionOf(c)) +
         fact(T("fPopulation"), fmtPopulation(c.population)) +
         fact(T("fCode"), c.code.toUpperCase()) +
-        factWide(T("fNeighbors"), borderNames(c, false)) +
+        factWide(T("fNeighbors"), borderNames(c, true)) +
         factWide(T("fKnownFor"), knownForOf(c)) +
         miniMapHTML(c) +
         confusablesHTML(c) +
@@ -568,7 +568,12 @@
     renderFlash();
   }
 
-  $("#flashCard").addEventListener("click", flipCard);
+  // Klik po kartici okreće SAMO prednju stranu (zastavu) na poleđinu.
+  // Na poleđini klik NE okreće natrag — inače bi klik na susjeda/kućicu/kartu
+  // bacio natrag na zastavu. Za povratak služi gumb „🔄 Okreni".
+  $("#flashCard").addEventListener("click", function () {
+    if (!flash.flipped) flipCard();
+  });
   $("#btnFlip").addEventListener("click", function (e) { e.stopPropagation(); flipCard(); });
   $("#btnKnew").addEventListener("click", function () { nextCard(true); });
   $("#btnDidnt").addEventListener("click", function () { nextCard(false); });
