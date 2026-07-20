@@ -50,9 +50,9 @@ ne uspije, ostaje emoji, pa polje nikad nije prazno.
 ## 🌐 Jezici
 Sučelje i podaci dostupni su na **5 jezika** (prekidač u zaglavlju): 🇭🇷 hrvatski,
 🇬🇧 engleski, 🇩🇪 njemački, 🇮🇹 talijanski i 🇪🇸 španjolski. Prevedeni su sučelje,
-imena država, kontinenti, vjere, savjeti za razlikovanje i opisi „poznato po"
-(opisi: Europa gotova, ostali kontinenti se popunjavaju). Nazivi valuta prikazuju
-se u međunarodnom (engleskom) obliku za jezike osim hrvatskog. Odabir jezika pamti se.
+imena država, kontinenti, vjere, savjeti za razlikovanje i **opisi „poznato po"
+za svih 197 država**. Nazivi valuta prikazuju se u međunarodnom (engleskom)
+obliku za jezike osim hrvatskog. Odabir jezika pamti se.
 
 ## 🎨 Ostalo
 - Svijetla i tamna tema (automatski prema sustavu + ručni prekidač).
