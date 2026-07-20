@@ -1050,6 +1050,15 @@
   function initPWA() {
     // Registriraj service worker (relativno — radi i pod /Learn-the-flags/)
     if ("serviceWorker" in navigator) {
+      // Kad novi service worker preuzme kontrolu (nakon deploya), osvježi
+      // stranicu jednom da se učita najnoviji kôd — ali ne pri prvoj instalaciji.
+      var hadController = !!navigator.serviceWorker.controller;
+      var reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloading || !hadController) return;
+        reloading = true;
+        window.location.reload();
+      });
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("sw.js").catch(function () {});
       });
