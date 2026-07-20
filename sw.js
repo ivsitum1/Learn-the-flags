@@ -1,9 +1,13 @@
 /* ===========================================================================
    Service worker — omogućuje instalaciju (PWA) i rad offline.
-   App-shell se predmemorira pri instalaciji; zastave (flagcdn) se spremaju
-   usput (network-first) pa rade i bez mreže nakon prvog gledanja.
+
+   VAŽNO: strategija je "network-first" za sve s ovog origina (HTML/JS/CSS),
+   pa korisnik UVIJEK dobije najnoviji kôd kad ima mreže; cache služi samo kao
+   pričuva kad nema mreže. (Prije je bilo "cache-first" pa su ostajale stare
+   verzije — npr. popravci se nisu vidjeli.)
+   Verziju cachea povećaj pri svakoj promjeni da se stari obriše.
    =========================================================================== */
-var CACHE = "ntz-cache-v1";
+var CACHE = "ntz-cache-v2";
 
 // Relativno na opseg (scope) service workera — radi i na /Learn-the-flags/.
 var ASSETS = [
@@ -29,7 +33,6 @@ var ASSETS = [
 self.addEventListener("install", function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
-      // Pojedinačno — jedan neuspjeh (npr. 404) ne ruši cijelu instalaciju.
       return Promise.all(ASSETS.map(function (url) {
         return c.add(url).catch(function () {});
       }));
@@ -46,38 +49,36 @@ self.addEventListener("activate", function (e) {
   );
 });
 
+// Network-first: pokušaj mrežu, spremi svježe u cache; ako mreže nema, vrati cache.
+function networkFirst(req) {
+  return fetch(req).then(function (resp) {
+    if (resp && resp.ok) {
+      var copy = resp.clone();
+      caches.open(CACHE).then(function (c) { c.put(req, copy); });
+    }
+    return resp;
+  }).catch(function () {
+    return caches.match(req).then(function (cached) {
+      if (cached) return cached;
+      if (req.mode === "navigate") return caches.match("./index.html");
+      return Response.error();
+    });
+  });
+}
+
 self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
   var url = new URL(req.url);
 
-  // Zastave s flagcdn.com — network-first, spremi u cache, offline fallback.
+  // Zastave s flagcdn.com — network-first, spremi u cache, offline pričuva.
   if (url.hostname === "flagcdn.com") {
-    e.respondWith(
-      fetch(req).then(function (r) {
-        var copy = r.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return r;
-      }).catch(function () { return caches.match(req); })
-    );
+    e.respondWith(networkFirst(req));
     return;
   }
 
-  // Isti origin — cache-first, uz mrežni fallback i spremanje novog.
+  // Sve s ovog origina — network-first (uvijek najnovije kad ima mreže).
   if (url.origin === location.origin) {
-    e.respondWith(
-      caches.match(req).then(function (cached) {
-        return cached || fetch(req).then(function (resp) {
-          if (resp && resp.ok) {
-            var copy = resp.clone();
-            caches.open(CACHE).then(function (c) { c.put(req, copy); });
-          }
-          return resp;
-        }).catch(function () {
-          // Za navigacije bez mreže vrati početnu stranicu.
-          if (req.mode === "navigate") return caches.match("./index.html");
-        });
-      })
-    );
+    e.respondWith(networkFirst(req));
   }
 });
