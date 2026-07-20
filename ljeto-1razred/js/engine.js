@@ -12,8 +12,62 @@
     return a;
   }
 
-  function pickRound(bank, n) {
-    return shuffle(bank).slice(0, Math.min(n, bank.length));
+  function pickRandom(arr, n) {
+    if (n >= arr.length) return shuffle(arr);
+    var copy = arr.slice();
+    var out = [];
+    var i;
+    for (i = 0; i < n; i++) {
+      var j = i + Math.floor(Math.random() * (copy.length - i));
+      var t = copy[i];
+      copy[i] = copy[j];
+      copy[j] = t;
+      out.push(copy[i]);
+    }
+    return out;
+  }
+
+  function pickRound(bank, n, gameId) {
+    var want = Math.min(n, bank.length);
+    if (!bank.length) return [];
+    if (!gameId || !global.Progress) {
+      return pickRandom(bank, want);
+    }
+
+    var seen = Progress.getSeen(gameId);
+    var seenSet = {};
+    seen.forEach(function (id) {
+      seenSet[String(id)] = true;
+    });
+
+    var fresh = [];
+    var used = [];
+    var i;
+    for (i = 0; i < bank.length; i++) {
+      var q = bank[i];
+      var id = q.id != null ? String(q.id) : null;
+      if (id && seenSet[id]) used.push(q);
+      else fresh.push(q);
+    }
+
+    if (fresh.length < want) {
+      Progress.clearSeen(gameId);
+      fresh = bank;
+      used = [];
+    }
+
+    var picked = pickRandom(fresh, want);
+    if (picked.length < want) {
+      picked = picked.concat(pickRandom(used, want - picked.length));
+    }
+
+    Progress.markSeen(
+      gameId,
+      picked.map(function (q) {
+        return q.id;
+      })
+    );
+    return picked;
   }
 
   function starsFromScore(correct, total) {

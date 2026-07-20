@@ -144,7 +144,7 @@
   function startGame() {
     var game = state.game;
     if (!game) return;
-    state.queue = Engine.pickRound(game.bank, game.roundSize || 10);
+    state.queue = Engine.pickRound(game.bank, game.roundSize || 10, game.id);
     state.index = 0;
     state.correct = 0;
     showView("play");

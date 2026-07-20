@@ -3,6 +3,7 @@
 
   var PREFIX = "ljeto1_";
   var KEY = PREFIX + "progress";
+  var SEEN_KEY = PREFIX + "seen";
 
   function empty() {
     return { games: {}, totalStars: 0 };
@@ -24,6 +25,60 @@
 
   function save(data) {
     localStorage.setItem(KEY, JSON.stringify(data));
+  }
+
+  function loadSeen() {
+    try {
+      var raw = localStorage.getItem(SEEN_KEY);
+      if (!raw) return {};
+      var data = JSON.parse(raw);
+      return data && typeof data === "object" ? data : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveSeen(data) {
+    try {
+      localStorage.setItem(SEEN_KEY, JSON.stringify(data));
+    } catch (e) {
+      // Ako je storage pun, resetiraj povijest viđenih.
+      localStorage.removeItem(SEEN_KEY);
+    }
+  }
+
+  function getSeen(gameId) {
+    var all = loadSeen();
+    var entry = all[gameId];
+    if (!entry) return [];
+    if (Array.isArray(entry)) return entry;
+    return Object.keys(entry);
+  }
+
+  function markSeen(gameId, ids) {
+    var all = loadSeen();
+    var map = all[gameId];
+    if (!map || Array.isArray(map)) {
+      map = {};
+      if (Array.isArray(all[gameId])) {
+        all[gameId].forEach(function (id) {
+          map[String(id)] = 1;
+        });
+      }
+    }
+    (ids || []).forEach(function (id) {
+      if (id == null) return;
+      map[String(id)] = 1;
+    });
+    all[gameId] = map;
+    saveSeen(all);
+  }
+
+  function clearSeen(gameId) {
+    var all = loadSeen();
+    if (gameId) delete all[gameId];
+    else all = {};
+    saveSeen(all);
   }
 
   function getStars(gameId) {
@@ -72,6 +127,9 @@
     getStars: getStars,
     setStars: setStars,
     subjectStars: subjectStars,
-    totalStars: totalStars
+    totalStars: totalStars,
+    getSeen: getSeen,
+    markSeen: markSeen,
+    clearSeen: clearSeen
   };
 })(window);

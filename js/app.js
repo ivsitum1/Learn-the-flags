@@ -591,12 +591,14 @@
   // ===========================================================================
   //  KVIZ (multiple choice) — za 1 ili više igrača (pass & play)
   // ===========================================================================
+  var QUIZ_COOLDOWN = 15; // barem toliko pitanja bez ponavljanja iste države (svi igrači)
   var quiz = {
     difficulty: "normal", continent: "sve",
     playerCount: 1, rounds: 5,
     players: [],       // [{name, score, answered}]
     turn: 0,           // redni broj poteza (od 0)
-    answered: false, current: null
+    answered: false, current: null,
+    recent: []         // ISO kodovi zadnjih prikazanih država (zajednički za sve igrače)
   };
 
   function quizPool() {
@@ -667,6 +669,7 @@
       });
     }
     quiz.turn = 0;
+    quiz.recent = [];
     $("#quizSetup").hidden = true;
     $("#quizGame").hidden = false;
     renderScoreboard();
@@ -753,10 +756,26 @@
     });
   }
 
+  function pickQuizCountry() {
+    var pool = quizPool();
+    // Ako je bazen mali (npr. Južna Amerika), ne blokiraj više nego pool.length - 1
+    var cooldown = Math.min(QUIZ_COOLDOWN, Math.max(0, pool.length - 1));
+    var blocked = {};
+    var start = Math.max(0, quiz.recent.length - cooldown);
+    for (var i = start; i < quiz.recent.length; i++) blocked[quiz.recent[i]] = true;
+    var available = pool.filter(function (c) { return !blocked[c.code]; });
+    if (!available.length) available = pool;
+    var pick = available[Math.floor(Math.random() * available.length)];
+    quiz.recent.push(pick.code);
+    if (quiz.recent.length > QUIZ_COOLDOWN) {
+      quiz.recent = quiz.recent.slice(quiz.recent.length - QUIZ_COOLDOWN);
+    }
+    return pick;
+  }
+
   function nextQuestion() {
     if (gameOver()) { showResults(); return; }
-    var pool = quizPool();
-    renderQuestion(pool[Math.floor(Math.random() * pool.length)]);
+    renderQuestion(pickQuizCountry());
   }
 
   function answerQuiz(btn, chosenKey, correct) {
@@ -823,6 +842,7 @@
       closeModal();
       quiz.players.forEach(function (p) { p.score = 0; });
       quiz.turn = 0;
+      quiz.recent = [];
       renderScoreboard();
       nextQuestion();
     });
