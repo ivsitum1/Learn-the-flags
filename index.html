@@ -113,10 +113,19 @@
         <div class="quiz-wrap">
           <div class="turn-banner" id="turnBanner"></div>
           <div class="quiz-card">
-            <div class="quiz-q" id="quizQuestion"></div>
-            <div id="quizFlag"></div>
-            <div class="options" id="quizOptions"></div>
-            <div class="quiz-feedback" id="quizFeedback" style="margin-top:16px"></div>
+            <div class="quiz-main">
+              <div class="quiz-left">
+                <div class="quiz-q" id="quizQuestion"></div>
+                <div id="quizFlag"></div>
+              </div>
+              <div class="quiz-right">
+                <div class="options" id="quizOptions"></div>
+                <button class="btn ghost hint-btn" id="quizHintBtn" data-i18n="hint">💡 Pomoć</button>
+                <div class="quiz-hint" id="quizHint"></div>
+              </div>
+            </div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+            <div class="quiz-reveal" id="quizReveal"></div>
           </div>
           <div class="flash-actions">
             <button class="btn primary" id="quizNext" style="visibility:hidden"></button>
