@@ -9,6 +9,7 @@ on:
       - main
       - master
       - claude/flags-learning-app-plan-tpos3s
+      - feat/ljeto-1razred
   workflow_dispatch:
 
 permissions:
@@ -38,6 +39,9 @@ jobs:
           mkdir -p _site
           cp index.html LICENSE README.md DATA_VERIFICATION.md _site/
           cp -r css js _site/
+          if [ -d ljeto-1razred ]; then
+            cp -r ljeto-1razred _site/
+          fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
