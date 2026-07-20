@@ -415,9 +415,40 @@ footer { text-align: center; color: var(--text-soft); font-size: .82rem; padding
   .modal .minimap { max-height: none; }
 }
 
+/* ---------- Tablet (uspravno): širi, ugodniji stupac ----------
+   Fokusiran jedan stupac (zastava gore, odgovori dolje), ali iskoristi širinu. */
+@media (min-width: 700px) and (orientation: portrait) {
+  .quiz-card { max-width: 640px; padding: 30px 32px; }
+  .card { max-width: 720px; }
+  .card-front .flag { width: 460px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 16px; }
+}
+
+/* ---------- Tablet i desktop (položeno / široko): kviz u dva stupca ----------
+   Dovoljno je široko za zastavu lijevo i ponuđene odgovore desno — bez praznog
+   prostora i bez scrollanja. Uspravni tablet ostaje fokusiran jedan stupac gore. */
+@media (min-width: 700px) and (orientation: landscape) {
+  .quiz-card { max-width: 860px; padding: 30px 34px; }
+  .quiz-main { flex-direction: row; gap: 36px; align-items: center; }
+  .quiz-left { flex: 0 0 42%; }
+  .quiz-right { flex: 1; text-align: left; }
+  .quiz-q { margin-bottom: 12px; }
+  #quizFlag .flag { width: 100%; max-width: 340px; margin: 0 auto; }
+  .options { margin-top: 0; }
+  .hint-btn { margin-top: 14px; }
+  .reveal-map { max-width: 560px; margin: 0 auto; }
+
+  /* Kartica i zastava iskoriste širi ekran */
+  .card { max-width: 760px; }
+  .card-front .flag { width: 480px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 16px; }
+}
+
 /* ---------- Položeni (landscape) mobitel: jednako pregledno kao uspravno ----------
    Nizak i širok ekran — zastava se skalira po visini, a kviz ide u dva stupca
-   (zastava lijevo, ponuđeni odgovori desno) da sve stane bez pretjeranog scrollanja. */
+   (zastava lijevo, ponuđeni odgovori desno) da sve stane bez pretjeranog scrollanja.
+   Dolazi NAKON tablet-pravila pa na niskom telefonu preuzima uže, po visini
+   skalirane vrijednosti. */
 @media (orientation: landscape) and (max-height: 640px) {
   main { padding: 14px 18px 56px; }
 
