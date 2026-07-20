@@ -166,6 +166,8 @@
     $("#flashProgress").style.width = ((flash.idx) / total * 100) + "%";
     $("#flashCount").textContent = (flash.idx + 1) + " / " + total;
     $("#flashScore").textContent = flash.score;
+    var prevBtn = $("#btnPrev");
+    if (prevBtn) { prevBtn.disabled = flash.idx === 0; }
 
     var card = $("#flashCard");
     card.classList.remove("flipped");
@@ -558,11 +560,20 @@
     renderFlash();
   }
 
+  // Listanje unatrag — vrati se na prethodnu karticu (bez diranja rezultata)
+  function prevCard() {
+    if (flash.idx <= 0) return;
+    flash.idx -= 1;
+    if (flash.seen > 0) flash.seen -= 1;
+    renderFlash();
+  }
+
   $("#flashCard").addEventListener("click", flipCard);
   $("#btnFlip").addEventListener("click", function (e) { e.stopPropagation(); flipCard(); });
   $("#btnKnew").addEventListener("click", function () { nextCard(true); });
   $("#btnDidnt").addEventListener("click", function () { nextCard(false); });
-  $("#btnSkip").addEventListener("click", function () { nextCard(null); });
+  $("#btnPrev").addEventListener("click", prevCard);
+  $("#btnNext").addEventListener("click", function () { nextCard(null); });
   $("#btnShuffle").addEventListener("click", newDeck);
   $("#btnResetScore").addEventListener("click", function () {
     flash.score = 0; store.set("score", 0); $("#flashScore").textContent = 0;

@@ -153,6 +153,7 @@ select:focus, input:focus { outline: 2px solid var(--primary); outline-offset: 1
 .btn.good { background: var(--good); color: #fff; border-color: transparent; }
 .btn.bad { background: var(--bad); color: #fff; border-color: transparent; }
 .btn.ghost { background: transparent; }
+.btn:disabled { opacity: .4; cursor: default; box-shadow: none; transform: none; }
 
 /* ---------- Stat pills ---------- */
 .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
