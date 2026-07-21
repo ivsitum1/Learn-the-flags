@@ -19,6 +19,7 @@
   var els = {
     views: {
       hub: document.getElementById("view-hub"),
+      shop: document.getElementById("view-shop"),
       subject: document.getElementById("view-subject"),
       intro: document.getElementById("view-intro"),
       play: document.getElementById("view-play"),
@@ -27,6 +28,8 @@
     btnBack: document.getElementById("btnBack"),
     starsTotal: document.getElementById("starsTotal"),
     subjectGrid: document.getElementById("subjectGrid"),
+    shopGrid: document.getElementById("shopGrid"),
+    shopHistory: document.getElementById("shopHistory"),
     subjectIcon: document.getElementById("subjectIcon"),
     subjectTitle: document.getElementById("subjectTitle"),
     subjectBlurb: document.getElementById("subjectBlurb"),
@@ -60,7 +63,7 @@
   }
 
   function refreshStars() {
-    els.starsTotal.textContent = "⭐ " + Progress.totalStars();
+    els.starsTotal.textContent = "⭐ " + Progress.wallet();
   }
 
   function gameIdsFor(subject) {
@@ -94,6 +97,96 @@
         openSubject(sub);
       });
       els.subjectGrid.appendChild(btn);
+    });
+  }
+
+  function openShop() {
+    if (state.view === "shop") return;
+    renderShop();
+    showView("shop");
+  }
+
+  function renderShop() {
+    var bal = Progress.wallet();
+    els.shopGrid.innerHTML = "";
+    (window.REWARDS || []).forEach(function (reward) {
+      var card = document.createElement("div");
+      card.className = "shop-card";
+      var need = reward.cost - bal;
+      var action = document.createElement("div");
+      action.className = "shop-action";
+      if (need > 0) {
+        var needEl = document.createElement("p");
+        needEl.className = "shop-need";
+        needEl.textContent = "Trebaš još " + need + " ⭐";
+        action.appendChild(needEl);
+        var disabled = document.createElement("button");
+        disabled.type = "button";
+        disabled.className = "btn primary";
+        disabled.textContent = "Iskoristi";
+        disabled.disabled = true;
+        action.appendChild(disabled);
+      } else {
+        var buy = document.createElement("button");
+        buy.type = "button";
+        buy.className = "btn primary";
+        buy.textContent = "Iskoristi";
+        buy.addEventListener("click", function () {
+          var msg =
+            "Stvarno potrošiti " +
+            reward.cost +
+            "⭐ za " +
+            reward.title +
+            "?";
+          if (!window.confirm(msg)) return;
+          var res = Progress.spend(reward);
+          if (!res.ok) return;
+          refreshStars();
+          renderShop();
+        });
+        action.appendChild(buy);
+      }
+      card.innerHTML =
+        '<span class="icon">' +
+        reward.emoji +
+        "</span><div><h3>" +
+        reward.title +
+        '</h3><p class="shop-cost">⭐ ' +
+        reward.cost +
+        "</p></div>";
+      card.appendChild(action);
+      els.shopGrid.appendChild(card);
+    });
+    renderHistory();
+  }
+
+  function renderHistory() {
+    var list = Progress.getSpent().slice(0, 10);
+    els.shopHistory.innerHTML = "";
+    if (!list.length) {
+      var empty = document.createElement("li");
+      empty.className = "shop-history-empty";
+      empty.textContent = "Još nema iskorištenih nagrada.";
+      els.shopHistory.appendChild(empty);
+      return;
+    }
+    list.forEach(function (item) {
+      var li = document.createElement("li");
+      var when = "";
+      try {
+        when = new Date(item.at).toLocaleDateString("hr-HR");
+      } catch (e) {
+        when = "";
+      }
+      li.innerHTML =
+        "<span>" +
+        item.title +
+        " · ⭐ " +
+        item.cost +
+        '</span><span class="shop-hist-meta">' +
+        when +
+        "</span>";
+      els.shopHistory.appendChild(li);
     });
   }
 
@@ -180,9 +273,16 @@
     var total = state.queue.length;
     var stars = Engine.starsFromScore(state.correct, total);
     Progress.setStars(state.game.id, stars, state.correct);
+    Progress.addToWallet(stars);
     els.resultStars.textContent = starText(stars);
     els.resultScore.textContent =
-      "Točno " + state.correct + " od " + total + " zadataka";
+      "Točno " +
+      state.correct +
+      " od " +
+      total +
+      " zadataka · +" +
+      stars +
+      " ⭐ u novčanik";
     if (stars === 3) {
       els.resultTitle.textContent = "Sjajno!";
       els.resultMsg.textContent = "Skoro savršeno — skupio/la si 3 zvjezdice!";
@@ -201,6 +301,11 @@
   }
 
   function goBack() {
+    if (state.view === "shop") {
+      renderHub();
+      showView("hub");
+      return;
+    }
     if (state.view === "play" || state.view === "intro" || state.view === "result") {
       if (state.subject) openSubject(state.subject);
       else {
@@ -217,6 +322,7 @@
   }
 
   els.btnBack.addEventListener("click", goBack);
+  els.starsTotal.addEventListener("click", openShop);
   els.btnStart.addEventListener("click", startGame);
   els.btnReplay.addEventListener("click", function () {
     openIntro(state.game);

@@ -20,7 +20,7 @@
       <span class="brand-sun">☀️</span>
       <span>Ljetni park</span>
     </div>
-    <div class="stars-total" id="starsTotal" title="Ukupne zvjezdice">⭐ 0</div>
+    <button type="button" class="stars-total" id="starsTotal" title="Zvjezdice — otvori dućan" aria-label="Zvjezdice — otvori dućan">⭐ 0</button>
   </header>
 
   <main>
@@ -32,6 +32,19 @@
         <p class="hero-sub">Uči kroz igru — matematika, hrvatski i priroda i društvo.</p>
       </div>
       <div class="subject-grid" id="subjectGrid"></div>
+    </section>
+
+    <!-- SHOP -->
+    <section class="view" id="view-shop" data-view="shop">
+      <div class="shop-head">
+        <h2>Dućan nagrada</h2>
+        <p class="shop-blurb">Potroši zvjezdice na stvarne nagrade — roditelj ih obavi.</p>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+      <div class="shop-history">
+        <h3>Nedavno iskorišteno</h3>
+        <ul id="shopHistory"></ul>
+      </div>
     </section>
 
     <!-- SUBJECT -->
@@ -88,6 +101,7 @@
 
   <script src="js/progress.js"></script>
   <script src="js/engine.js"></script>
+  <script src="js/rewards.js"></script>
   <script src="js/content/matematika.js"></script>
   <script src="js/content/hrvatski.js"></script>
   <script src="js/content/priroda.js"></script>

@@ -6,7 +6,7 @@
   var SEEN_KEY = PREFIX + "seen";
 
   function empty() {
-    return { games: {}, totalStars: 0 };
+    return { games: {}, totalStars: 0, wallet: 0, spent: [] };
   }
 
   function load() {
@@ -17,6 +17,8 @@
       if (!data || typeof data !== "object") return empty();
       if (!data.games) data.games = {};
       if (typeof data.totalStars !== "number") data.totalStars = 0;
+      if (typeof data.wallet !== "number") data.wallet = data.totalStars || 0;
+      if (!Array.isArray(data.spent)) data.spent = [];
       return data;
     } catch (e) {
       return empty();
@@ -122,12 +124,51 @@
     return load().totalStars || 0;
   }
 
+  function wallet() {
+    return load().wallet || 0;
+  }
+
+  function addToWallet(n) {
+    var data = load();
+    var add = Math.max(0, Math.floor(Number(n) || 0));
+    data.wallet = (data.wallet || 0) + add;
+    save(data);
+    return data.wallet;
+  }
+
+  function spend(reward) {
+    var data = load();
+    var cost = reward && typeof reward.cost === "number" ? reward.cost : 0;
+    if (cost <= 0 || (data.wallet || 0) < cost) {
+      return { ok: false, wallet: data.wallet || 0 };
+    }
+    data.wallet -= cost;
+    data.spent = data.spent || [];
+    data.spent.push({
+      id: reward.id,
+      title: reward.title,
+      cost: cost,
+      at: new Date().toISOString()
+    });
+    save(data);
+    return { ok: true, wallet: data.wallet };
+  }
+
+  function getSpent() {
+    var list = load().spent || [];
+    return list.slice().reverse();
+  }
+
   global.Progress = {
     load: load,
     getStars: getStars,
     setStars: setStars,
     subjectStars: subjectStars,
     totalStars: totalStars,
+    wallet: wallet,
+    addToWallet: addToWallet,
+    spend: spend,
+    getSpent: getSpent,
     getSeen: getSeen,
     markSeen: markSeen,
     clearSeen: clearSeen

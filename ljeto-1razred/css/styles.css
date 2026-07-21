@@ -91,6 +91,15 @@ body {
   border-radius: 999px;
   box-shadow: var(--shadow);
   font-size: 0.95rem;
+  border: none;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.stars-total:active {
+  transform: scale(0.96);
 }
 
 .back-btn {
@@ -587,6 +596,136 @@ main {
   margin-top: 0.85rem;
   display: flex;
   justify-content: center;
+}
+
+/* Shop */
+.shop-head {
+  margin-bottom: 1.25rem;
+}
+
+.shop-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+}
+
+.shop-blurb {
+  margin: 0.35rem 0 0;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.shop-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.shop-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.85rem 1rem;
+  font-family: inherit;
+  color: inherit;
+}
+
+.shop-card .icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.shop-card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.shop-card .shop-cost {
+  margin: 0.15rem 0 0;
+  color: #b45309;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.shop-card .shop-action {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.shop-card .btn {
+  min-height: 2.6rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.shop-card .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.shop-need {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-align: right;
+  max-width: 7.5rem;
+}
+
+.shop-history {
+  margin-top: 1.75rem;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.15rem;
+}
+
+.shop-history h3 {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.shop-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shop-history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.shop-history li:first-child {
+  border-top: none;
+}
+
+.shop-history .shop-hist-meta {
+  color: var(--ink-soft);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shop-history-empty {
+  margin: 0;
+  color: var(--ink-soft);
+  font-weight: 600;
 }
 
 @media (min-width: 560px) {
