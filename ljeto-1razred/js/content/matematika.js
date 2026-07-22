@@ -99,10 +99,14 @@
   }
   function subQ(a, b) {
     var d = a - b;
+    var ch = [d];
+    [d - 1, d + 1, d + 2, d - 2, d + 3].forEach(function (v) {
+      if (ch.length < 4 && v >= 0 && v <= 20 && ch.indexOf(v) < 0) ch.push(v);
+    });
     racun.push(mcq(
       "Koliko je " + a + " − " + b + "?",
       d,
-      [d - 1 < 0 ? d + 2 : d - 1, d, d + 1, d + 2],
+      ch,
       a + " − " + b + " = " + d + ".",
       { kind: "groups", groups: [a], token: "🔵", suffix: "  (−" + b + ")" }
     ));
@@ -218,6 +222,151 @@
   ].forEach(function (expr) {
     lanac.push(chain(expr));
   });
+
+  // ---- Dodatni zadaci po uzoru na radnu bilježnicu ----
+  function calc(expr) {
+    var p = expr.trim().split(/\s+/);
+    var a = parseInt(p[0], 10);
+    for (var i = 1; i < p.length; i += 2) {
+      a = p[i] === "+" ? a + parseInt(p[i + 1], 10) : a - parseInt(p[i + 1], 10);
+    }
+    return a;
+  }
+  function prettyExpr(expr) {
+    return expr.trim().split(/\s+/).map(function (t) { return t === "-" ? "−" : t; }).join(" ");
+  }
+  function near(ans) {
+    var c = [ans];
+    [-1, 1, -2, 2, 3, -3].forEach(function (d) {
+      var v = ans + d;
+      if (c.length < 4 && v >= 0 && v <= 20 && c.indexOf(v) < 0) c.push(v);
+    });
+    return c;
+  }
+
+  var rijeci = {
+    1: "jedan", 2: "dva", 3: "tri", 4: "četiri", 5: "pet", 6: "šest", 7: "sedam",
+    8: "osam", 9: "devet", 10: "deset", 11: "jedanaest", 12: "dvanaest", 13: "trinaest",
+    14: "četrnaest", 15: "petnaest", 16: "šesnaest", 17: "sedamnaest", 18: "osamnaest",
+    19: "devetnaest", 20: "dvadeset"
+  };
+  var redni = {
+    1: "prvi", 2: "drugi", 3: "treći", 4: "četvrti", 5: "peti",
+    6: "šesti", 7: "sedmi", 8: "osmi", 9: "deveti", 10: "deseti"
+  };
+  function wordChoices(n, map) {
+    var out = [map[n]];
+    [1, -1, 2, -2, 3].forEach(function (d) {
+      var w = map[n + d];
+      if (out.length < 4 && w && out.indexOf(w) < 0) out.push(w);
+    });
+    return out;
+  }
+
+  // Redni brojevi (kao "Redni brojevi": prvi, drugi, treći …)
+  brojevi.push({
+    type: "match",
+    prompt: "Spoji broj i redni broj.",
+    pairs: [["1.", "prvi"], ["2.", "drugi"], ["3.", "treći"]],
+    explain: "1. prvi, 2. drugi, 3. treći."
+  });
+  brojevi.push({
+    type: "match",
+    prompt: "Spoji broj i redni broj.",
+    pairs: [["4.", "četvrti"], ["5.", "peti"], ["6.", "šesti"]],
+    explain: "4. četvrti, 5. peti, 6. šesti."
+  });
+  [3, 4, 7, 9].forEach(function (n) {
+    brojevi.push(mcq("Koji je redni broj za " + n + "?", redni[n], wordChoices(n, redni),
+      n + ". po redu je " + redni[n] + "."));
+  });
+  brojevi.push(mcq("Petar je stigao prvi, Goran drugi, a Matija treći. Tko je stigao drugi?",
+    "Goran", ["Petar", "Goran", "Matija", "nitko"], "Drugi je stigao Goran."));
+  brojevi.push(mcq("Koji redni broj dolazi odmah nakon rednog broja peti?",
+    "šesti", ["četvrti", "peti", "šesti", "sedmi"], "Nakon petog dolazi šesti."));
+  brojevi.push(order("Poredaj redne brojeve po redu.", ["prvi", "drugi", "treći"],
+    "Redom: prvi, drugi, treći."));
+
+  // Brojevne riječi (kao "Zapiši brojkama ili brojevnim riječima")
+  [12, 15, 17, 19, 14, 11, 18].forEach(function (n) {
+    brojevi.push(mcq("Kako se riječima piše broj " + n + "?", rijeci[n], wordChoices(n, rijeci),
+      "Broj " + n + " pišemo: " + rijeci[n] + "."));
+  });
+  [13, 16, 20].forEach(function (n) {
+    brojevi.push(mcq("Koji je to broj: " + rijeci[n] + "?", n, near(n),
+      rijeci[n] + " je broj " + n + "."));
+  });
+
+  // Brojanje unaprijed i unazad (brojevi veći od 10)
+  brojevi.push(mcq("Broji unaprijed: 11, 12, 13, ☐, 15. Koji broj nedostaje?", 14, near(14),
+    "Nakon 13 dolazi 14."));
+  brojevi.push(mcq("Broji unaprijed: 16, 17, ☐, 19. Koji broj nedostaje?", 18, near(18),
+    "Nakon 17 dolazi 18."));
+  brojevi.push(mcq("Broji unazad: 20, 19, ☐, 17. Koji broj nedostaje?", 18, near(18),
+    "Unazad iza 19 dolazi 18."));
+  brojevi.push(mcq("Broji unazad: 15, 14, 13, ☐. Koji broj nedostaje?", 12, near(12),
+    "Unazad iza 13 dolazi 12."));
+  brojevi.push(order("Poredaj brojeći unazad (od najvećeg do najmanjeg).", [16, 13, 9],
+    "Od najvećeg: 16, 13, 9."));
+
+  // Usporedba izraza (kao "upiši znak <, > ili =")
+  [
+    ["3 + 4", "6 - 5"], ["4 + 2", "8 - 3"], ["6 + 4", "10 - 0"], ["5 + 2", "4 + 3"],
+    ["4 - 3", "7 - 6"], ["7 + 2", "9 - 2"], ["8 - 6", "9 - 5"], ["1 + 5", "8 + 2"]
+  ].forEach(function (pair) {
+    var l = calc(pair[0]), r = calc(pair[1]);
+    var ans = l > r ? ">" : l < r ? "<" : "=";
+    brojevi.push(mcq(
+      "Usporedi: " + prettyExpr(pair[0]) + " ☐ " + prettyExpr(pair[1]) + ". Koji znak ide u kućicu?",
+      ans, ["<", "=", ">"],
+      prettyExpr(pair[0]) + " = " + l + ", " + prettyExpr(pair[1]) + " = " + r + ", pa je " + l + " " + ans + " " + r + "."
+    ));
+  });
+
+  // Dopuna do 10 (kao domino-kartice 9+1, 8+2 …)
+  function makeTen(a) {
+    return mcq("Koliko nedostaje broju " + a + " do 10?", 10 - a, near(10 - a),
+      a + " + " + (10 - a) + " = 10.");
+  }
+  [1, 2, 3, 4, 6, 7, 8, 9].forEach(function (a) { racun.push(makeTen(a)); });
+
+  // Pribrojnik i zbroj (matematički pojmovi)
+  racun.push(mcq("Prvi pribrojnik je 15, a drugi pribrojnik je 3. Koliki je zbroj?",
+    18, near(18), "Zbroj = 15 + 3 = 18."));
+  racun.push(mcq("Prvi pribrojnik je 12, a drugi pribrojnik je 6. Koliki je zbroj?",
+    18, near(18), "Zbroj = 12 + 6 = 18."));
+  racun.push(mcq("Prvi pribrojnik je 7, a zbroj je 18. Koliki je drugi pribrojnik?",
+    11, near(11), "18 − 7 = 11."));
+  racun.push(mcq("Kojem broju treba dodati 4 da se dobije 17?",
+    13, near(13), "13 + 4 = 17."));
+  racun.push(mcq("Kojem broju treba dodati 7 da se dobije 20?",
+    13, near(13), "13 + 7 = 20."));
+
+  // Jednadžbe s ravnotežom (kao "izračunaj: 12 + 5 = 6 + ☐")
+  function balance(leftStr, known, boxFirst) {
+    var L = calc(leftStr);
+    var m = L - known;
+    var right = boxFirst ? ("☐ + " + known) : (known + " + ☐");
+    return mcq(
+      "Koji broj nedostaje: " + prettyExpr(leftStr) + " = " + right + "?",
+      m, near(m),
+      prettyExpr(leftStr) + " = " + L + ", pa u kućicu ide " + m + "."
+    );
+  }
+  [
+    ["12 + 5", 6, false], ["13 + 7", 12, true], ["1 + 18", 8, false],
+    ["14 + 4", 12, false], ["0 + 14", 12, false], ["15 + 0", 2, true]
+  ].forEach(function (b) { racun.push(balance(b[0], b[1], b[2])); });
+
+  // Zadaci riječima "za koliko više" i ukupno (kao zadaci sa str. 36.–37.)
+  racun.push(mcq("Tina je izračunala 15 zadataka, a Lana 3 zadatka više. Koliko je zadataka izračunala Lana?",
+    18, near(18), "15 + 3 = 18 zadataka."));
+  racun.push(mcq("Na lijevoj strani ulice je 11 kuća, a na desnoj 7 kuća više. Koliko kuća ima na desnoj strani?",
+    18, near(18), "11 + 7 = 18 kuća."));
+  racun.push(mcq("Imam 12 bojica. Seka mi pokloni još 2 bojice. Koliko ću ih ukupno imati?",
+    14, near(14), "12 + 2 = 14 bojica."));
+  racun.push(mcq("Maja je nacrtala 13 crvenih i 2 plava cvjetića. Koliko je cvjetića nacrtala ukupno?",
+    15, near(15), "13 + 2 = 15 cvjetića."));
 
   var oblici = [];
   var shapeNames = ["krug", "trokut", "kvadrat", "pravokutnik"];
