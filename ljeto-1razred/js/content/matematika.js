@@ -6,8 +6,11 @@
   function uniqChoices(answer, extras) {
     var set = {};
     var out = [];
+    // Dopusti točan odgovor i iznad MAX (npr. zbroj stranica oblika),
+    // inače ponuda ostane bez točnog broja ili s nasumičnim 0–3.
+    var lim = Math.max(MAX, Number(answer) || 0);
     function add(v) {
-      if (typeof v !== "number" || v < 0 || v > MAX) return;
+      if (typeof v !== "number" || !isFinite(v) || v < 0 || v > lim) return;
       var k = String(v);
       if (set[k]) return;
       set[k] = true;
@@ -18,7 +21,7 @@
     var deltas = [-3, -2, -1, 1, 2, 3, 4, -4, 5, -5];
     var i;
     for (i = 0; i < deltas.length && out.length < 4; i++) add(answer + deltas[i]);
-    for (i = 0; i <= MAX && out.length < 4; i++) add(i);
+    for (i = 0; i <= lim && out.length < 4; i++) add(i);
     return out.slice(0, 4);
   }
 

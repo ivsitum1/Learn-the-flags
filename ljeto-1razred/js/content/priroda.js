@@ -489,16 +489,25 @@
     ["žuto", "pripremimo se"],
     ["zeleno", "idemo oprezno"]
   ];
+  // [naziv, lokativna fraza (gdje?), radnja]
   var placesHome = [
-    ["škola", "učimo"],
-    ["park", "igramo se"],
-    ["kuća", "odmaramo se"],
-    ["bolnica", "liječimo se"],
-    ["trgovina", "kupujemo"],
-    ["knjižnica", "posuđujemo knjige"],
-    ["igralište", "trčimo i igramo"],
-    ["ambulanta", "idemo liječniku"]
+    ["škola", "u školi", "učimo"],
+    ["park", "u parku", "igramo se"],
+    ["kuća", "u kući", "odmaramo se"],
+    ["bolnica", "u bolnici", "liječimo se"],
+    ["trgovina", "u trgovini", "kupujemo"],
+    ["knjižnica", "u knjižnici", "posuđujemo knjige"],
+    ["igralište", "na igralištu", "trčimo i igramo"],
+    ["ambulanta", "u ambulanti", "idemo liječniku"]
   ];
+
+  function placeSentence(loc, action) {
+    var head = loc.charAt(0).toUpperCase() + loc.slice(1);
+    if (/ se$/.test(action)) {
+      return head + " se najčešće " + action.replace(/ se$/, "") + ".";
+    }
+    return head + " najčešće " + action + ".";
+  }
 
   body.forEach(function (b) {
     okolina.push(
@@ -571,16 +580,27 @@
     okolina.push(
       mcq(
         "place-" + p[0],
-        "Što najčešće radimo u mjestu: " + p[0] + "?",
-        p[1],
-        uniqChoices(p[1], placesHome.map(function (x) { return x[1]; })),
-        "U " + p[0] + " — " + p[1] + "."
+        "Što najčešće radimo " + p[1] + "?",
+        p[2],
+        uniqChoices(
+          p[2],
+          placesHome.map(function (x) {
+            return x[2];
+          })
+        ),
+        placeSentence(p[1], p[2])
       )
     );
   });
 
-  okolina.push(order("ord-day", "Poredaj: jutro, podne, večer.", ["jutro", "podne", "večer"], "Dan ide od jutra do večeri."));
-  okolina.push(order("ord-week", "Poredaj dane: ponedjeljak, utorak, srijeda.", ["ponedjeljak", "utorak", "srijeda"], "Ponedjeljak → utorak → srijeda."));
+  okolina.push(
+    order(
+      "ord-day",
+      "Poredaj dijelove dana redom (od ranijeg prema kasnijem).",
+      ["jutro", "podne", "večer"],
+      "Jutro → podne → večer."
+    )
+  );
   okolina.push(mcq("country", "Koja je naša zemlja?", "Hrvatska", ["Italija", "Hrvatska", "Njemačka", "Francuska"], "Živimo u Hrvatskoj."));
   okolina.push(mcq("capital", "Koji je glavni grad Hrvatske?", "Zagreb", ["Split", "Zagreb", "Rijeka", "Osijek"], "Glavni grad je Zagreb."));
   okolina.push(mcq("sea", "Uz koje more leži Hrvatska?", "Jadransko more", ["Crno more", "Jadransko more", "Sjeverno more", "Baltičko more"], "Hrvatska leži uz Jadransko more."));
@@ -599,8 +619,12 @@
     id: "match-place-action",
     type: "match",
     prompt: "Spoji mjesto i što tamo radimo.",
-    pairs: [["škola", "učimo"], ["park", "igramo se"], ["kuća", "odmaramo se"]],
-    explain: "Škola–učimo, park–igra, kuća–odmor."
+    pairs: [
+      ["škola", "učimo"],
+      ["park", "igramo se"],
+      ["knjižnica", "posuđujemo knjige"]
+    ],
+    explain: "U školi učimo, u parku se igramo, u knjižnici posuđujemo knjige."
   });
   okolina.push({
     id: "match-light",
@@ -611,7 +635,6 @@
   });
 
   // Kombinacije: dijelovi dana × aktivnosti
-  var dayParts = ["ujutro", "podne", "navečer"];
   var dayActs = [
     ["ujutro", "peremo zube i doručkujemo"],
     ["podne", "ručamo"],
@@ -624,20 +647,29 @@
         "Što najčešće radimo " + row[0] + "?",
         row[1],
         uniqChoices(row[1], dayActs.map(function (x) { return x[1]; }).concat(["spavamo cijeli dan", "igramo na cesti"])),
-        row[0].charAt(0).toUpperCase() + row[0].slice(1) + ": " + row[1] + "."
+        row[0].charAt(0).toUpperCase() + row[0].slice(1) + " najčešće " + row[1] + "."
       )
     );
   });
 
-  dayParts.forEach(function (p1, i1) {
-    dayParts.forEach(function (p2, i2) {
+  // Redoslijed dijelova dana (imenice + genitiv uz „prije“)
+  var dayOrder = [
+    { key: "jutro", prije: "jutra" },
+    { key: "podne", prije: "podneva" },
+    { key: "večer", prije: "večeri" }
+  ];
+  dayOrder.forEach(function (a, i1) {
+    dayOrder.forEach(function (b, i2) {
       if (i1 === i2) return;
+      var earlier = i1 < i2;
       okolina.push(
         tf(
-          "tf-dayord-" + p1 + "-" + p2,
-          p1.charAt(0).toUpperCase() + p1.slice(1) + " dolazi prije nego " + p2 + " u tipičnom danu.",
-          i1 < i2,
-          i1 < i2 ? "Da." : "Ne — " + p2 + " je ranije / drugačiji red."
+          "tf-dayord-" + a.key + "-" + b.key,
+          a.key.charAt(0).toUpperCase() + a.key.slice(1) + " je prije " + b.prije + ".",
+          earlier,
+          earlier
+            ? "Da. U danu red ide: jutro, zatim podne, zatim večer."
+            : "Ne. U danu prvo dolazi jutro, zatim podne, a tek onda večer."
         )
       );
     });
@@ -665,9 +697,9 @@
       okolina.push(
         tf(
           "tf-placewrong-" + p[0] + "-" + q[0],
-          "U mjestu " + p[0] + " najčešće: " + q[1] + ".",
+          placeSentence(p[1], q[2]),
           false,
-          "U " + p[0] + " najčešće: " + p[1] + "."
+          placeSentence(p[1], p[2])
         )
       );
     });
@@ -712,15 +744,21 @@
       )
     );
   }
-  for (i = 0; i < weekdays.length - 2; i++) {
-    okolina.push(
-      order(
-        "ord-week-" + i,
-        "Poredaj dane abecednim redom tjedna (od ranijeg).",
-        [weekdays[i], weekdays[i + 1], weekdays[i + 2]],
-        weekdays[i] + " → " + weekdays[i + 1] + " → " + weekdays[i + 2]
-      )
-    );
+  for (i = 0; i < weekdays.length; i++) {
+    for (var wj = i + 1; wj < weekdays.length; wj++) {
+      for (var wk = wj + 1; wk < weekdays.length; wk++) {
+        // Preskoči tri uzastopna dana — prelagano i predvidljivo
+        if (wj === i + 1 && wk === wj + 1) continue;
+        okolina.push(
+          order(
+            "ord-week-" + i + "-" + wj + "-" + wk,
+            "Poredaj dane redom u tjednu (od ranijeg prema kasnijem).",
+            [weekdays[i], weekdays[wj], weekdays[wk]],
+            weekdays[i] + " → " + weekdays[wj] + " → " + weekdays[wk] + "."
+          )
+        );
+      }
+    }
   }
 
   global.CONTENT_PRIRODA = {
