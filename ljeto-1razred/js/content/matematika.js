@@ -120,6 +120,105 @@
   racun.push(tf("8 − 3 = 6", false, "8 − 3 = 5, ne 6."));
   racun.push(mcq("Što je više: 7 + 2 ili 6 + 4?", "6 + 4", ["7 + 2", "6 + 4", "jednako", "ne znam"], "7+2=9, a 6+4=10."));
 
+  // Popuni pribrojnik (kao "popuni tablicu": pribrojnik + pribrojnik = zbroj)
+  function missing(a, s) {
+    var m = s - a;
+    var choices = [m];
+    [-1, 1, -2, 2, 3, -3].forEach(function (delta) {
+      var v = m + delta;
+      if (choices.length < 4 && v >= 0 && v <= 20 && choices.indexOf(v) < 0) choices.push(v);
+    });
+    return mcq(
+      "Koji broj nedostaje: " + a + " + ☐ = " + s + "?",
+      m,
+      choices,
+      a + " + " + m + " = " + s + "."
+    );
+  }
+  [[5, 11], [3, 10], [7, 12], [8, 20], [9, 15], [6, 11], [4, 13], [10, 16]].forEach(function (p) {
+    racun.push(missing(p[0], p[1]));
+  });
+
+  // Zadaci riječima o eurima (kao zadaci 36.–39. iz radne bilježnice)
+  racun.push(mcq(
+    "Darko je imao 5 eura. Tata mu je dao 7 eura, a mama još 4 eura. Koliko eura sada ima Darko?",
+    16, [14, 15, 16, 17], "5 + 7 + 4 = 16 eura."
+  ));
+  racun.push(mcq(
+    "Luka je imao 5 eura, mama mu je dala još 11 eura, a on je bratu dao 7 eura. Koliko eura mu je ostalo?",
+    9, [7, 8, 9, 10], "5 + 11 − 7 = 9 eura."
+  ));
+  racun.push(mcq(
+    "Petar je imao 11 eura. Za čokoladu je platio 6 eura. Koliko eura mu je ostalo?",
+    5, [4, 5, 6, 7], "11 − 6 = 5 eura."
+  ));
+  racun.push(mcq(
+    "Marko je imao 20 eura. Kupio je knjigu za 12 eura i sok za 3 eura. Koliko eura mu je ostalo?",
+    5, [4, 5, 6, 8], "20 − 12 − 3 = 5 eura."
+  ));
+  racun.push(mcq(
+    "Ana je imala 8 eura. Baka joj je dala još 6 eura. Koliko eura sada ima Ana?",
+    14, [12, 13, 14, 15], "8 + 6 = 14 eura."
+  ));
+  racun.push(mcq(
+    "Iva je imala 9 eura. Potrošila je 4 eura, a onda dobila još 8 eura. Koliko eura sada ima?",
+    13, [11, 12, 13, 14], "9 − 4 + 8 = 13 eura."
+  ));
+  racun.push(mcq(
+    "Josip ima 6 eura. Mama mu je dala još 9 eura. Ima li dovoljno za autić koji košta 16 eura?",
+    "Ne", ["Da", "Ne"], "6 + 9 = 15 eura, a autić košta 16. Fali mu 1 euro."
+  ));
+
+  // Lančani računi (računanje slijeva nadesno, s tri ili četiri člana)
+  var lanac = [];
+  function chain(expr) {
+    var parts = expr.trim().split(/\s+/);
+    var acc = parseInt(parts[0], 10);
+    var pretty = String(acc);
+    var steps = [];
+    for (var i = 1; i < parts.length; i += 2) {
+      var op = parts[i];
+      var n = parseInt(parts[i + 1], 10);
+      var prev = acc;
+      var opDisp = op === "+" ? "+" : "−";
+      if (op === "+") acc += n; else acc -= n;
+      pretty += " " + opDisp + " " + n;
+      steps.push(prev + " " + opDisp + " " + n + " = " + acc);
+    }
+    var ans = acc;
+    var choices = [ans];
+    [-1, 1, -2, 2, 3, -3].forEach(function (delta) {
+      var v = ans + delta;
+      if (choices.length < 4 && v >= 0 && v <= 20 && choices.indexOf(v) < 0) choices.push(v);
+    });
+    return {
+      type: "mcq",
+      prompt: "Izračunaj po redu (slijeva nadesno):",
+      answer: ans,
+      choices: choices,
+      explain: steps.join(", ") + ".",
+      visual: { kind: "text", text: pretty + " = ?" }
+    };
+  }
+  [
+    // tri člana
+    "13 - 3 - 6", "18 - 8 - 3", "17 - 7 - 5", "16 - 6 - 4", "12 - 2 - 3",
+    "19 - 9 - 7", "19 - 5 + 2", "14 - 6 + 7", "17 - 8 + 3", "14 - 4 - 7",
+    "16 - 6 - 5", "20 - 10 - 5", "16 - 7 + 2", "10 - 8 + 3", "13 - 4 - 6",
+    "13 - 8 + 11", "1 + 17 - 9", "11 - 1 + 5", "4 + 8 + 1", "5 + 2 - 4",
+    "14 + 2 - 5", "16 - 12 + 5", "2 + 9 - 4", "18 - 15 + 6", "5 + 6 - 2",
+    "7 - 4 + 11", "4 + 10 - 6", "7 + 8 - 3", "14 + 6 - 3", "15 - 8 + 6",
+    "8 - 3 + 15", "13 - 4 + 5", "11 + 1 - 8", "16 - 5 + 2", "20 - 9 + 5",
+    "18 - 17 + 6", "16 - 10 + 5", "8 - 6 + 15", "19 - 9 + 3", "11 - 7 + 12",
+    // četiri člana
+    "20 - 13 + 4 - 5", "16 - 9 + 12 - 7", "11 - 8 + 15 - 3", "14 - 12 + 8 + 7",
+    "15 - 8 - 5 + 12", "11 + 5 - 12 + 4", "12 + 6 - 3 + 2", "11 + 2 - 3 + 8",
+    "4 + 12 - 7 + 6", "7 - 3 + 14 - 5", "9 + 11 - 7 - 5", "6 + 8 - 10 + 7",
+    "17 - 9 + 3 - 6", "13 + 3 - 5 + 7"
+  ].forEach(function (expr) {
+    lanac.push(chain(expr));
+  });
+
   var oblici = [];
   var shapeNames = ["krug", "trokut", "kvadrat", "pravokutnik"];
   shapeNames.forEach(function (s) {
@@ -199,9 +298,17 @@
         id: "mat-racun",
         title: "Zbrajanje i oduzimanje",
         emoji: "➕",
-        desc: "Računaj do 20 uz jabuke i kuglice.",
+        desc: "Računaj do 20, popuni pribrojnik i riješi zadatke o eurima.",
         roundSize: 10,
         bank: racun
+      },
+      {
+        id: "mat-lanac",
+        title: "Lančani računi",
+        emoji: "🔗",
+        desc: "Zbrajaj i oduzimaj po redu, s tri ili četiri broja.",
+        roundSize: 10,
+        bank: lanac
       },
       {
         id: "mat-oblici",
