@@ -63,7 +63,7 @@
   }
 
   function refreshStars() {
-    els.starsTotal.textContent = "⭐ " + Progress.wallet();
+    els.starsTotal.textContent = "🎒 Novčanik ⭐ " + Progress.wallet();
   }
 
   function gameIdsFor(subject) {
