@@ -6,7 +6,7 @@
   var SEEN_KEY = PREFIX + "seen";
 
   function empty() {
-    return { games: {}, totalStars: 0, wallet: 0, spent: [] };
+    return { games: {}, totalStars: 0, wallet: 0, spent: [], unlocked: {} };
   }
 
   function load() {
@@ -19,6 +19,7 @@
       if (typeof data.totalStars !== "number") data.totalStars = 0;
       if (typeof data.wallet !== "number") data.wallet = data.totalStars || 0;
       if (!Array.isArray(data.spent)) data.spent = [];
+      if (!data.unlocked || typeof data.unlocked !== "object") data.unlocked = {};
       return data;
     } catch (e) {
       return empty();
@@ -159,6 +160,46 @@
     return list.slice().reverse();
   }
 
+  function ensureUnlockedDefaults(subjectFirstGameIds) {
+    var data = load();
+    var changed = false;
+    Object.keys(subjectFirstGameIds).forEach(function (sid) {
+      if (!Array.isArray(data.unlocked[sid]) || !data.unlocked[sid].length) {
+        data.unlocked[sid] = [subjectFirstGameIds[sid]];
+        changed = true;
+      }
+    });
+    if (changed) save(data);
+  }
+
+  function isUnlocked(subjectId, gameId) {
+    var data = load();
+    var list = data.unlocked && data.unlocked[subjectId];
+    return Array.isArray(list) && list.indexOf(gameId) !== -1;
+  }
+
+  function unlockNext(subjectId, gameIdsInOrder, completedGameId) {
+    var data = load();
+    if (!data.unlocked[subjectId]) data.unlocked[subjectId] = [];
+    var list = data.unlocked[subjectId];
+    if (list.indexOf(completedGameId) === -1) list.push(completedGameId);
+    var idx = gameIdsInOrder.indexOf(completedGameId);
+    if (idx >= 0 && idx < gameIdsInOrder.length - 1) {
+      var nextId = gameIdsInOrder[idx + 1];
+      if (list.indexOf(nextId) === -1) list.push(nextId);
+    }
+    save(data);
+  }
+
+  function gusarUnlocked(subjectGameIds) {
+    return ["matematika", "hrvatski", "priroda"].every(function (sid) {
+      var ids = subjectGameIds[sid] || [];
+      return ids.some(function (gid) {
+        return getStars(gid) >= 1;
+      });
+    });
+  }
+
   global.Progress = {
     load: load,
     getStars: getStars,
@@ -171,6 +212,10 @@
     getSpent: getSpent,
     getSeen: getSeen,
     markSeen: markSeen,
-    clearSeen: clearSeen
+    clearSeen: clearSeen,
+    ensureUnlockedDefaults: ensureUnlockedDefaults,
+    isUnlocked: isUnlocked,
+    unlockNext: unlockNext,
+    gusarUnlocked: gusarUnlocked
   };
 })(window);
