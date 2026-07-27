@@ -166,6 +166,8 @@
     $("#flashProgress").style.width = ((flash.idx) / total * 100) + "%";
     $("#flashCount").textContent = (flash.idx + 1) + " / " + total;
     $("#flashScore").textContent = flash.score;
+    var prevBtn = $("#btnPrev");
+    if (prevBtn) { prevBtn.disabled = flash.idx === 0; }
 
     var card = $("#flashCard");
     card.classList.remove("flipped");
@@ -180,7 +182,8 @@
 
     $("#cardBack").innerHTML =
       '<div class="task-label">' + taskLabel() + '</div>' +
-      '<div class="answer-name">' + answer + '</div>' +
+      '<button type="button" class="answer-name speakable" data-speak="' + answer.replace(/"/g, "&quot;") + '">' +
+        answer + ' <span class="read-aloud">' + T("readAloud") + '</span></button>' +
       flagHTML(c.code, "answer-flag") +
       '<div class="answer-name" style="font-size:1.05rem;color:var(--text-soft);margin-top:-6px">' + nameOf(c) + '</div>' +
       '<div class="facts">' +
@@ -190,7 +193,7 @@
         fact(T("fReligion"), religionOf(c)) +
         fact(T("fPopulation"), fmtPopulation(c.population)) +
         fact(T("fCode"), c.code.toUpperCase()) +
-        factWide(T("fNeighbors"), borderNames(c, false)) +
+        factWide(T("fNeighbors"), borderNames(c, true)) +
         factWide(T("fKnownFor"), knownForOf(c)) +
         miniMapHTML(c) +
         confusablesHTML(c) +
@@ -557,11 +560,25 @@
     renderFlash();
   }
 
-  $("#flashCard").addEventListener("click", flipCard);
+  // Listanje unatrag — vrati se na prethodnu karticu (bez diranja rezultata)
+  function prevCard() {
+    if (flash.idx <= 0) return;
+    flash.idx -= 1;
+    if (flash.seen > 0) flash.seen -= 1;
+    renderFlash();
+  }
+
+  // Klik po kartici okreće SAMO prednju stranu (zastavu) na poleđinu.
+  // Na poleđini klik NE okreće natrag — inače bi klik na susjeda/kućicu/kartu
+  // bacio natrag na zastavu. Za povratak služi gumb „🔄 Okreni".
+  $("#flashCard").addEventListener("click", function () {
+    if (!flash.flipped) flipCard();
+  });
   $("#btnFlip").addEventListener("click", function (e) { e.stopPropagation(); flipCard(); });
   $("#btnKnew").addEventListener("click", function () { nextCard(true); });
   $("#btnDidnt").addEventListener("click", function () { nextCard(false); });
-  $("#btnSkip").addEventListener("click", function () { nextCard(null); });
+  $("#btnPrev").addEventListener("click", prevCard);
+  $("#btnNext").addEventListener("click", function () { nextCard(null); });
   $("#btnShuffle").addEventListener("click", newDeck);
   $("#btnResetScore").addEventListener("click", function () {
     flash.score = 0; store.set("score", 0); $("#flashScore").textContent = 0;
@@ -569,6 +586,8 @@
 
   // klik na susjeda (chip) na poleđini otvara njegov detalj
   $("#cardBack").addEventListener("click", function (e) {
+    var sp = e.target.closest("[data-speak]");
+    if (sp) { e.stopPropagation(); speak(sp.getAttribute("data-speak")); return; }
     var chip = e.target.closest(".chip.link");
     if (chip && chip.dataset.code) { e.stopPropagation(); openModal(chip.dataset.code); }
   });
@@ -591,14 +610,14 @@
   // ===========================================================================
   //  KVIZ (multiple choice) — za 1 ili više igrača (pass & play)
   // ===========================================================================
-  var QUIZ_COOLDOWN = 15; // barem toliko pitanja bez ponavljanja iste države (svi igrači)
   var quiz = {
     difficulty: "normal", continent: "sve",
     playerCount: 1, rounds: 5,
     players: [],       // [{name, score, answered}]
     turn: 0,           // redni broj poteza (od 0)
     answered: false, current: null,
-    recent: []         // ISO kodovi zadnjih prikazanih država (zajednički za sve igrače)
+    used: [],          // kodovi već postavljenih država (bez ponavljanja u igri)
+    hintUsed: false
   };
 
   function quizPool() {
@@ -669,7 +688,7 @@
       });
     }
     quiz.turn = 0;
-    quiz.recent = [];
+    quiz.used = [];
     $("#quizSetup").hidden = true;
     $("#quizGame").hidden = false;
     renderScoreboard();
@@ -727,6 +746,14 @@
     $("#quizFeedback").textContent = ""; $("#quizFeedback").className = "quiz-feedback";
     $("#quizNext").style.visibility = "hidden";
 
+    // Reset pomoći (hint) i prikaza karte za novo pitanje
+    quiz.hintUsed = false;
+    $("#quizHint").innerHTML = ""; $("#quizHint").classList.remove("show");
+    $("#quizReveal").innerHTML = ""; $("#quizReveal").classList.remove("show");
+    var hintBtn = $("#quizHintBtn");
+    hintBtn.style.visibility = "visible";
+    hintBtn.disabled = false;
+
     // Prikaži zastavu tek kad je SVG spreman — bez bljeska ISO slova na Windowsu
     var flagBox = $("#quizFlag");
     flagBox.innerHTML = '<span class="flag quiz-flag-loading" aria-hidden="true"></span>';
@@ -756,26 +783,88 @@
     });
   }
 
-  function pickQuizCountry() {
+  // Bez ponavljanja: biramo iz još neiskorištenih država ovog špila.
+  // Kad ih ponestane, špil kreće ispočetka, ali nikad ne ponovi baš zadnju.
+  function pickNextCountry() {
     var pool = quizPool();
-    // Ako je bazen mali (npr. Južna Amerika), ne blokiraj više nego pool.length - 1
-    var cooldown = Math.min(QUIZ_COOLDOWN, Math.max(0, pool.length - 1));
-    var blocked = {};
-    var start = Math.max(0, quiz.recent.length - cooldown);
-    for (var i = start; i < quiz.recent.length; i++) blocked[quiz.recent[i]] = true;
-    var available = pool.filter(function (c) { return !blocked[c.code]; });
-    if (!available.length) available = pool;
-    var pick = available[Math.floor(Math.random() * available.length)];
-    quiz.recent.push(pick.code);
-    if (quiz.recent.length > QUIZ_COOLDOWN) {
-      quiz.recent = quiz.recent.slice(quiz.recent.length - QUIZ_COOLDOWN);
+    if (!pool.length) return null;
+    var used = quiz.used;
+    var avail = pool.filter(function (c) { return used.indexOf(c.code) === -1; });
+    if (!avail.length) {
+      var last = quiz.current ? quiz.current.code : null;
+      quiz.used = [];
+      avail = pool.filter(function (c) { return c.code !== last; });
+      if (!avail.length) avail = pool.slice();
     }
-    return pick;
+    var c = avail[Math.floor(Math.random() * avail.length)];
+    quiz.used.push(c.code);
+    return c;
   }
 
   function nextQuestion() {
     if (gameOver()) { showResults(); return; }
-    renderQuestion(pickQuizCountry());
+    var c = pickNextCountry();
+    if (c) renderQuestion(c);
+  }
+
+  // ---- Pomoć (hint) — mala djeca dobiju natuknicu ----
+  function hintText(country) {
+    var starts = T("hintStarts");
+    function firstLetter(s) { return (s || "").trim().charAt(0).toUpperCase(); }
+    if (quiz.difficulty === "hard") {
+      return '🌍 ' + nameOf(country) + ' · ' + starts + ' «' + firstLetter(capitalOf(country)) + '»';
+    }
+    if (quiz.difficulty === "easy") {
+      return '🏳️ ' + nameOf(country) + ' · ' + starts + ' «' + firstLetter(continentOf(country)) + '»';
+    }
+    // normalno: pogađa se država → daj kontinent + prvo slovo imena
+    return '🧭 ' + continentOf(country) + ' · ' + starts + ' «' + firstLetter(nameOf(country)) + '»';
+  }
+
+  function showHint() {
+    if (!quiz.current || quiz.answered || quiz.hintUsed) return;
+    quiz.hintUsed = true;
+    var box = $("#quizHint");
+    box.innerHTML = '<span class="hint-tag">💡</span> ' + hintText(quiz.current);
+    box.classList.add("show");
+    var hb = $("#quizHintBtn");
+    hb.disabled = true;
+    hb.style.visibility = "hidden";
+  }
+
+  // ---- Čitanje naglas (nježno potiče djecu da pročitaju odgovor) ----
+  function speak(text) {
+    try {
+      if (!window.speechSynthesis) return;
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = ({ hr: "hr-HR", en: "en-GB", de: "de-DE", it: "it-IT", es: "es-ES" })[lang] || "en-GB";
+      u.rate = 0.9;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  // ---- Prikaz karte ispravne države nakon odgovora ----
+  function quizMapHTML(c) {
+    if (!window.COUNTRY_POLYS || !window.COUNTRY_POLYS[c.code]) return "";
+    return '<div class="reveal-map-caption">' + T("fMapZoom") + '</div>' +
+      '<canvas class="minimap minimap-zoom reveal-map" width="720" height="420" ' +
+      'data-mode="zoom" data-code="' + c.code + '"></canvas>';
+  }
+
+  function revealCountry() {
+    var c = quiz.current;
+    if (!c) return;
+    var box = $("#quizReveal");
+    box.innerHTML =
+      '<div class="reveal-lead">' + T("quizLocate") + '</div>' +
+      '<button type="button" class="reveal-name" data-speak="' + nameOf(c).replace(/"/g, "&quot;") + '">' +
+        flagEmoji(c.code) + ' ' + nameOf(c) +
+        ' <span class="read-aloud">' + T("readAloud") + '</span>' +
+      '</button>' +
+      quizMapHTML(c);
+    box.classList.add("show");
+    drawMaps(box);
   }
 
   function answerQuiz(btn, chosenKey, correct) {
@@ -794,6 +883,10 @@
     if (ok) { fb.textContent = T("correct") + "  (" + nameOf(quiz.current) + ")"; fb.className = "quiz-feedback ok"; }
     else { fb.textContent = T("wrongPrefix") + " " + correct.label + " (" + nameOf(quiz.current) + ")"; fb.className = "quiz-feedback no"; }
 
+    // Sakrij pomoć i pokaži gdje se ispravna država nalazi na karti
+    $("#quizHintBtn").style.visibility = "hidden";
+    revealCountry();
+
     quiz.turn += 1;
     renderScoreboard();
     var btnNext = $("#quizNext");
@@ -804,6 +897,12 @@
 
   $("#quizNext").addEventListener("click", nextQuestion);
   $("#quizEnd").addEventListener("click", showResults);
+  $("#quizHintBtn").addEventListener("click", showHint);
+  // Klik na ime države pročita ga naglas — potiče čitanje kod najmlađih
+  $("#quizReveal").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-speak]");
+    if (btn) speak(btn.getAttribute("data-speak"));
+  });
 
   function showResults() {
     var ranked = quiz.players.slice().sort(function (a, b) { return b.score - a.score; });
@@ -842,7 +941,7 @@
       closeModal();
       quiz.players.forEach(function (p) { p.score = 0; });
       quiz.turn = 0;
-      quiz.recent = [];
+      quiz.used = [];
       renderScoreboard();
       nextQuestion();
     });
@@ -940,6 +1039,73 @@
     sel.addEventListener("change", function () { setLanguage(this.value); });
   }
 
+  // ===========================================================================
+  //  PWA — instalacija na početni zaslon + offline (service worker)
+  // ===========================================================================
+  function isStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+  }
+
+  function initPWA() {
+    // Registriraj service worker (relativno — radi i pod /Learn-the-flags/)
+    if ("serviceWorker" in navigator) {
+      // Kad novi service worker preuzme kontrolu (nakon deploya), osvježi
+      // stranicu jednom da se učita najnoviji kôd — ali ne pri prvoj instalaciji.
+      var hadController = !!navigator.serviceWorker.controller;
+      var reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloading || !hadController) return;
+        reloading = true;
+        window.location.reload();
+      });
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+
+    var installBtn = $("#installBtn");
+    var deferredPrompt = null;
+
+    // Android/desktop Chrome: ponudi vlastiti gumb „Instaliraj"
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isStandalone()) installBtn.hidden = false;
+    });
+
+    installBtn.addEventListener("click", function () {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(function () {
+        deferredPrompt = null;
+        installBtn.hidden = true;
+      });
+    });
+
+    window.addEventListener("appinstalled", function () {
+      installBtn.hidden = true;
+      deferredPrompt = null;
+      var hint = $("#iosInstallHint");
+      if (hint) hint.hidden = true;
+    });
+
+    // iOS Safari nema beforeinstallprompt — pokaži kratku uputu (jednom)
+    var ua = window.navigator.userAgent || "";
+    var isIOS = /iphone|ipad|ipod/i.test(ua);
+    var isSafari = /^((?!chrome|crios|fxios|android).)*safari/i.test(ua);
+    if (isIOS && isSafari && !isStandalone() && !store.get("iosHintDismissed", false)) {
+      var hint = $("#iosInstallHint");
+      if (hint) {
+        hint.hidden = false;
+        $("#iosInstallClose").addEventListener("click", function () {
+          hint.hidden = true;
+          store.set("iosHintDismissed", true);
+        });
+      }
+    }
+  }
+
   function init() {
     // tema
     var savedTheme = store.get("theme", null);
@@ -967,6 +1133,7 @@
     renderEncyclopedia();
 
     showView(store.get("lastView", "flash"));
+    initPWA();
   }
 
   init();
