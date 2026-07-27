@@ -17,6 +17,7 @@
   --mat: #2f8f6b;
   --hrv: #d97706;
   --pid: #2563a8;
+  --gus: #1e3a4c;
 }
 
 *,
@@ -288,8 +289,9 @@ main {
 }
 
 .map-region.gusar {
-  background: linear-gradient(135deg, rgba(30, 58, 76, 0.12), rgba(255, 201, 60, 0.08));
-  border-left: 6px solid var(--ink-soft);
+  background: linear-gradient(135deg, rgba(30, 58, 76, 0.14), rgba(255, 201, 60, 0.1));
+  border-left: 6px solid var(--gus);
+  grid-column: 1 / -1;
 }
 
 .map-region.locked {
@@ -783,10 +785,28 @@ main {
   color: #9b2c2c;
 }
 
+.feedback.info {
+  background: #fff8e6;
+  color: var(--ink-soft);
+  border: 1px solid rgba(255, 201, 60, 0.45);
+}
+
 .play-actions {
   margin-top: 0.85rem;
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.hint-btn {
+  font-weight: 800;
+}
+
+.hint-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* Shop */

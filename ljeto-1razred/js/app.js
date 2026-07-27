@@ -32,7 +32,8 @@
     queue: [],
     index: 0,
     correct: 0,
-    justUnlockedGameId: null
+    justUnlockedGameId: null,
+    hintUsed: false
   };
 
   var els = {
@@ -337,6 +338,46 @@
     showQuestion();
   }
 
+  function applyHintToQuestion(q, panel, hintBtn) {
+    if (state.hintUsed) return;
+    state.hintUsed = true;
+    if (hintBtn) hintBtn.disabled = true;
+
+    var result = Engine.applyHint(q);
+    if (result.hintText) {
+      els.feedback.className = "feedback info";
+      els.feedback.textContent = result.hintText;
+      els.feedback.classList.remove("hidden");
+    }
+    if (
+      result.choices &&
+      (q.type === "mcq" || q.type === "truefalse" || q.type === "count")
+    ) {
+      q.choices = result.choices;
+      var allowed = {};
+      result.choices.forEach(function (c) {
+        allowed[String(c)] = true;
+      });
+      Array.prototype.forEach.call(panel.querySelectorAll(".btn.choice"), function (btn) {
+        if (!allowed[btn.textContent]) btn.remove();
+      });
+    }
+  }
+
+  function mountHintButton(q, panel) {
+    if (!state.game || !state.game.allowHint) return;
+    state.hintUsed = false;
+    var hintBtn = document.createElement("button");
+    hintBtn.type = "button";
+    hintBtn.className = "btn ghost hint-btn";
+    hintBtn.id = "btnHint";
+    hintBtn.textContent = "💡 Hint";
+    hintBtn.addEventListener("click", function () {
+      applyHintToQuestion(q, panel, hintBtn);
+    });
+    els.playActions.insertBefore(hintBtn, els.playActions.firstChild);
+  }
+
   function showQuestion() {
     var total = state.queue.length;
     var i = state.index;
@@ -360,6 +401,7 @@
         }
       }
     );
+    mountHintButton(q, els.playPanel);
   }
 
   function finishGame() {
