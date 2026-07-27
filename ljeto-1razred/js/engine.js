@@ -448,10 +448,35 @@
     return String(q.answer);
   }
 
+  function applyHint(q) {
+    var type = (q && q.type) || "mcq";
+    if (type === "mcq" || type === "truefalse" || type === "count") {
+      var choices = uniqueStrings((q.choices || []).slice());
+      if (q.answer != null && choices.indexOf(String(q.answer)) === -1) {
+        choices.push(String(q.answer));
+      }
+      var wrong = choices.filter(function (c) {
+        return String(c) !== String(q.answer);
+      });
+      // makni do 2 distraktora; ostavi ≥1 wrong ako postoji, ukupno ≥2 choices
+      var remove = Math.min(2, Math.max(0, wrong.length - 1));
+      var shuffledWrong = shuffle(wrong);
+      var keepWrong = shuffledWrong.slice(remove);
+      var next = shuffle([String(q.answer)].concat(keepWrong));
+      if (next.length < 2 && q.hint) {
+        return { choices: choices, hintText: String(q.hint) };
+      }
+      return { choices: next, hintText: q.hint ? String(q.hint) : null };
+    }
+    if (q && q.hint) return { hintText: String(q.hint) };
+    return { hintText: "Pogledaj pažljivo pitanje još jednom." };
+  }
+
   global.Engine = {
     shuffle: shuffle,
     pickRound: pickRound,
     starsFromScore: starsFromScore,
-    mountQuestion: mountQuestion
+    mountQuestion: mountQuestion,
+    applyHint: applyHint
   };
 })(window);
