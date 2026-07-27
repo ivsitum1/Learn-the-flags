@@ -27,5 +27,11 @@ pass("station-link polish", /\.station-link/.test(css) && /station-link/.test(cs
 pass("trail-polish marker", /trail-polish/.test(css));
 pass("region-enter keyframes", /@keyframes\s+region-enter/.test(css));
 pass("map-region--enter class in app", /map-region--enter/.test(app));
+pass("unlock-burst keyframes", /@keyframes\s+unlock-burst|unlock-burst/.test(css));
+pass("star-shower", /star-shower/.test(css));
+pass("hint-shimmer", /hint-shimmer/.test(css));
+pass("hint-slide", /hint-slide/.test(css));
+pass("app star-shower hook", /star-shower/.test(app));
+pass("app hint-shimmer hook", /hint-shimmer/.test(app));
 var failed = results.filter(function (r) { return !r.ok; });
 process.exit(failed.length ? 1 : 0);

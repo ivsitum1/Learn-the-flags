@@ -382,7 +382,7 @@
 
     var result = Engine.applyHint(q);
     if (result.hintText) {
-      els.feedback.className = "feedback info";
+      els.feedback.className = "feedback info hint-slide";
       els.feedback.textContent = result.hintText;
       els.feedback.classList.remove("hidden");
     }
@@ -406,6 +406,7 @@
     var hintBtn = document.createElement("button");
     hintBtn.type = "button";
     hintBtn.className = "btn ghost hint-btn";
+    hintBtn.classList.add("hint-shimmer");
     hintBtn.id = "btnHint";
     hintBtn.textContent = "💡 Hint";
     hintBtn.addEventListener("click", function () {
@@ -463,6 +464,12 @@
     els.resultStars.classList.remove("treasure-pop");
     void els.resultStars.offsetWidth;
     if (stars >= 1) els.resultStars.classList.add("treasure-pop");
+    var resultPanel = els.resultStars.closest(".result-panel");
+    if (resultPanel) {
+      resultPanel.classList.remove("has-star-shower");
+      void resultPanel.offsetWidth;
+      if (stars >= 1) resultPanel.classList.add("has-star-shower");
+    }
     els.resultScore.textContent =
       "Točno " +
       state.correct +
