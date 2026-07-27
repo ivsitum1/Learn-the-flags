@@ -4,6 +4,9 @@ Edukacijska web-aplikacija za učenje zastava svih država svijeta — na hrvats
 Čisti statični web (HTML + CSS + vanilla JavaScript), **bez build koraka**, radi i
 offline. Sadrži **197 država** s bogatim podacima.
 
+U istom repozitoriju nalazi se i **[Ljetni park](ljeto-1razred/)** — zabavno ljetno
+ponavljanje gradiva 1. razreda (matematika, hrvatski, priroda i društvo).
+
 ## ✨ Značajke
 
 ### 🃏 Kartice (flashcard)

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ljetni park — ponavljanje 1. razreda</title>
+  <meta name="description" content="Zabavno ljetno ponavljanje gradiva prvog razreda: matematika, hrvatski jezik, priroda i društvo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <button type="button" class="back-btn hidden" id="btnBack" aria-label="Natrag">←</button>
+    <div class="brand-mini" id="brandMini">
+      <span class="brand-sun">☀️</span>
+      <span>Ljetni park</span>
+    </div>
+    <button type="button" class="stars-total" id="starsTotal"
+      title="Novčanik — otvori dućan"
+      aria-label="Novčanik — otvori dućan">🎒 Novčanik ⭐ 0</button>
+  </header>
+
+  <main>
+    <!-- HUB -->
+    <section class="view active" id="view-hub" data-view="hub">
+      <div class="hero">
+        <p class="hero-kicker">Ljetni park · 1. razred</p>
+        <h1 class="hero-title">Potraga za blagom</h1>
+        <p class="hero-sub">Prati staze kroz tri regije otoka — svaka stanica otključava sljedeći trag.</p>
+      </div>
+      <div class="subject-grid" id="subjectGrid"></div>
+    </section>
+
+    <!-- SHOP -->
+    <section class="view" id="view-shop" data-view="shop">
+      <div class="shop-head">
+        <h2>Dućan nagrada</h2>
+        <p class="shop-blurb">Potroši zvjezdice na stvarne nagrade — roditelj ih obavi.</p>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+      <div class="shop-history">
+        <h3>Nedavno iskorišteno</h3>
+        <ul id="shopHistory"></ul>
+      </div>
+    </section>
+
+    <!-- SUBJECT -->
+    <section class="view" id="view-subject" data-view="subject">
+      <div class="subject-head">
+        <span class="subject-icon" id="subjectIcon"></span>
+        <div>
+          <h2 id="subjectTitle"></h2>
+          <p id="subjectBlurb" class="subject-blurb"></p>
+        </div>
+      </div>
+      <div class="game-grid" id="gameGrid"></div>
+    </section>
+
+    <!-- GAME INTRO -->
+    <section class="view" id="view-intro" data-view="intro">
+      <div class="panel intro-panel">
+        <span class="intro-emoji" id="introEmoji"></span>
+        <h2 id="introTitle"></h2>
+        <p id="introDesc" class="intro-desc"></p>
+        <p class="intro-meta"><span id="introCount"></span> zadataka · do 3 ⭐</p>
+        <button type="button" class="btn primary big" id="btnStart">Kreni!</button>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section class="view" id="view-play" data-view="play">
+      <div class="play-bar">
+        <div class="progress-track"><span id="playProgress"></span></div>
+        <div class="play-stats">
+          <span id="playCounter">1 / 10</span>
+          <span class="play-score">Točno: <strong id="playCorrect">0</strong></span>
+        </div>
+      </div>
+      <div class="panel play-panel" id="playPanel"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="play-actions" id="playActions"></div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="view" id="view-result" data-view="result">
+      <div class="panel result-panel">
+        <div class="result-stars" id="resultStars"></div>
+        <h2 id="resultTitle">Bravo!</h2>
+        <p id="resultMsg" class="result-msg"></p>
+        <p class="result-score"><span id="resultScore"></span></p>
+        <div class="result-actions">
+          <button type="button" class="btn primary" id="btnReplay">Igraj ponovno</button>
+          <button type="button" class="btn ghost" id="btnToSubject">Natrag na predmet</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/progress.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/content/matematika.js"></script>
+  <script src="js/content/hrvatski.js"></script>
+  <script src="js/content/priroda.js"></script>
+  <script src="js/content/gusarski.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
