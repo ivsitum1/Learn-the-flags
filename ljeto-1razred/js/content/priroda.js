@@ -1,7 +1,11 @@
 (function (global) {
   "use strict";
 
-  function mcq(id, prompt, answer, choices, explain, visual) {
+  function mcq(id, prompt, answer, choices, explain, visual, diff) {
+    if (typeof visual === "number") {
+      diff = visual;
+      visual = null;
+    }
     return {
       id: id,
       type: "mcq",
@@ -9,29 +13,43 @@
       answer: answer,
       choices: choices,
       explain: explain || ("Točno je „" + answer + "“."),
-      visual: visual || null
+      visual: visual || null,
+      diff: diff == null ? 2 : diff
     };
   }
 
-  function tf(id, prompt, answer, explain) {
+  function tf(id, prompt, answer, explain, diff) {
     return {
       id: id,
       type: "truefalse",
       prompt: prompt,
       answer: answer ? "Točno" : "Netočno",
       choices: ["Točno", "Netočno"],
-      explain: explain
+      explain: explain,
+      diff: diff == null ? 2 : diff
     };
   }
 
-  function order(id, prompt, answer, explain) {
+  function order(id, prompt, answer, explain, diff) {
     return {
       id: id,
       type: "order",
       prompt: prompt,
       answer: answer,
       items: answer.slice(),
-      explain: explain || ("Redoslijed: " + answer.join(", "))
+      explain: explain || ("Redoslijed: " + answer.join(", ")),
+      diff: diff == null ? 2 : diff
+    };
+  }
+
+  function match(id, prompt, pairs, explain, diff) {
+    return {
+      id: id,
+      type: "match",
+      prompt: prompt,
+      pairs: pairs,
+      explain: explain,
+      diff: diff == null ? 2 : diff
     };
   }
 
@@ -192,13 +210,15 @@
   godisnja.push(tf("tf-autumn-cold", "U jesen dani postaju kraći i hladniji.", true, "Jesen je prijelaz prema zimi."));
   godisnja.push(tf("tf-summer-hot", "Ljeto je najtoplije godišnje doba.", true, "Da."));
   godisnja.push(tf("tf-winter-hot", "Zima je najtoplije godišnje doba.", false, "Najtoplije je ljeto."));
-  godisnja.push({
-    id: "match-season-weather",
-    type: "match",
-    prompt: "Spoji godišnje doba i tipičnu vremensku sliku.",
-    pairs: [["zima", "snijeg"], ["ljeto", "vrućina"], ["jesen", "lišće"], ["proljeće", "cvijeće"]],
-    explain: "Zima–snijeg, ljeto–vrućina, jesen–lišće, proljeće–cvijeće."
-  });
+  godisnja.push(
+    match(
+      "match-season-weather",
+      "Spoji godišnje doba i tipičnu vremensku sliku.",
+      [["zima", "snijeg"], ["ljeto", "vrućina"], ["jesen", "lišće"], ["proljeće", "cvijeće"]],
+      "Zima–snijeg, ljeto–vrućina, jesen–lišće, proljeće–cvijeće.",
+      3
+    )
+  );
 
   // Koji mjesec pripada dobu — obrnuti tip
   seasons.forEach(function (s) {
@@ -365,12 +385,6 @@
     );
   });
 
-  living.forEach(function (name, idx) {
-    if (idx % 2 !== 0) return;
-    ziva.push(
-      tf("tf-live-" + name, name.charAt(0).toUpperCase() + name.slice(1) + " je živo biće.", true, "Da, " + name + " je živo.")
-    );
-  });
   nonLiving.forEach(function (name) {
     ziva.push(
       tf("tf-nonlive-" + name, name.charAt(0).toUpperCase() + name.slice(1) + " je živo biće.", false, name.charAt(0).toUpperCase() + name.slice(1) + " nije živo biće.")
@@ -403,12 +417,37 @@
   ziva.push(mcq("need-animal", "Što životinje trebaju za život?", "hranu, vodu i zrak", ["samo igračke", "hranu, vodu i zrak", "samo sunce", "plastiku"], "Životinje trebaju hranu, vodu i zrak."));
   ziva.push(tf("tf-plants-water", "Biljke trebaju vodu.", true, "Da."));
   ziva.push(tf("tf-fish-air", "Ribe žive na suhom kopnu.", false, "Ribe žive u vodi."));
-  ziva.push({
-    id: "match-animal-home",
-    type: "match",
-    prompt: "Spoji životinju i mjesto.",
-    pairs: [["riba", "voda"], ["ptica", "gnijezdo"], ["pas", "kuća"], ["pčela", "košnica"]],
-    explain: "Riba–voda, ptica–gnijezdo, pas–kuća, pčela–košnica."
+  ziva.push(
+    match(
+      "match-animal-home",
+      "Spoji životinju i mjesto.",
+      [["riba", "voda"], ["ptica", "gnijezdo"], ["pas", "kuća"], ["pčela", "košnica"]],
+      "Riba–voda, ptica–gnijezdo, pas–kuća, pčela–košnica.",
+      2
+    )
+  );
+
+  ziva.push(
+    match(
+      "match-legs",
+      "Spoji životinju i broj nogu (tipično).",
+      [["žaba", "4"], ["pčela", "6"], ["riba", "0"], ["pas", "4"]],
+      "Žaba i pas imaju 4 noge, pčela 6, riba nema noge za hodanje.",
+      3
+    )
+  );
+
+  [
+    ["Što NIJE živo biće?", "kamen", ["pas", "kamen", "mačka", "ruža"]],
+    ["Što JE živo biće?", "hrast", ["stol", "auto", "hrast", "olovka"]],
+    ["Što od navedenog je životinja?", "dupin", ["trava", "dupin", "kamen", "stol"]],
+    ["Što od navedenog je biljka?", "suncokret", ["mrav", "suncokret", "lopta", "auto"]],
+    ["Što NIJE živo biće?", "cesta", ["kokoš", "cesta", "jabuka", "leptir"]],
+    ["Što JE živo biće?", "medvjed", ["sat", "medvjed", "kuća", "kišobran"]]
+  ].forEach(function (row, idx) {
+    var cap = row[1].charAt(0).toUpperCase() + row[1].slice(1);
+    var explain = living.indexOf(row[1]) >= 0 ? cap + " je živo biće." : cap + " nije živo biće.";
+    ziva.push(mcq("live-mix-" + idx, row[0], row[1], row[2], explain, 2));
   });
 
   // Usporedi životinje: tko ima više nogu / domaća vs divlja kombinacije
@@ -598,12 +637,65 @@
       "ord-day",
       "Poredaj dijelove dana redom (od ranijeg prema kasnijem).",
       ["jutro", "podne", "večer"],
-      "Jutro → podne → večer."
+      "Jutro → podne → večer.",
+      2
     )
   );
-  okolina.push(mcq("country", "Koja je naša zemlja?", "Hrvatska", ["Italija", "Hrvatska", "Njemačka", "Francuska"], "Živimo u Hrvatskoj."));
-  okolina.push(mcq("capital", "Koji je glavni grad Hrvatske?", "Zagreb", ["Split", "Zagreb", "Rijeka", "Osijek"], "Glavni grad je Zagreb."));
-  okolina.push(mcq("sea", "Uz koje more leži Hrvatska?", "Jadransko more", ["Crno more", "Jadransko more", "Sjeverno more", "Baltičko more"], "Hrvatska leži uz Jadransko more."));
+
+  okolina.push(
+    order(
+      "ord-yesterday-today-tomorrow",
+      "Poredaj redom: jučer, danas, sutra.",
+      ["jučer", "danas", "sutra"],
+      "Jučer je prošao, danas je sada, sutra dolazi poslije danas.",
+      2
+    )
+  );
+
+  [
+    ["Što znači jučer?", "dan prije današnjeg", ["dan prije današnjeg", "danas", "dan poslije sutra", "tjedan dana"]],
+    ["Što znači danas?", "dan u kojem smo sada", ["jučer", "dan u kojem smo sada", "sutra", "prošla godina"]],
+    ["Što znači sutra?", "dan poslije današnjeg", ["dan prije jučer", "prošli mjesec", "dan poslije današnjeg", "jučer"]],
+    ["Koji dan dolazi poslije danas?", "sutra", ["jučer", "danas", "sutra", "prosinac"]],
+    ["Koji dan je bio prije danas?", "jučer", ["sutra", "jučer", "petak", "ljeto"]]
+  ].forEach(function (row, idx) {
+    okolina.push(mcq("rel-day-" + idx, row[0], row[1], row[2], "Točno: " + row[1] + ".", 2));
+  });
+
+  okolina.push(tf("tf-tomorrow-after", "Sutra dolazi poslije današnjeg dana.", true, "Sutra je dan poslije danas.", 2));
+  okolina.push(tf("tf-yesterday-before", "Jučer je bilo prije današnjeg dana.", true, "Jučer je prošao dan.", 2));
+  okolina.push(tf("tf-today-now", "Danas je dan u kojem smo sada.", true, "Danas je sadašnji dan.", 1));
+  okolina.push(tf("tf-yesterday-future", "Jučer je dan koji tek dolazi.", false, "Jučer je već prošao — dolazi sutra.", 3));
+
+  okolina.push(
+    match(
+      "match-body-func",
+      "Spoji dio tijela i što radimo.",
+      [
+        ["glava", "gledamo očima"],
+        ["ruka", "držimo stvari"],
+        ["noga", "hodamo"],
+        ["uho", "slušamo"],
+        ["nos", "mirišemo"],
+        ["usta", "govorimo i jedemo"]
+      ],
+      "Svaki dio tijela ima svoju važnu ulogu.",
+      2
+    )
+  );
+
+  okolina.push(
+    match(
+      "match-body-sense",
+      "Spoji osjetilo i dio tijela.",
+      [["vid", "oko"], ["sluh", "uho"], ["miris", "nos"], ["okus", "usta"]],
+      "Oko vidi, uho sluša, nos miriše, ustima okusimo.",
+      3
+    )
+  );
+  okolina.push(mcq("country", "Koja je naša zemlja?", "Hrvatska", ["Italija", "Hrvatska", "Njemačka", "Francuska"], "Živimo u Hrvatskoj.", 1));
+  okolina.push(mcq("capital", "Koji je glavni grad Hrvatske?", "Zagreb", ["Split", "Zagreb", "Rijeka", "Osijek"], "Glavni grad je Zagreb.", 1));
+  okolina.push(mcq("sea", "Uz koje more leži Hrvatska?", "Jadransko more", ["Crno more", "Jadransko more", "Sjeverno more", "Baltičko more"], "Hrvatska leži uz Jadransko more.", 2));
   okolina.push(mcq("cross", "Što radimo na pješačkom prijelazu?", "gledamo lijevo i desno", ["trčimo odmah", "gledamo lijevo i desno", "zatvorimo oči", "slušamo glazbu jako"], "Prvo pogledamo cestu."));
   okolina.push(mcq("trash", "Gdje bacamo otpad?", "u koš za smeće", ["na pod", "u koš za smeće", "u rijeku", "na cestu"], "Otpad ide u koš."));
   okolina.push(mcq("listen", "Što je važno u razgovoru?", "slušati drugoga", ["vikati", "slušati drugoga", "prekidati uvijek", "okretati leđa"], "Slušanje pokazuje poštovanje."));
@@ -613,26 +705,32 @@
   okolina.push(tf("tf-teeth", "Zubi se peru ujutro i navečer.", true, "Higijena zubi je važna."));
   okolina.push(tf("tf-respect", "Svatko ima pravo na poštovanje.", true, "Poštujemo sebe i druge."));
   okolina.push(tf("tf-litter", "Otpad bacamo u rijeku.", false, "Otpad ide u koš."));
-  okolina.push(tf("tf-red-go", "Na crvenom svjetlu trčimo preko ceste.", false, "Na crvenom stanemo."));
-  okolina.push(tf("tf-hr", "Hrvatska je naša domovina.", true, "Da."));
-  okolina.push({
-    id: "match-place-action",
-    type: "match",
-    prompt: "Spoji mjesto i što tamo radimo.",
-    pairs: [
-      ["škola", "učimo"],
-      ["park", "igramo se"],
-      ["knjižnica", "posuđujemo knjige"]
-    ],
-    explain: "U školi učimo, u parku se igramo, u knjižnici posuđujemo knjige."
-  });
-  okolina.push({
-    id: "match-light",
-    type: "match",
-    prompt: "Spoji boju semafora i što radimo.",
-    pairs: [["crveno", "stani"], ["žuto", "pripremi se"], ["zeleno", "idi oprezno"]],
-    explain: "Crveno–stani, žuto–pripremi se, zeleno–idi."
-  });
+  okolina.push(tf("tf-red-go", "Na crvenom svjetlu trčimo preko ceste.", false, "Na crvenom stanemo i čekamo.", 2));
+  okolina.push(tf("tf-green-careful", "Na zelenom svjetlu idemo oprezno i gledamo lijevo-desno.", true, "Zeleno znači da možemo ići, ali oprezno.", 2));
+  okolina.push(tf("tf-hr", "Hrvatska je naša domovina.", true, "Da.", 1));
+  okolina.push(
+    match(
+      "match-place-action",
+      "Spoji mjesto i što tamo radimo.",
+      [
+        ["škola", "učimo"],
+        ["park", "igramo se"],
+        ["knjižnica", "posuđujemo knjige"],
+        ["bolnica", "liječimo se"]
+      ],
+      "U školi učimo, u parku se igramo, u knjižnici posuđujemo knjige, u bolnici liječimo se.",
+      2
+    )
+  );
+  okolina.push(
+    match(
+      "match-light",
+      "Spoji boju semafora i što radimo.",
+      [["crveno", "stani"], ["žuto", "pripremi se"], ["zeleno", "idi oprezno"]],
+      "Crveno–stani, žuto–pripremi se, zeleno–idi oprezno.",
+      2
+    )
+  );
 
   // Kombinacije: dijelovi dana × aktivnosti
   var dayActs = [
@@ -765,14 +863,14 @@
     id: "priroda",
     title: "Priroda i društvo",
     icon: "🌿",
-    blurb: "Velika banka: godišnja doba, živa bića te ja i okolina.",
+    blurb: "Potraga za blagom: godišnja doba, živa bića i ja u okolini — 1. razred.",
     color: "pid",
     games: [
       {
         id: "pid-godisnja",
         title: "Godišnja doba",
         emoji: "🌤️",
-        desc: "Mjeseci, doba, vrijeme i odjeća — bez ponavljanja.",
+        desc: "Trag: mjeseci, doba, vrijeme i odjeća — velika banka.",
         roundSize: 12,
         bank: godisnja
       },
@@ -780,7 +878,7 @@
         id: "pid-ziva",
         title: "Živa bića",
         emoji: "🐾",
-        desc: "Biljke i životinje, domaće i divlje — velika banka.",
+        desc: "Trag: biljke i životinje, domaće i divlje — više MCQ nego laki TF.",
         roundSize: 12,
         bank: ziva
       },
@@ -788,7 +886,7 @@
         id: "pid-okolina",
         title: "Ja i okolina",
         emoji: "🏠",
-        desc: "Tijelo, obitelj, škola, promet i Hrvatska.",
+        desc: "Trag: tijelo, obitelj, škola, promet, vrijeme i Hrvatska.",
         roundSize: 12,
         bank: okolina
       }
