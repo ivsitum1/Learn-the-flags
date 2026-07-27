@@ -1284,86 +1284,91 @@
   duljina = duljina.concat(nedostaje);
   slogSastavi = slogSastavi.concat(spoji);
 
+  var hrvGames = [
+    {
+      id: "hrv-prvo-zadnje",
+      title: "Prvo i zadnje slovo",
+      emoji: "🔠",
+      desc: "Trag: koje slovo stoji na početku ili na kraju riječi.",
+      roundSize: 12,
+      bank: prvoZadnje
+    },
+    {
+      id: "hrv-duljina",
+      title: "Broj slova",
+      emoji: "🔢",
+      desc: "Trag: koliko slova ima riječ i koje nedostaje.",
+      roundSize: 10,
+      bank: duljina
+    },
+    {
+      id: "hrv-velika-mala",
+      title: "Velika i mala slova",
+      emoji: "🔤",
+      desc: "Trag: spoji veliko i malo slovo (i dijakritike).",
+      roundSize: 12,
+      bank: velikaMala
+    },
+    {
+      id: "hrv-abeceda",
+      title: "Abeceda",
+      emoji: "🔠",
+      desc: "Trag: što dolazi prije i poslije, poredaj slova.",
+      roundSize: 12,
+      bank: abeceda
+    },
+    {
+      id: "hrv-slogovi",
+      title: "Broj slogova",
+      emoji: "🧩",
+      desc: "Trag: koliko slogova ima riječ.",
+      roundSize: 12,
+      bank: slogBroj
+    },
+    {
+      id: "hrv-sastavi",
+      title: "Sastavi riječ",
+      emoji: "🧱",
+      desc: "Trag: spoji slogove i sastavi riječ.",
+      roundSize: 10,
+      bank: slogSastavi
+    },
+    {
+      id: "hrv-recenica",
+      title: "Rečenica i pravopis",
+      emoji: "✏️",
+      desc: "Trag: veliko slovo, točka, upitnik i razmak.",
+      roundSize: 10,
+      bank: recenica
+    },
+    {
+      id: "hrv-citanje",
+      title: "Čitanje",
+      emoji: "📚",
+      desc: "Trag: kratki tekst — tko, što, gdje, koja boja.",
+      roundSize: 10,
+      bank: citanjeKratko
+    },
+    {
+      id: "hrv-razumijevanje",
+      title: "Razumijevanje",
+      emoji: "🕵️",
+      desc: "Trag: duža priča — zaključuj iz teksta.",
+      roundSize: 10,
+      bank: razumijevanje
+    }
+  ];
+
+  var ntGames =
+    (global.CONTENT_NINA_TINO_HRV && global.CONTENT_NINA_TINO_HRV.games) || [];
+
   global.CONTENT_HRVATSKI = {
     id: "hrvatski",
     title: "Hrvatski",
     icon: "📖",
     blurb:
-      "Potraga za blagom: 9 stanica — slova, abeceda, slogovi, rečenice i čitanje (1. razred).",
+      "Potraga za blagom: stanice slova i čitanja + Nina i Tino (1. razred).",
     color: "hrv",
-    games: [
-      {
-        id: "hrv-prvo-zadnje",
-        title: "Prvo i zadnje slovo",
-        emoji: "🔠",
-        desc: "Trag: koje slovo stoji na početku ili na kraju riječi.",
-        roundSize: 12,
-        bank: prvoZadnje
-      },
-      {
-        id: "hrv-duljina",
-        title: "Broj slova",
-        emoji: "🔢",
-        desc: "Trag: koliko slova ima riječ i koje nedostaje.",
-        roundSize: 10,
-        bank: duljina
-      },
-      {
-        id: "hrv-velika-mala",
-        title: "Velika i mala slova",
-        emoji: "🔤",
-        desc: "Trag: spoji veliko i malo slovo (i dijakritike).",
-        roundSize: 12,
-        bank: velikaMala
-      },
-      {
-        id: "hrv-abeceda",
-        title: "Abeceda",
-        emoji: "🔠",
-        desc: "Trag: što dolazi prije i poslije, poredaj slova.",
-        roundSize: 12,
-        bank: abeceda
-      },
-      {
-        id: "hrv-slogovi",
-        title: "Broj slogova",
-        emoji: "🧩",
-        desc: "Trag: koliko slogova ima riječ.",
-        roundSize: 12,
-        bank: slogBroj
-      },
-      {
-        id: "hrv-sastavi",
-        title: "Sastavi riječ",
-        emoji: "🧱",
-        desc: "Trag: spoji slogove i sastavi riječ.",
-        roundSize: 10,
-        bank: slogSastavi
-      },
-      {
-        id: "hrv-recenica",
-        title: "Rečenica i pravopis",
-        emoji: "✏️",
-        desc: "Trag: veliko slovo, točka, upitnik i razmak.",
-        roundSize: 10,
-        bank: recenica
-      },
-      {
-        id: "hrv-citanje",
-        title: "Čitanje",
-        emoji: "📚",
-        desc: "Trag: kratki tekst — tko, što, gdje, koja boja.",
-        roundSize: 10,
-        bank: citanjeKratko
-      },
-      {
-        id: "hrv-razumijevanje",
-        title: "Razumijevanje",
-        emoji: "🕵️",
-        desc: "Trag: duža priča — zaključuj iz teksta.",
-        roundSize: 10,
-        bank: razumijevanje
-      }
-    ]
+    games: hrvGames.concat(ntGames)
   };
 })(window);

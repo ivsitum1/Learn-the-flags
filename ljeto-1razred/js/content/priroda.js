@@ -1065,19 +1065,632 @@
     tf("tf-water-save", "Vodu treba trošiti pažljivo, ne uzalud.", true, "Voda je dragocjena.", 2)
   );
 
+  /* ===================== DOPUNA: Nina i Tino 1 PRIRODA (flip 11269) ===================== */
+  // Dom / škola / odgovorno ponašanje
+  bankOkolina.push(
+    match(
+      "nina-match-family",
+      "Spoji riječi koje pripadaju istoj obiteljskoj vezi (Nina i Tino 1).",
+      [
+        ["sin", "otac"],
+        ["kći", "majka"],
+        ["baka", "djed"],
+        ["sestra", "brat"]
+      ],
+      "Sin–otac, kći–majka, baka–djed, sestra–brat.",
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-room-home",
+      "Koja se prostorija nalazi samo u domu (ne u školi)?",
+      "spavaća soba",
+      ["učionica", "spavaća soba", "školsko dvorište", "zbornica"],
+      "Spavaća soba je u domu; učionica i zbornica su u školi.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-room-school",
+      "Što pripada školi, a ne domu?",
+      "učionica",
+      ["kuhinja", "spavaća soba", "učionica", "dnevni boravak"],
+      "Učionica je školska prostorija.",
+      null,
+      1
+    )
+  );
+  bankOkolina.push(
+    tf(
+      "nina-tf-shortest",
+      "Najkraći put od kuće do škole uvijek je najsigurniji.",
+      false,
+      "Najkraći put nije uvijek najsigurniji — biramo siguran put.",
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-112",
+      "Koji broj zovemo kad treba hitna pomoć?",
+      "112",
+      ["122", "211", "121", "112"],
+      "Hitni broj je 112.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    tf(
+      "nina-tf-adult-devices",
+      "Nekim uređajima u domu smiju se služiti samo odrasli.",
+      true,
+      "Odrasli koriste uređaje koji mogu biti opasni za djecu.",
+      2
+    )
+  );
+  bankOkolina.push(
+    match(
+      "nina-match-material",
+      "Spoji materijal i tipičan predmet (Nina i Tino 1).",
+      [
+        ["drvo", "stol / klupa"],
+        ["staklo", "prozor / čaša"],
+        ["metal", "vilica / ključ"],
+        ["plastika", "bočica / posuda"],
+        ["tekstil", "majica / ručnik"]
+      ],
+      "Predmeti su od različitih materijala: drvo, staklo, metal, plastika, tekstil.",
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-right-duty",
+      "Što je dužnost (ne samo pravo) u domu ili školi?",
+      "pomagati u kućanskim poslovima",
+      ["imati ime", "pomagati u kućanskim poslovima", "imati roditelje", "živjeti u Hrvatskoj"],
+      "Dužnosti su poslovi i odgovornosti koje obavljamo.",
+      null,
+      2
+    )
+  );
+
+  // Promet (proširenje iz udžbenika)
+  bankOkolina.push(
+    mcq(
+      "nina-plocnik",
+      "Po čemu se kreću pješaci?",
+      "pločniku",
+      ["kolniku", "pločniku", "pruzi", "moru"],
+      "Pješaci hodaju pločnikom.",
+      null,
+      1
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-kolnik",
+      "Po čemu se kreću vozila?",
+      "kolniku",
+      ["pločniku", "kolniku", "krovu", "igralištu"],
+      "Vozila se kreću kolnikom.",
+      null,
+      1
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-desna",
+      "Kojom se stranom pločnika krećemo u prometu?",
+      "desnom",
+      ["lijevom", "desnom", "sredinom kolnika", "unatrag"],
+      "Krećemo se desnom stranom.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-zebra",
+      "Koja životinja dijeli ime s pješačkim prijelazom?",
+      "zebra",
+      ["lav", "zebra", "pas", "mačka"],
+      "Pješački prijelaz zovemo i zebrom.",
+      null,
+      1
+    )
+  );
+  bankOkolina.push(
+    order(
+      "nina-ord-look",
+      "Poredaj što radiš prije prelaska zebre.",
+      ["lijevo", "desno", "lijevo"],
+      "Uvijek: lijevo → desno → lijevo.",
+      2
+    )
+  );
+  bankOkolina.push(
+    tf(
+      "nina-tf-play-road",
+      "Igranje na kolniku je sigurno.",
+      false,
+      "Kolnik je za vozila — igranje tamo je opasno.",
+      1
+    )
+  );
+  bankOkolina.push(
+    tf(
+      "nina-tf-zebra-safe",
+      "Prelazak preko zebre sigurniji je od trčanja preko kolnika.",
+      true,
+      "Cestu prelazimo na označenom pješačkom prijelazu.",
+      1
+    )
+  );
+  bankOkolina.push(
+    tf(
+      "nina-tf-belt",
+      "U vozilu se vežemo sigurnosnim pojasom.",
+      true,
+      "Pojas štiti putnike.",
+      1
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-bike-path",
+      "Kako se zove dio prometnice za bicikliste?",
+      "biciklistička staza",
+      ["kolnik samo za auta", "biciklistička staza", "željeznička pruga", "pločnik za trčanje"],
+      "Biciklisti koriste biciklističku stazu.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-who-look",
+      "Tko mora pogledati lijevo–desno–lijevo prije prelaska zebre?",
+      "pješak",
+      ["samo vozač", "pješak", "samo policajac", "nitko"],
+      "Pješak uvijek gleda lijevo–desno–lijevo.",
+      null,
+      2
+    )
+  );
+
+  // Jesen / zima → godišnja doba i vrijeme
+  bankDoba.push(
+    tf(
+      "nina-tf-autumn-days",
+      "Ujesen dani postaju kraći, a noći dulje.",
+      true,
+      "U jeseni dani se skraćuju.",
+      2
+    )
+  );
+  bankDoba.push(
+    mcq(
+      "nina-selice",
+      "Kako zovemo ptice koje se ujesen sele?",
+      "selice",
+      ["stanarice", "selice", "grabljivice", "noćne ptice"],
+      "Ptice koje se sele zovu se selice; one koje ostaju — stanarice.",
+      null,
+      2
+    )
+  );
+  bankDoba.push(
+    mcq(
+      "nina-stanarice",
+      "Kako zovemo ptice koje se ujesen ne sele?",
+      "stanarice",
+      ["selice", "stanarice", "galebovi svi", "pingvini"],
+      "Stanarice ostaju u okolini i zimi.",
+      null,
+      2
+    )
+  );
+  bankVrijeme.push(
+    tf(
+      "nina-tf-sandals",
+      "Ujesen obuvamo sandale jer je toplo kao ljeti.",
+      false,
+      "Ujesen je hladnije — biramo topliju obuću.",
+      2
+    )
+  );
+  bankVrijeme.push(
+    tf(
+      "nina-tf-late-autumn-hot",
+      "U kasnoj jeseni vani je toplo kao ljeti.",
+      false,
+      "Kasna jesen je hladnija; pijemo tople napitke.",
+      2
+    )
+  );
+  bankVrijeme.push(
+    tf(
+      "nina-tf-warm-drinks",
+      "U kasnoj jeseni često pijemo tople napitke.",
+      true,
+      "Hladnije je, pa nam trebaju topli napitci.",
+      1
+    )
+  );
+  bankVrijeme.push(
+    tf(
+      "nina-tf-winter-coldest",
+      "Zima je najhladnije godišnje doba.",
+      true,
+      "Zima je najhladnija.",
+      1
+    )
+  );
+  bankVrijeme.push(
+    tf(
+      "nina-tf-winter-nights",
+      "Zimi su dani kratki, a noći duge.",
+      true,
+      "Zimi noći traju dulje od dana.",
+      2
+    )
+  );
+  bankVrijeme.push(
+    mcq(
+      "nina-winter-clothes",
+      "Što radimo s odjećom na kraju jeseni / početkom zime?",
+      "vadimo topliju odjeću",
+      ["vadimo sandale", "vadimo topliju odjeću", "samo kratke hlače", "ništa ne mijenjamo"],
+      "Pospremamo lakšu, vadimo topliju odjeću i obuću.",
+      null,
+      2
+    )
+  );
+  bankDoba.push(
+    mcq(
+      "nina-winter-holiday",
+      "Koji blagdan pripada zimskom vremenu?",
+      "Božić",
+      ["Uskrs", "Božić", "Ivanje", "Martinje samo ljeti"],
+      "Zimi su npr. Sveti Nikola, Badnjak, Božić i Nova godina.",
+      null,
+      2
+    )
+  );
+  bankDoba.push(
+    match(
+      "nina-match-winter-holidays",
+      "Spoji zimski blagdan / praznik (Nina i Tino 1).",
+      [
+        ["Sveti Nikola", "početak prosinca"],
+        ["Badnjak", "dan prije Božića"],
+        ["Božić", "zimski blagdan"],
+        ["Nova godina", "1. siječnja"]
+      ],
+      "Zimi obilježavamo blagdane i praznike u obitelji.",
+      2
+    )
+  );
+
+  // Dani, pozdravi, jučer–danas–sutra
+  bankDani.push(
+    match(
+      "nina-match-greet",
+      "Spoji pozdrav i doba dana (Nina i Tino 1).",
+      [
+        ["Dobro jutro", "jutro"],
+        ["Dobar dan", "dan / prijepodne"],
+        ["Dobra večer", "večer"],
+        ["Laku noć", "noć"]
+      ],
+      "Pozdravljamo prema dobu dana.",
+      2
+    )
+  );
+  bankDani.push(
+    tf(
+      "nina-tf-day-parts",
+      "Dan se sastoji od svijetlog i tamnog dijela.",
+      true,
+      "Dan ima dan (svjetlo) i noć (tama).",
+      2
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-week-7",
+      "Koliko dana ima jedan tjedan?",
+      "7",
+      ["5", "6", "7", "10"],
+      "Tjedan ima sedam dana.",
+      null,
+      1
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-workdays",
+      "Koji su radni dani u tjednu?",
+      "ponedjeljak do petka",
+      ["samo subota", "ponedjeljak do petka", "samo nedjelja", "samo srijeda"],
+      "Radnim danima idemo u školu: pon–pet.",
+      null,
+      1
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-weekend",
+      "Koji dani čine vikend (neradne dane)?",
+      "subota i nedjelja",
+      ["ponedjeljak i utorak", "subota i nedjelja", "srijeda i četvrtak", "samo petak"],
+      "Subota i nedjelja su neradni dani / vikend.",
+      null,
+      1
+    )
+  );
+  bankDani.push(tf("nina-tf-fri-after-thu", "Petak je poslije četvrtka.", true, "Redoslijed: … četvrtak, petak …", 1));
+  bankDani.push(tf("nina-tf-before-tue", "Prije utorka je srijeda.", false, "Prije utorka je ponedjeljak.", 2));
+  bankDani.push(tf("nina-tf-sat-between", "Subota je između petka i nedjelje.", true, "Petak → subota → nedjelja.", 1));
+  bankDani.push(tf("nina-tf-week-ends-fri", "Tjedan završava u petak.", false, "Tjedan završava u nedjelju; nakon nje opet je ponedjeljak.", 2));
+  bankDani.push(tf("nina-tf-week-starts-mon", "Tjedan počinje u ponedjeljak.", true, "Od ponedjeljka počinje novi tjedan.", 1));
+  bankDani.push(tf("nina-tf-tue-second", "Drugi dan u tjednu je utorak.", true, "1. ponedjeljak, 2. utorak.", 2));
+  bankDani.push(tf("nina-tf-sat-fifth", "Subota je peti dan u tjednu.", false, "Peti dan je petak; subota je šesti.", 3));
+  bankDani.push(
+    mcq(
+      "nina-mid-weekday",
+      "Kako se zove radni dan u sredini tjedna?",
+      "srijeda",
+      ["ponedjeljak", "srijeda", "subota", "nedjelja"],
+      "Srijeda je u sredini radnog tjedna.",
+      null,
+      2
+    )
+  );
+  bankDani.push(
+    tf(
+      "nina-tf-ydt-1",
+      "Ako je jučer bila srijeda, danas je utorak.",
+      false,
+      "Ako je jučer bila srijeda, danas je četvrtak.",
+      3
+    )
+  );
+  bankDani.push(
+    tf(
+      "nina-tf-ydt-2",
+      "Danas je subota, znači sutra je petak.",
+      false,
+      "Ako je danas subota, sutra je nedjelja.",
+      2
+    )
+  );
+  bankDani.push(
+    tf(
+      "nina-tf-ydt-3",
+      "Sutra je nedjelja, znači danas je subota.",
+      true,
+      "Dan prije nedjelje je subota.",
+      2
+    )
+  );
+  bankDani.push(
+    tf(
+      "nina-tf-ydt-4",
+      "Ako je sutra utorak, jučer je bio ponedjeljak.",
+      false,
+      "Ako je sutra utorak, danas je ponedjeljak, a jučer je bila nedjelja.",
+      3
+    )
+  );
+
+  // Dodatni kvizovi iz istog udžbenika (sigurnost, doba dana, jesen)
+  bankOkolina.push(
+    mcq(
+      "nina-safe-play",
+      "Što je SIGURNO u prometu?",
+      "prelazak zebre",
+      ["igranje na kolniku", "hodanje prugom", "prelazak zebre", "trčanje preko kolnika"],
+      "Cestu prelazimo na zebri — igranje na kolniku i hodanje prugom su opasni.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-roles-traffic",
+      "U prometu mogu biti…",
+      "pješak, putnik ili biciklist",
+      ["samo vozač auta", "pješak, putnik ili biciklist", "samo policajac", "samo učenik u učionici"],
+      "Kao dijete sudjeluješ kao pješak, putnik ili biciklist.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    tf(
+      "nina-tf-green-run",
+      "Na zelenom svjetlu smiješ trčati preko ceste bez gledanja.",
+      false,
+      "Bez obzira na semafor: stani–pogledaj–slušaj–kreni.",
+      2
+    )
+  );
+  bankOkolina.push(
+    mcq(
+      "nina-class-not",
+      "Što ne bi trebalo biti u učionici za vrijeme nastave?",
+      "loptanje / trčanje po razredu",
+      ["knjiga", "olovka", "loptanje / trčanje po razredu", "ploča"],
+      "Za nastave pazimo na mir i red u učionici.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    match(
+      "nina-match-traffic",
+      "Spoji prometni pojam (Nina i Tino 1).",
+      [
+        ["pločnik", "za pješake"],
+        ["kolnik", "za vozila"],
+        ["zebra", "pješački prijelaz"],
+        ["kaciga", "štiti glavu na biciklu"]
+      ],
+      "Pločnik–pješaci, kolnik–vozila, zebra–prijelaz, kaciga–sigurnost.",
+      2
+    )
+  );
+
+  bankDani.push(
+    mcq(
+      "nina-greet-morning",
+      "Kako pozdravljaš ujutro?",
+      "Dobro jutro",
+      ["Laku noć", "Dobro jutro", "Dobra večer", "Sretan Božić"],
+      "Ujutro kažemo: Dobro jutro.",
+      null,
+      1
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-greet-night",
+      "Kako pozdravljaš prije spavanja?",
+      "Laku noć",
+      ["Dobro jutro", "Dobar dan", "Laku noć", "Dobar tek"],
+      "Prije spavanja: Laku noć.",
+      null,
+      1
+    )
+  );
+  bankDani.push(
+    order(
+      "nina-ord-dayparts",
+      "Poredaj doba dana od ranijeg prema kasnijem.",
+      ["jutro", "podne", "večer", "noć"],
+      "Jutro → podne → večer → noć.",
+      2
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-word-yesterday",
+      "Za dan prije današnjeg kažemo…",
+      "jučer",
+      ["sutra", "jučer", "prekosutra", "danas"],
+      "Dan prije = jučer.",
+      null,
+      1
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-word-tomorrow",
+      "Za sljedeći dan kažemo…",
+      "sutra",
+      ["jučer", "prekjuče", "sutra", "prošli tjedan"],
+      "Sljedeći dan = sutra.",
+      null,
+      1
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-prekjuce",
+      "Što znači prekjuče?",
+      "dan prije jučer",
+      ["danas", "sutra", "dan prije jučer", "prekosutra"],
+      "Prekjuče = dan prije jučer.",
+      null,
+      3
+    )
+  );
+  bankDani.push(
+    mcq(
+      "nina-prekosutra",
+      "Što znači prekosutra?",
+      "dan poslije sutra",
+      ["jučer", "danas", "dan poslije sutra", "prekjuče"],
+      "Prekosutra = dan poslije sutra.",
+      null,
+      3
+    )
+  );
+  bankDani.push(
+    tf(
+      "nina-tf-after-sun",
+      "Nakon nedjelje opet je ponedjeljak — počinje novi tjedan.",
+      true,
+      "Tjedan se ponavlja: nakon nedjelje dolazi ponedjeljak.",
+      1
+    )
+  );
+
+  bankDoba.push(
+    mcq(
+      "nina-evergreen",
+      "Koji list ujesen obično NE mijenja boju (ostaje zelen)?",
+      "zimzeleni / četinjača",
+      ["javorov list", "zimzeleni / četinjača", "hrastov list", "lipov list"],
+      "Neka stabla (zimzelena) zimi zadrže zeleno lišće.",
+      null,
+      3
+    )
+  );
+  bankDoba.push(
+    tf(
+      "nina-tf-autumn-insects",
+      "U kasnoj jeseni u prirodi ima puno kukaca kao ljeti.",
+      false,
+      "Kasna jesen je tiša — manje kukaca i zvukova.",
+      2
+    )
+  );
+  bankVrijeme.push(
+    mcq(
+      "nina-autumn-dress",
+      "Kako se odijevamo ujesen kad zahladi?",
+      "toplije (jakna, zatvorena obuća)",
+      ["samo kupaći", "toplije (jakna, zatvorena obuća)", "samo sandale", "ništa"],
+      "S promjenom vremena mijenja se i odjeća.",
+      null,
+      1
+    )
+  );
+  bankVrijeme.push(
+    match(
+      "nina-match-season-clothes",
+      "Spoji godišnje doba i tipičnu odjeću (Nina i Tino 1).",
+      [
+        ["ljeto", "majica / sandale"],
+        ["jesen", "jakna / zatvorene cipele"],
+        ["zima", "kapa / rukavice / čizme"],
+        ["proljeće", "lakša jakna"]
+      ],
+      "Odijevamo se prema vremenu i godišnjem dobu.",
+      2
+    )
+  );
+
   global.CONTENT_PRIRODA = {
     id: "priroda",
     title: "Priroda i društvo",
     icon: "🌿",
     blurb:
-      "Potraga za blagom: 9 stanica — doba, mjeseci, živa bića, tijelo i okolina (1. razred).",
+      "Potraga za blagom: 9 stanica prema Profilu (Nina i Tino 1) — doba, vrijeme, živa bića, tijelo, dani i okolina.",
     color: "pid",
     games: [
       {
         id: "pid-godisnja",
         title: "Godišnja doba",
         emoji: "🌸",
-        desc: "Trag: proljeće, ljeto, jesen, zima — redoslijed i znakovi.",
+        desc: "Trag: proljeće–zima, selice/stanarice, zimski blagdani.",
         roundSize: 12,
         bank: bankDoba
       },
@@ -1093,7 +1706,7 @@
         id: "pid-vrijeme",
         title: "Vrijeme i odjeća",
         emoji: "☔",
-        desc: "Trag: kiša, sunce, snijeg i što nosimo.",
+        desc: "Trag: kiša, sunce, snijeg, jesen/zima i što nosimo.",
         roundSize: 10,
         bank: bankVrijeme
       },
@@ -1133,7 +1746,7 @@
         id: "pid-dani",
         title: "Dani i doba dana",
         emoji: "🗓️",
-        desc: "Trag: dani u tjednu, jutro–večer, jučer–sutra.",
+        desc: "Trag: tjedan, pozdravi, jučer–danas–sutra (Nina i Tino).",
         roundSize: 12,
         bank: bankDani
       },
@@ -1141,7 +1754,7 @@
         id: "pid-okolina",
         title: "Ja i okolina",
         emoji: "🏠",
-        desc: "Trag: obitelj, škola, promet, Hrvatska i briga o okolini.",
+        desc: "Trag: škola, obitelj, promet (zebra, 112) i okolina.",
         roundSize: 12,
         bank: bankOkolina
       }

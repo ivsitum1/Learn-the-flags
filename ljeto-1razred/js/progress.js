@@ -178,6 +178,16 @@
     return Array.isArray(list) && list.indexOf(gameId) !== -1;
   }
 
+  function unlockGame(subjectId, gameId) {
+    var data = load();
+    if (!data.unlocked[subjectId]) data.unlocked[subjectId] = [];
+    var list = data.unlocked[subjectId];
+    if (list.indexOf(gameId) === -1) {
+      list.unshift(gameId);
+      save(data);
+    }
+  }
+
   function unlockNext(subjectId, gameIdsInOrder, completedGameId) {
     var data = load();
     if (!data.unlocked[subjectId]) data.unlocked[subjectId] = [];
@@ -215,6 +225,7 @@
     clearSeen: clearSeen,
     ensureUnlockedDefaults: ensureUnlockedDefaults,
     isUnlocked: isUnlocked,
+    unlockGame: unlockGame,
     unlockNext: unlockNext,
     gusarUnlocked: gusarUnlocked
   };
