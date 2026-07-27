@@ -349,6 +349,22 @@
       true,
       "Crveno = stoj.",
       1
+    ),
+    mcq(
+      "nt-usp-voce-ili",
+      "Je li mrkva voće ili povrće?",
+      "povrće",
+      ["voće", "povrće"],
+      "Mrkva je povrće.",
+      1
+    ),
+    mcq(
+      "nt-usp-jabuka-vrsta",
+      "Je li jabuka voće ili povrće?",
+      "voće",
+      ["voće", "povrće"],
+      "Jabuka je voće.",
+      1
     )
   ];
 
@@ -489,6 +505,97 @@
       ["golu", "krevetu", "akvariju", "pečnici"],
       "Lopta JE U golu.",
       1
+    ),
+    mcq(
+      "nt-rij-kaciga",
+      "Trebaš li kacigu na biciklu / romobilu?",
+      "da",
+      ["da", "ne"],
+      "Na biciklu i romobilu imam kacigu — sigurnost.",
+      1
+    ),
+    mcq(
+      "nt-rij-kotaci-bicikl",
+      "Koliko kotača ima bicikl?",
+      "2",
+      ["1", "2", "3", "4"],
+      "Bicikl ima dva kotača.",
+      1
+    ),
+    mcq(
+      "nt-rij-bajka-macak",
+      "Kako se zove priča: mačak + čizme?",
+      "Mačak u čizmama",
+      ["Mačak u čizmama", "Vuk i sedam kozlića", "Princeza na zrnu graška", "Crvenkapica"],
+      "Prijevod: Mačak u čizmama.",
+      2
+    ),
+    mcq(
+      "nt-rij-bajka-vuk",
+      "Kako se zove priča: vuk + sedam kozlića?",
+      "Vuk i sedam kozlića",
+      ["Mačak u čizmama", "Vuk i sedam kozlića", "Pepeljuga", "Trnoružica"],
+      "Vuk i sedam kozlića.",
+      2
+    ),
+    mcq(
+      "nt-rij-bajka-grasak",
+      "Kako se zove priča: kraljevna + zrno graška?",
+      "Princeza na zrnu graška",
+      ["Crvenkapica", "Princeza na zrnu graška", "Snjeguljica", "Ivica i Marica"],
+      "Princeza na zrnu graška.",
+      2
+    ),
+    mcq(
+      "nt-rij-crvenkapica-vuk",
+      "Koga je Crvenkapica srela na putu?",
+      "vuka",
+      ["lava", "vuka", "medvjeda", "slona"],
+      "Srela je vuka.",
+      1
+    ),
+    mcq(
+      "nt-rij-zag-jabuka",
+      "Zagonetka: okruglo voće, kuća na drvu, ponekad kuća crvu. Što je?",
+      "jabuka",
+      ["jabuka", "grožđe", "kruška", "šljiva"],
+      "Rješenje: jabuka.",
+      2
+    ),
+    mcq(
+      "nt-rij-zag-grozdje",
+      "Zagonetka: u slapiću kuglice, crne ili bijele… Što je?",
+      "grožđe",
+      ["jabuka", "grožđe", "kruška", "limun"],
+      "Rješenje: grožđe.",
+      2
+    ),
+    mcq(
+      "nt-rij-zag-kruska",
+      "Zagonetka: ljepotica žutog lica, šaptao joj jež… Što je?",
+      "kruška",
+      ["jabuka", "grožđe", "kruška", "šljiva"],
+      "Rješenje: kruška.",
+      2
+    ),
+    match(
+      "nt-rij-eva-iva",
+      "Poveži iste riječi (veliko ↔ malo).",
+      [
+        ["EVA", "Eva"],
+        ["IVA", "Iva"],
+        ["VI", "vi"]
+      ],
+      "Ista riječ, drugačiji zapis.",
+      1
+    ),
+    mcq(
+      "nt-rij-rk-roko",
+      "Slovo O je pobjeglo: RK → koja riječ?",
+      "Roko",
+      ["Roko", "rak", "rok", "kosa"],
+      "RK + O = Roko.",
+      2
     )
   ];
 
@@ -619,6 +726,101 @@
       ["treba biti tiho", "viči glasnije", "trči", "jedi"],
       "Znak za tišinu.",
       1
+    ),
+    mcq(
+      "nt-rec-zumzi-odakle",
+      "Odakle se spustio Zumzi?",
+      "sa zvijezde Zumzilije",
+      ["sa zvijezde Zumzilije", "iz mora", "iz škole", "iz šume"],
+      "Zumzi se spustio sa zvijezde Zumzilije.",
+      2
+    ),
+    mcq(
+      "nt-rec-zumzi-boja",
+      "Kakve je boje Zumzi?",
+      "zelene (s velikim plavim nosom)",
+      ["crvene", "zelene (s velikim plavim nosom)", "samo plave", "samo žute"],
+      "Zumzi je zelene boje i ima veliki plavi nos.",
+      2
+    ),
+    mcq(
+      "nt-rec-zumzi-ruke",
+      "Koliko ruku ima Zumzi?",
+      "tri",
+      ["jednu", "dvije", "tri", "pet"],
+      "Ima tri oka i tri ruke.",
+      2
+    ),
+    mcq(
+      "nt-rec-zumzi-krakovi",
+      "Što Zumzi ima ispod struka?",
+      "sedam krakova",
+      ["krila", "sedam krakova", "kotače", "ništa"],
+      "Ispod struka ima sedam krakova.",
+      2
+    ),
+    mcq(
+      "nt-rec-mis-tko",
+      "Tko je zabunom ušao u školsku knjižnicu? (priča)",
+      "miš",
+      ["pas", "miš", "lav", "riba"],
+      "Mišić je zabunom ušao u knjižnicu.",
+      1
+    ),
+    mcq(
+      "nt-rec-voce-lubenica",
+      "Pročitaj: lubenica JE NA…",
+      "pladnju",
+      ["pladnju", "biciklu", "krovu", "nebu"],
+      "Lubenica JE NA pladnju.",
+      1
+    ),
+    mcq(
+      "nt-rec-voce-grozdje",
+      "Pročitaj: grožđe JE U…",
+      "zdeli",
+      ["zdeli", "golu", "šumi", "autu"],
+      "Grožđe JE U zdjeli.",
+      1
+    ),
+    mcq(
+      "nt-rec-stonoga",
+      "Tko je šetao po travi u pjesmi *Stonoga*?",
+      "bosonoga stonoga",
+      ["bosonoga stonoga", "lav", "pas", "slon"],
+      "Bosonoga stonoga šetala po travi.",
+      2
+    ),
+    mcq(
+      "nt-rec-stonoga-mrav",
+      "Što je zaključio mudri mrav?",
+      "bolje jedna glava i sto nogu nego obrnuto",
+      ["bolje jedna glava i sto nogu nego obrnuto", "treba više glava", "ne treba noge", "neka šuti"],
+      "Nezgoda bi bila da je noga jedna, a stotinu glava.",
+      3
+    ),
+    mcq(
+      "nt-rec-usklicnik",
+      "Što staviš na kraj rečenice kad si uzbuđen: „Pazi!“?",
+      "uskličnik (!)",
+      ["uskličnik (!)", "upitnik (?)", "zarez", "ništa"],
+      "Uzbuđenje / zapovijed → uskličnik.",
+      1
+    ),
+    mcq(
+      "nt-rec-upitnik",
+      "Što staviš na kraj pitanja: „Kako si?“?",
+      "upitnik (?)",
+      ["uskličnik (!)", "upitnik (?)", "točka", "zarez"],
+      "Pitanje → upitnik.",
+      1
+    ),
+    tf(
+      "nt-tf-recenica-tocaka",
+      "Obična rečenica na kraju ima točku.",
+      true,
+      "Izjava završava točkom.",
+      1
     )
   ];
 
@@ -700,6 +902,221 @@
       "U školi učimo napisati svoje ime.",
       true,
       "Zadatak: NAPIŠI SVOJE IME.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-i",
+      "U kojoj riječi čuješ glas I?",
+      "miš",
+      ["pas", "miš", "pasulj", "brod"],
+      "Miš ima glas I.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-a",
+      "U kojoj riječi čuješ glas A?",
+      "mama",
+      ["miš", "mama", "sin", "brod"],
+      "Mama ima glas A.",
+      1
+    ),
+    mcq(
+      "nt-sl-anja-kraj",
+      "Anja traži sličice koje završavaju istim glasom kao njezino ime. Koji je to glas?",
+      "A",
+      ["A", "N", "J", "I"],
+      "Anja završava glasom A.",
+      2
+    ),
+    mcq(
+      "nt-sl-kosarka-obuća",
+      "Što ćeš obuti ako ideš igrati košarku?",
+      "tenisice",
+      ["tenisice", "gumene čizme", "papuče", "peraje"],
+      "Za košarku trebaš tenisice.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-v",
+      "U kojoj riječi čuješ glas V?",
+      "vuk",
+      ["miš", "vuk", "pas", "sin"],
+      "Vuk počinje glasom V.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-e",
+      "U kojem imenu čuješ glas E?",
+      "Eva",
+      ["Ana", "Eva", "Iva", "Maja"],
+      "Eva ima glas E.",
+      1
+    ),
+    mcq(
+      "nt-sl-vi-veliko",
+      "Napiši velikim slovima: vi → ?",
+      "VI",
+      ["vi", "VI", "Iv", "VV"],
+      "vi → VI.",
+      1
+    ),
+    match(
+      "nt-sl-parovi",
+      "Spoji veliko i malo slovo.",
+      [
+        ["I", "i"],
+        ["A", "a"],
+        ["V", "v"],
+        ["E", "e"]
+      ],
+      "Veliko i malo slovo u paru.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-o",
+      "U kojoj riječi čuješ glas O?",
+      "slon",
+      ["miš", "slon", "pas", "sin"],
+      "Slon ima glas O.",
+      1
+    ),
+    mcq(
+      "nt-sl-dva-o",
+      "Koja riječ ima DVA slova O?",
+      "bombon",
+      ["kos", "bombon", "pas", "sin"],
+      "Bombon: o–o.",
+      2
+    ),
+    mcq(
+      "nt-sl-oko",
+      "Na glavi imamo puno slova O. Najviše slova O ima svako naše…",
+      "oko",
+      ["nos", "oko", "usta", "kosa"],
+      "OKO ima dva O.",
+      2
+    ),
+    mcq(
+      "nt-sl-glas-u",
+      "U kojoj riječi čuješ glas U?",
+      "auto",
+      ["pas", "auto", "sin", "miš"],
+      "Auto ima glas U.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-t",
+      "U kojoj riječi čuješ glas T?",
+      "auto",
+      ["mama", "auto", "sin", "ovo"],
+      "Auto ima glas T.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-m",
+      "U kojoj riječi čuješ glas M?",
+      "more",
+      ["pas", "more", "sin", "auto"],
+      "More počinje glasom M.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-n",
+      "U kojoj riječi čuješ glas N?",
+      "nos",
+      ["pas", "nos", "mama", "ovo"],
+      "Nos počinje glasom N.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-l",
+      "U kojoj riječi čuješ glas L?",
+      "lav",
+      ["pas", "lav", "mama", "sin"],
+      "Lav počinje glasom L.",
+      1
+    ),
+    mcq(
+      "nt-sl-skriveno-ova",
+      "U riječi NOVAC skriva se…",
+      "OVA",
+      ["IVA", "OVA", "IVO", "EVI"],
+      "NOVAC → OVA.",
+      2
+    ),
+    match(
+      "nt-sl-eo-parovi",
+      "Spoji veliko i malo: O i U.",
+      [
+        ["O", "o"],
+        ["U", "u"],
+        ["T", "t"],
+        ["M", "m"],
+        ["N", "n"],
+        ["L", "l"]
+      ],
+      "Veliko i malo slovo.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-s",
+      "U kojoj riječi čuješ glas S?",
+      "slon",
+      ["mama", "slon", "lav", "brod"],
+      "Slon počinje glasom S.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-sh",
+      "U kojoj riječi čuješ glas Š?",
+      "šuma",
+      ["pas", "šuma", "mama", "auto"],
+      "Šuma počinje glasom Š.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-p",
+      "U kojoj riječi čuješ glas P?",
+      "pas",
+      ["mama", "pas", "sin", "lav"],
+      "Pas počinje glasom P.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-r",
+      "U kojoj riječi čuješ glas R?",
+      "robot",
+      ["mama", "robot", "sin", "pas"],
+      "Robot počinje glasom R.",
+      1
+    ),
+    mcq(
+      "nt-sl-glas-k",
+      "U kojoj riječi čuješ glas K?",
+      "krava",
+      ["mama", "krava", "sin", "pas"],
+      "Krava počinje glasom K.",
+      1
+    ),
+    match(
+      "nt-sl-parovi2",
+      "Spoji veliko i malo slovo (S, Š, P, R, K).",
+      [
+        ["S", "s"],
+        ["Š", "š"],
+        ["P", "p"],
+        ["R", "r"],
+        ["K", "k"]
+      ],
+      "Veliko i malo slovo.",
+      1
+    ),
+    mcq(
+      "nt-sl-leti-pliva",
+      "Tko TIPIČNO leti?",
+      "ptica",
+      ["ptica", "riba", "stonoga", "mrav"],
+      "Ptica leti; riba pliva.",
       1
     )
   ];
