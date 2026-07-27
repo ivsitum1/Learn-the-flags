@@ -144,7 +144,7 @@
       var got = Progress.subjectStars(gameIdsFor(sub));
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "map-region";
+      btn.className = "map-region map-region--enter";
       btn.dataset.id = sub.id;
       btn.innerHTML =
         '<span class="icon">' +
@@ -171,7 +171,7 @@
     var unlocked = Progress.gusarUnlocked(gusarSubjectGameIds());
     var btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "map-region gusar";
+    btn.className = "map-region gusar map-region--enter";
     if (!gusarContent || !unlocked) {
       btn.classList.add("locked");
       btn.innerHTML =

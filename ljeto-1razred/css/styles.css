@@ -492,6 +492,26 @@ main {
   cursor: not-allowed;
 }
 
+@keyframes region-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.map-region.map-region--enter {
+  animation: region-enter 0.45s ease both;
+}
+
+.map-region.map-region--enter:nth-child(1) { animation-delay: 0.05s; }
+.map-region.map-region--enter:nth-child(2) { animation-delay: 0.12s; }
+.map-region.map-region--enter:nth-child(3) { animation-delay: 0.19s; }
+.map-region.map-region--enter:nth-child(4) { animation-delay: 0.26s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .map-region.map-region--enter {
+    animation: none !important;
+  }
+}
+
 .station-trail {
   display: flex;
   flex-direction: column;
@@ -499,12 +519,32 @@ main {
   gap: 0;
 }
 
+/* trail-polish */
 .station-link {
   width: 4px;
-  height: 1.25rem;
+  height: 1.35rem;
   margin: 0 auto;
-  background: linear-gradient(180deg, rgba(255, 201, 60, 0.5), rgba(61, 154, 95, 0.45));
+  background: linear-gradient(180deg, rgba(255, 201, 60, 0.75), rgba(61, 154, 95, 0.65));
   border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 201, 60, 0.45);
+  position: relative;
+}
+
+.station-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--sun);
+  box-shadow: 0 0 8px rgba(255, 201, 60, 0.8);
+}
+
+.station-node:not(.locked) {
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255, 201, 60, 0.25);
 }
 
 .station-node {
