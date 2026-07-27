@@ -85,6 +85,54 @@
     };
   }
 
+  /* ===================== PROSTORNI ODNOSI (Super matematika 1. dio) ===================== */
+  var prostor = [];
+  [
+    ["sm-prostor-dulji", "Koja je riječ za predmet koji ima veću duljinu?", "dulji", ["dulji", "kraći", "širi", "tanji"], "Dulji predmet ima veću duljinu.", 1],
+    ["sm-prostor-kraci", "Koja je riječ za predmet koji ima manju duljinu?", "kraći", ["dulji", "kraći", "veći", "teži"], "Kraći predmet ima manju duljinu.", 1],
+    ["sm-prostor-veci", "Lopta A je veća od lopte B. Koja je manja?", "lopta B", ["lopta A", "lopta B", "jednake su", "ne znam"], "Ako je A veća, B je manja.", 1],
+    ["sm-prostor-manji", "Torba je manja od ruksaka. Što je veće?", "ruksak", ["torba", "ruksak", "jednako", "kutija"], "Ruksak je veći od torbe.", 1],
+    ["sm-prostor-iznad", "Ptica je na grani. Gdje je ptica u odnosu na travu?", "iznad", ["iznad", "ispod", "lijevo", "desno"], "Grana je iznad trave, pa je i ptica iznad.", 2],
+    ["sm-prostor-ispod", "Mačka je ispod stola. Gdje je stol u odnosu na mačku?", "iznad", ["ispod", "iznad", "između", "pokraj"], "Ako je mačka ispod, stol je iznad nje.", 2],
+    ["sm-prostor-ispred", "Tin stoji ispred vratiju. Što je iza Tina?", "vrata", ["vrata", "prozor", "stolica", "nebo"], "Tin je ispred vratiju, pa su vrata iza njega.", 2],
+    ["sm-prostor-iza", "Lopta je iza kutije. Što vidiš prvo ako gledaš sprijeda?", "kutiju", ["loptu", "kutiju", "oboje jednako", "ništa"], "Predmet ispred zaklanja onaj iza.", 2],
+    ["sm-prostor-lijevo", "Na slici u knjizi: olovka je lijevo od gumice. Što je desno od olovke?", "gumica", ["olovka", "gumica", "bilježnica", "stol"], "Desno od olovke je gumica.", 2],
+    ["sm-prostor-desno", "Šalica je desno od tanjura. Što je lijevo od šalice?", "tanjur", ["šalica", "tanjur", "žlica", "kuhinja"], "Lijevo od šalice je tanjur.", 2],
+    ["sm-prostor-izmedu", "Broj 5 je između 4 i 6. Koji je broj između 7 i 9?", "8", ["6", "7", "8", "9"], "Između 7 i 9 je 8.", 2],
+    ["sm-prostor-blizi", "Škola je bliža kući od parka. Što je dalje od kuće?", "park", ["škola", "park", "jednako", "trgovina"], "Park je dalje.", 2]
+  ].forEach(function (row) {
+    prostor.push(mcq(row[0], row[1], row[2], row[3], row[4], null, row[5]));
+  });
+  prostor.push(match(
+    "sm-prostor-match",
+    "Spoji parove riječi koje su suprotne.",
+    [["dulji", "kraći"], ["veći", "manji"], ["iznad", "ispod"]],
+    "Suprotnosti: dulji↔kraći, veći↔manji, iznad↔ispod.",
+    2
+  ));
+  prostor.push(match(
+    "sm-prostor-match2",
+    "Spoji odnos s primjerom.",
+    [["ispred", "dijete pred vratima"], ["iza", "lopta iza stolice"], ["pokraj", "knjiga pokraj olovke"]],
+    "Ispred = pred nečim; iza = iza nečega; pokraj = uz nešto.",
+    2
+  ));
+  [
+    ["sm-prostor-tf1", "Ako je traka dulja, ona je kraća.", false, "Dulja i kraća su suprotnosti.", 1],
+    ["sm-prostor-tf2", "Predmet iznad stola nije na podu ispod stola.", true, "Iznad i ispod su različiti položaji.", 1],
+    ["sm-prostor-tf3", "Lijevo i desno ovise o tome kako stojiš i gledaš.", true, "Lijevo/desno su u odnosu na gledatelja.", 2],
+    ["sm-prostor-tf4", "Broj 10 je između 8 i 9.", false, "Između 8 i 9 nema cijelog broja; 10 je poslije 9.", 2]
+  ].forEach(function (row) {
+    prostor.push(tf(row[0], row[1], row[2], row[3], row[4]));
+  });
+  prostor.push(order(
+    "sm-prostor-ord-size",
+    "Poredaj od najmanjeg do najvećeg: mrav, pas, slon.",
+    ["mrav", "pas", "slon"],
+    "Od najmanjeg: mrav, pas, slon.",
+    1
+  ));
+
   /* ===================== BROJEVI ===================== */
   var brojevi = [];
   var a, b, n, start;
@@ -159,9 +207,50 @@
   for (n = 10; n <= MAX; n++) {
     var tens = Math.floor(n / 10);
     var ones = n % 10;
-    brojevi.push(numQ("tens-" + n, "Koliko desetica ima broj " + n + "?", tens, n + " = " + tens + " desetica i " + ones + " jedinica."));
-    brojevi.push(numQ("ones-" + n, "Koliko jedinica ima broj " + n + "?", ones, n + " = " + tens + " desetica i " + ones + " jedinica."));
+    brojevi.push(numQ("tens-" + n, "Koliko desetica ima broj " + n + "?", tens, n + " = " + tens + " desetica i " + ones + " jedinica.", null, 2));
+    brojevi.push(numQ("ones-" + n, "Koliko jedinica ima broj " + n + "?", ones, n + " = " + tens + " desetica i " + ones + " jedinica.", null, 2));
+    brojevi.push(
+      mcq(
+        "sm-compose-" + n,
+        "Koji broj ima " + tens + " desetica i " + ones + " jedinica?",
+        n,
+        uniqChoices(n, [tens * 10, ones, n + 1, n - 1]),
+        tens + " desetica i " + ones + " jedinica = " + n + ".",
+        null,
+        2
+      )
+    );
+    brojevi.push(
+      tf(
+        "sm-digit-" + n,
+        "Broj " + n + " je " + (n < 10 ? "jednoznamenkast" : "dvoznamenkast") + ".",
+        true,
+        n < 10 ? "Brojevi 0–9 imaju jednu znamenku." : "Brojevi 10–20 imaju dvije znamenke.",
+        n < 10 ? 1 : 2
+      )
+    );
   }
+  for (n = 0; n <= 9; n++) {
+    brojevi.push(
+      tf("sm-onedigit-" + n, "Broj " + n + " je dvoznamenkast.", false, "Brojevi 0–9 su jednoznamenkasti.", 1)
+    );
+  }
+  brojevi.push(match(
+    "sm-tens-match",
+    "Spoji broj s rastavljanjem na desetice i jedinice.",
+    [["12", "1 desetica i 2 jedinice"], ["15", "1 desetica i 5 jedinica"], ["20", "2 desetice i 0 jedinica"]],
+    "12 = 1 d + 2 j; 15 = 1 d + 5 j; 20 = 2 d + 0 j.",
+    2
+  ));
+  brojevi.push(mcq(
+    "sm-ten-block",
+    "Što je jedna desetica?",
+    "10 jedinica",
+    ["10 jedinica", "1 jedinica", "20 jedinica", "5 jedinica"],
+    "Jedna desetica = 10 jedinica.",
+    null,
+    1
+  ));
 
   for (a = 0; a <= MAX; a++) {
     for (b = 0; b <= MAX; b++) {
@@ -231,6 +320,60 @@
       );
     }
   }
+
+  // Veza zbrajanja i oduzimanja + zamjena mjesta pribrojnika (Super matematika 2. dio)
+  for (a = 1; a <= 10; a++) {
+    for (b = 1; a + b <= MAX; b++) {
+      var sumAb = a + b;
+      racun.push(
+        tf(
+          "sm-comm-" + a + "-" + b,
+          a + " + " + b + " = " + b + " + " + a,
+          true,
+          "Pribrojnici mogu zamijeniti mjesta: zbroj ostaje " + sumAb + ".",
+          a + b <= 10 ? 1 : 2
+        )
+      );
+      racun.push(
+        numQ(
+          "sm-inv-sub-" + a + "-" + b,
+          "Znamo da je " + a + " + " + b + " = " + sumAb + ". Koliko je " + sumAb + " − " + a + "?",
+          b,
+          "Oduzimanje poništava zbrajanje: " + sumAb + " − " + a + " = " + b + ".",
+          null,
+          2
+        )
+      );
+      racun.push(
+        numQ(
+          "sm-inv-sub2-" + a + "-" + b,
+          "Znamo da je " + a + " + " + b + " = " + sumAb + ". Koliko je " + sumAb + " − " + b + "?",
+          a,
+          sumAb + " − " + b + " = " + a + ".",
+          null,
+          2
+        )
+      );
+    }
+  }
+  racun.push(mcq(
+    "sm-comm-pick",
+    "Koji izraz daje isti zbroj kao 4 + 9?",
+    "9 + 4",
+    ["9 + 4", "9 − 4", "4 − 9", "14 − 9"],
+    "Zamjena mjesta pribrojnika: 4 + 9 = 9 + 4.",
+    null,
+    1
+  ));
+  racun.push(mcq(
+    "sm-inv-pick",
+    "Ako je 8 + 5 = 13, koji oduzimak je točan?",
+    "13 − 5 = 8",
+    ["13 − 5 = 8", "13 − 8 = 13", "8 − 5 = 13", "5 − 8 = 13"],
+    "Iz zbroja oduzmemo jedan pribrojnik i dobijemo drugi.",
+    null,
+    2
+  ));
 
   // Lančani računi: a + b − c  i  a − b + c
   var c;
@@ -793,28 +936,327 @@
     oblici.push(mcq("real-" + i, "U stvarnom svijetu: " + row[0], row[1], shapeNames, "Najbliži oblik je " + row[1] + "."));
   });
 
+  // Geometrijska tijela + točka/crta (Super matematika 1. dio)
+  var tijela = ["kugla", "valjak", "kocka", "kvadar", "piramida", "stožac"];
+  [
+    ["sm-tijelo-lopta", "Lopta je najsličnija kojem tijelu?", "kugla", "Lopta je okrugla u svim smjerovima — to je kugla."],
+    ["sm-tijelo-konzerva", "Konzerva juhe najviše sliči na…", "valjak", "Valjak ima dva okrugla dna i zakrivljeni plašt."],
+    ["sm-tijelo-secer", "Kocka šećera ima oblik…", "kocka", "Sve stranice kocke su kvadrati jednake veličine."],
+    ["sm-tijelo-kutija", "Kutija cipela najčešće je…", "kvadar", "Kvadar ima pravokutne strane (kao kutija)."],
+    ["sm-tijelo-kapa", "Rođendanska kapica najviše sliči na…", "stožac", "Stožac ima kružnu bazu i vrh."],
+    ["sm-tijelo-egipat", "Poznata egipatska građevina ima oblik…", "piramida", "Piramida ima trokutaste strane koje se susreću u vrhu."]
+  ].forEach(function (row) {
+    oblici.push(mcq(row[0], row[1], row[2], tijela.slice(), row[3], null, 2));
+  });
+  oblici.push(mcq(
+    "sm-tijelo-round",
+    "Koje tijelo možeš kotrljati u svim smjerovima?",
+    "kugla",
+    tijela.slice(),
+    "Kugla se kotrlja u svim smjerovima.",
+    null,
+    1
+  ));
+  oblici.push(mcq(
+    "sm-tijelo-flat",
+    "Koje tijelo ima sve strane kvadratne i jednake?",
+    "kocka",
+    tijela.slice(),
+    "Kod kocke su sve strane jednaki kvadrati.",
+    null,
+    2
+  ));
+  oblici.push(match(
+    "sm-tijelo-match",
+    "Spoji predmet s geometrijskim tijelom.",
+    [["lopta", "kugla"], ["konzerva", "valjak"], ["kutija", "kvadar"]],
+    "Lopta→kugla, konzerva→valjak, kutija→kvadar.",
+    2
+  ));
+  oblici.push(match(
+    "sm-tijelo-match2",
+    "Spoji predmet s tijelom.",
+    [["kocka leda", "kocka"], ["sladoledni vaflek", "stožac"], ["šator s trokutastim stranama", "piramida"]],
+    "Led→kocka, vaflek→stožac, šator→piramida.",
+    2
+  ));
+  [
+    ["sm-tijelo-tf1", "Kugla ima vrhove kao kocka.", false, "Kugla nema vrhove ni bridove.", 2],
+    ["sm-tijelo-tf2", "Valjak ima dva okrugla dna.", true, "Valjak ima dva kruga i plašt.", 2],
+    ["sm-tijelo-tf3", "Kvadar i kocka su isto tijelo.", false, "Kocka je poseban kvadar s jednakim bridovima.", 3],
+    ["sm-tijelo-tf4", "Stožac ima jedan vrh.", true, "Stožac završava u jednom vrhu.", 1]
+  ].forEach(function (row) {
+    oblici.push(tf(row[0], row[1], row[2], row[3], row[4]));
+  });
+  oblici.push(mcq(
+    "sm-tocka",
+    "Što je točka u geometriji?",
+    "mjesto bez duljine",
+    ["mjesto bez duljine", "duga crta", "krug", "kutija"],
+    "Točka označava položaj; nema duljinu ni širinu.",
+    null,
+    2
+  ));
+  oblici.push(mcq(
+    "sm-crta",
+    "Što dobiješ kad spojiš dvije točke?",
+    "crtu / dužinu",
+    ["crtu / dužinu", "kuglu", "broj", "boju"],
+    "Dvije točke određuju crtu (dužinu) između njih.",
+    null,
+    2
+  ));
+  oblici.push(tf("sm-tf-tocka", "Točka ima duljinu od 2 centimetra.", false, "Točka nema duljinu.", 2));
+  oblici.push(tf("sm-tf-lik-tijelo", "Krug je geometrijski lik, a kugla je geometrijsko tijelo.", true, "Likovi su ravni; tijela zauzimaju prostor.", 2));
+  oblici.push(mcq(
+    "sm-lik-vs-tijelo",
+    "Što je ravni oblik koji možeš nacrtati na papiru?",
+    "geometrijski lik",
+    ["geometrijski lik", "geometrijsko tijelo", "desetica", "novčić samo"],
+    "Likovi (krug, trokut…) crtamo u ravnini.",
+    null,
+    2
+  ));
+
+  /* ===================== DODATNE STANICE (Pages) ===================== */
+  function calc(expr) {
+    var p = expr.trim().split(/\s+/);
+    var acc = parseInt(p[0], 10);
+    for (var ci = 1; ci < p.length; ci += 2) {
+      acc = p[ci] === "+" ? acc + parseInt(p[ci + 1], 10) : acc - parseInt(p[ci + 1], 10);
+    }
+    return acc;
+  }
+
+  function prettyExpr(expr) {
+    return expr.trim().split(/\s+/).map(function (t) {
+      return t === "-" ? "−" : t;
+    }).join(" ");
+  }
+
+  var brojRijeciMap = {
+    1: "jedan", 2: "dva", 3: "tri", 4: "četiri", 5: "pet", 6: "šest", 7: "sedam",
+    8: "osam", 9: "devet", 10: "deset", 11: "jedanaest", 12: "dvanaest", 13: "trinaest",
+    14: "četrnaest", 15: "petnaest", 16: "šesnaest", 17: "sedamnaest", 18: "osamnaest",
+    19: "devetnaest", 20: "dvadeset"
+  };
+  var redniMap = {
+    1: "prvi", 2: "drugi", 3: "treći", 4: "četvrti", 5: "peti",
+    6: "šesti", 7: "sedmi", 8: "osmi", 9: "deveti", 10: "deseti",
+    11: "jedanaesti", 12: "dvanaesti", 13: "trinaesti", 14: "četrnaesti", 15: "petnaesti",
+    16: "šesnaesti", 17: "sedamnaesti", 18: "osamnaesti", 19: "devetnaesti", 20: "dvadeseti"
+  };
+
+  function wordChoices(n, map) {
+    var out = [map[n]];
+    [1, -1, 2, -2, 3, -3].forEach(function (d) {
+      var w = map[n + d];
+      if (out.length < 4 && w && out.indexOf(w) < 0) out.push(w);
+    });
+    return out;
+  }
+
+  var redniB = [];
+  redniB.push(match("red-m1", "Spoji broj i redni broj.", [["1.", "prvi"], ["2.", "drugi"], ["3.", "treći"]], "1. prvi, 2. drugi, 3. treći."));
+  redniB.push(match("red-m2", "Spoji broj i redni broj.", [["4.", "četvrti"], ["5.", "peti"], ["6.", "šesti"]], "4. četvrti, 5. peti, 6. šesti."));
+  redniB.push(match("red-m3", "Spoji broj i redni broj.", [["7.", "sedmi"], ["8.", "osmi"], ["9.", "deveti"], ["10.", "deseti"]], "7. sedmi, 8. osmi, 9. deveti, 10. deseti."));
+  redniB.push(match("sm-red-m4", "Spoji broj i redni broj (do 20).", [["11.", "jedanaesti"], ["12.", "dvanaesti"], ["15.", "petnaesti"]], "11. jedanaesti, 12. dvanaesti, 15. petnaesti.", 2));
+  redniB.push(match("sm-red-m5", "Spoji broj i redni broj (do 20).", [["18.", "osamnaesti"], ["19.", "devetnaesti"], ["20.", "dvadeseti"]], "18. osamnaesti, 19. devetnaesti, 20. dvadeseti.", 2));
+  [3, 4, 6, 7, 8, 9, 11, 12, 14, 16, 17, 19, 20].forEach(function (num) {
+    redniB.push(mcq("red-q-" + num, "Koji je redni broj za " + num + "?", redniMap[num], wordChoices(num, redniMap), num + ". po redu je " + redniMap[num] + ".", null, num <= 10 ? 1 : 2));
+  });
+  redniB.push(numQ("red-before-5", "Ana je peta u redu. Koliko je djece ispred nje?", 4, "Ispred pete osobe su četiri osobe."));
+  redniB.push(numQ("red-before-6", "Ti si šesti u redu. Koliko je ljudi ispred tebe?", 5, "Ispred šestog je pet ljudi."));
+  redniB.push(numQ("sm-red-before-15", "Luka je 15. u redu. Koliko je djece ispred njega?", 14, "Ispred 15. stoji 14 djece.", null, 2));
+  redniB.push(mcq("red-last", "U redu je 8 djece, Marko je posljednji. Koji je Marko po redu?", "osmi", ["šesti", "sedmi", "osmi", "deveti"], "Posljednji od 8 je osmi."));
+  redniB.push(mcq("red-between", "Koji je redni broj između trećeg i petog?", "četvrti", ["drugi", "treći", "četvrti", "peti"], "Između trećeg i petog je četvrti."));
+  redniB.push(mcq("sm-red-between-20", "Koji je redni broj između 18. i 20.?", "devetnaesti", ["sedamnaesti", "osamnaesti", "devetnaesti", "dvadeseti"], "Između 18. i 20. je 19. (devetnaesti).", null, 2));
+  redniB.push(mcq("red-race", "Redoslijed na cilju: Petar, Goran, Matija, Iva. Tko je ušao treći?", "Matija", ["Petar", "Goran", "Matija", "Iva"], "Treći je Matija."));
+  redniB.push(mcq("red-before-8", "Koji redni broj dolazi odmah prije osmoga?", "sedmi", ["šesti", "sedmi", "osmi", "deveti"], "Prije osmog je sedmi."));
+  redniB.push(mcq("red-after-9", "Koji redni broj dolazi odmah nakon devetoga?", "deseti", ["osmi", "deveti", "deseti", "jedanaesti"], "Nakon devetog je deseti."));
+  redniB.push(mcq("sm-red-after-19", "Koji redni broj dolazi odmah nakon 19.?", "dvadeseti", ["osamnaesti", "devetnaesti", "dvadeseti", "jedanaesti"], "Nakon 19. je 20. (dvadeseti).", null, 2));
+  redniB.push(order("red-ord", "Poredaj redne brojeve po redu.", ["prvi", "drugi", "treći", "četvrti"], "Redom: prvi, drugi, treći, četvrti."));
+  redniB.push(order("sm-red-ord2", "Poredaj redne brojeve po redu.", ["jedanaesti", "petnaesti", "dvadeseti"], "11., 15., 20.", 2));
+  redniB.push(tf("red-tf1", "Peti dolazi poslije šestog.", false, "Peti dolazi prije šestog."));
+  redniB.push(tf("red-tf2", "Ako si prvi, nitko nije ispred tebe.", true, "Prvi je na početku reda."));
+  redniB.push(tf("sm-red-tf3", "Dvadeseti dolazi poslije devetnaestog.", true, "19. pa 20.", 1));
+  redniB.push(tf("sm-red-tf4", "Jedanaesti je prije desetog.", false, "Jedanaesti dolazi poslije desetog.", 2));
+
+  var brojRijeci = [];
+  [12, 15, 17, 19, 14, 11, 18, 16].forEach(function (num) {
+    brojRijeci.push(mcq("br-w-" + num, "Kako se riječima piše broj " + num + "?", brojRijeciMap[num], wordChoices(num, brojRijeciMap), "Broj " + num + " pišemo: " + brojRijeciMap[num] + "."));
+  });
+  [13, 16, 20, 11, 17].forEach(function (num) {
+    brojRijeci.push(numQ("br-n-" + num, "Koji je to broj: " + brojRijeciMap[num] + "?", num, brojRijeciMap[num] + " je broj " + num + "."));
+  });
+  [["8 + 6", 14], ["20 - 5", 15], ["9 + 9", 18], ["7 + 6", 13], ["11 + 6", 17], ["19 - 8", 11]].forEach(function (pair, idx) {
+    var val = calc(pair[0]);
+    brojRijeci.push(mcq("br-calc-" + idx, "Izračunaj i napiši riječima: " + prettyExpr(pair[0]) + " = ?", brojRijeciMap[val], wordChoices(val, brojRijeciMap), prettyExpr(pair[0]) + " = " + val + " = " + brojRijeciMap[val] + "."));
+  });
+  brojRijeci.push(mcq("br-cmp1", "Što je veće: trinaest ili petnaest?", "petnaest", ["trinaest", "petnaest", "jednako", "ne znam"], "15 je veće od 13."));
+  brojRijeci.push(mcq("br-cmp2", "Što je manje: osamnaest ili četrnaest?", "četrnaest", ["osamnaest", "četrnaest", "jednako", "ne znam"], "14 je manje od 18."));
+  brojRijeci.push(order("br-ord", "Poredaj brojeve od najmanjeg (napisani su riječima).", ["jedanaest", "petnaest", "dvadeset"], "11, 15, 20 → jedanaest, petnaest, dvadeset."));
+
+  var lanac = [];
+  function chainQ(id, expr) {
+    var parts = expr.trim().split(/\s+/);
+    var acc = parseInt(parts[0], 10);
+    var pretty = String(acc);
+    var steps = [];
+    for (var li = 1; li < parts.length; li += 2) {
+      var op = parts[li];
+      var num = parseInt(parts[li + 1], 10);
+      var prev = acc;
+      var opDisp = op === "+" ? "+" : "−";
+      if (op === "+") acc += num;
+      else acc -= num;
+      pretty += " " + opDisp + " " + num;
+      steps.push(prev + " " + opDisp + " " + num + " = " + acc);
+    }
+    lanac.push({
+      id: id,
+      type: "mcq",
+      prompt: "Izračunaj po redu (slijeva nadesno):",
+      answer: acc,
+      choices: uniqChoices(acc),
+      explain: steps.join(", ") + ".",
+      visual: { kind: "text", text: pretty + " = ?" },
+      diff: 3
+    });
+  }
+  [
+    "13 - 3 - 6", "18 - 8 - 3", "17 - 7 - 5", "16 - 6 - 4", "12 - 2 - 3",
+    "19 - 9 - 7", "19 - 5 + 2", "14 - 6 + 7", "17 - 8 + 3", "14 - 4 - 7",
+    "16 - 6 - 5", "20 - 10 - 5", "16 - 7 + 2", "10 - 8 + 3", "13 - 4 - 6",
+    "13 - 8 + 11", "1 + 17 - 9", "11 - 1 + 5", "4 + 8 + 1", "5 + 2 - 4",
+    "14 + 2 - 5", "16 - 12 + 5", "2 + 9 - 4", "18 - 15 + 6", "5 + 6 - 2",
+    "7 - 4 + 11", "4 + 10 - 6", "7 + 8 - 3", "14 + 6 - 3", "15 - 8 + 6",
+    "8 - 3 + 15", "13 - 4 + 5", "11 + 1 - 8", "16 - 5 + 2", "20 - 9 + 5",
+    "18 - 17 + 6", "16 - 10 + 5", "8 - 6 + 15", "19 - 9 + 3", "11 - 7 + 12",
+    "20 - 13 + 4 - 5", "16 - 9 + 12 - 7", "11 - 8 + 15 - 3", "14 - 12 + 8 + 7",
+    "15 - 8 - 5 + 12", "11 + 5 - 12 + 4", "12 + 6 - 3 + 2", "11 + 2 - 3 + 8",
+    "4 + 12 - 7 + 6", "7 - 3 + 14 - 5", "9 + 11 - 7 - 5", "6 + 8 - 10 + 7",
+    "17 - 9 + 3 - 6", "13 + 3 - 5 + 7", "8 + 9 - 5 + 3", "7 + 8 - 6 + 4",
+    "13 - 8 + 12 - 9", "6 + 7 - 9 + 8", "15 - 7 + 6 - 5", "9 + 8 - 4 - 7",
+    "12 - 9 + 15 - 6", "4 + 9 - 6 + 8", "16 - 8 + 7 - 5", "11 + 7 - 9 + 4"
+  ].forEach(function (expr, idx) {
+    chainQ("lan-" + idx, expr);
+  });
+
+  var zadaci = [];
+  [
+    ["zad-01", "Darko je imao 5 eura. Tata mu je dao 7 eura, a mama još 4 eura. Koliko eura sada ima Darko?", 16],
+    ["zad-02", "Luka je imao 5 eura, mama mu je dala još 11 eura, a on je bratu dao 7 eura. Koliko eura mu je ostalo?", 9],
+    ["zad-03", "Marko je imao 20 eura. Kupio je knjigu za 12 eura i sok za 3 eura. Koliko eura mu je ostalo?", 5],
+    ["zad-04", "Iva je imala 9 eura. Potrošila je 4 eura, a onda dobila još 8 eura. Koliko eura sada ima?", 13],
+    ["zad-05", "Josip ima 6 eura. Mama mu je dala još 9 eura. Ima li dovoljno za autić koji košta 16 eura?", "Ne", ["Da", "Ne"], "6 + 9 = 15 eura, a autić košta 16. Fali mu 1 euro."],
+    ["zad-06", "Tina je izračunala 15 zadataka, a Lana 3 zadatka više. Koliko je zadataka izračunala Lana?", 18],
+    ["zad-07", "Na lijevoj strani ulice je 11 kuća, a na desnoj 7 kuća više. Koliko kuća ima na desnoj strani?", 18],
+    ["zad-08", "Ana ima 15 eura, a Iva 8 eura. Za koliko eura Ana ima više od Ive?", 7],
+    ["zad-09", "Marko ima 12 sličica, a Ivan 5. Za koliko sličica Marko ima više?", 7],
+    ["zad-10", "U košari je 8 jabuka i 6 krušaka. Pojeli su 5 komada voća. Koliko je voća ostalo?", 9],
+    ["zad-11", "U autobusu je 12 putnika. Na stanici izađe 5, a uđu 4 putnika. Koliko je sada putnika?", 11],
+    ["zad-12", "Na grani je 14 ptica. Odleti 9, a doleti 3. Koliko je ptica sada na grani?", 8],
+    ["zad-13", "Imam 12 bojica. Seka mi pokloni još 2 bojice. Koliko ću ih ukupno imati?", 14],
+    ["zad-14", "Maja je nacrtala 13 crvenih i 2 plava cvjetića. Koliko je cvjetića nacrtala ukupno?", 15],
+    ["zad-15", "Petar je imao 11 eura. Za čokoladu je platio 6 eura. Koliko eura mu je ostalo?", 5],
+    ["zad-16", "U razredu je 9 djevojčica i 8 dječaka. Koliko je ukupno učenika?", 17],
+    ["sm-novac-01", "Mia ima 10 eura. Igračka košta 7 eura. Koliko eura joj ostaje nakon kupnje?", 3],
+    ["sm-novac-02", "Tin ima 4 eura, a baka mu doda 8 eura. Može li kupiti knjigu od 12 eura?", "Da", ["Da", "Ne"], "4 + 8 = 12 eura — točno za knjigu."],
+    ["sm-novac-03", "Jedan sok košta 2 eura. Koliko koštaju 5 sokova?", 10],
+    ["sm-novac-04", "Ema ima 15 eura. Kupila je naljepnice za 6 eura i gumicu za 3 eura. Koliko eura joj ostaje?", 6],
+    ["sm-novac-05", "Autić košta 18 eura. Luka ima 9 eura. Koliko mu još fali?", 9],
+    ["sm-novac-06", "U trgovini: lopta 5 eura, zmaj 8 eura. Koliko koštaju zajedno?", 13],
+    ["sm-novac-07", "Ana ima 20 eura. Kupila je dvije igračke: jednu za 7 i drugu za 6 eura. Koliko joj ostaje?", 7],
+    ["sm-novac-08", "Marko ima 3 novčića od 1 eura i jednu novčanicu od 5 eura. Koliko eura ima ukupno?", 8],
+    ["sm-novac-09", "Iva treba 14 eura za ulaznicu. Ima 9 eura. Koliko još treba uštedjeti?", 5],
+    ["sm-novac-10", "Petar je platio 16 eura i dobio ostatak 4 eura. Koliko je koštala roba?", 12]
+  ].forEach(function (row) {
+    if (typeof row[2] === "number") {
+      zadaci.push(numQ(row[0], row[1], row[2], row[3] || null, null, row[0].indexOf("sm-novac") === 0 ? 2 : 2));
+    } else {
+      zadaci.push(mcq(row[0], row[1], row[2], row[3], row[4] || null, null, 2));
+    }
+  });
+  zadaci.push(mcq(
+    "sm-novac-enough",
+    "Imam 11 eura. Igračka košta 11 eura. Imam li dovoljno?",
+    "Da",
+    ["Da", "Ne"],
+    "11 = 11 — imaš točno dovoljno.",
+    null,
+    1
+  ));
+  zadaci.push(match(
+    "sm-novac-match",
+    "Spoji kupnju s izračunom.",
+    [["ima 10, kupi za 3", "10 − 3"], ["ima 4, dobije 5", "4 + 5"], ["fali do 12 od 7", "12 − 7"]],
+    "Ostaje oduzimanje; dobivanje zbrajanje; fali razlika.",
+    2
+  ));
+
   global.CONTENT_MATEMATIKA = {
     id: "matematika",
     title: "Matematika",
     icon: "🔢",
-    blurb: "Potraga za blagom: brojevi do 20, račun, jednačenja i zadaci s riječima — srednje do teže 1. razred.",
+    blurb: "Potraga za blagom po Profilu: prostorni odnosi, oblici i tijela, brojevi do 20, račun, novac i zadaci riječima.",
     color: "mat",
     games: [
+      {
+        id: "mat-prostor",
+        title: "Prostorni odnosi",
+        emoji: "📐",
+        desc: "Trag: dulji/kraći, veći/manji, iznad/ispod, lijevo/desno.",
+        roundSize: 10,
+        bank: prostor
+      },
+      {
+        id: "mat-oblici",
+        title: "Oblici i tijela",
+        emoji: "🔷",
+        desc: "Trag: likovi, geometrijska tijela, točka i crta.",
+        roundSize: 10,
+        bank: oblici
+      },
       {
         id: "mat-brojevi",
         title: "Brojevi do 20",
         emoji: "🔢",
-        desc: "Trag: usporedi brojeve, nađi što nedostaje i poredaj — velika banka.",
+        desc: "Trag: usporedi, desetice i jedinice, jedno-/dvoznamenkasti.",
         roundSize: 12,
         bank: brojevi
+      },
+      {
+        id: "mat-redni",
+        title: "Redni brojevi",
+        emoji: "🥇",
+        desc: "Trag: prvi do dvadeseti i snalaženje u redu.",
+        roundSize: 10,
+        bank: redniB
+      },
+      {
+        id: "mat-broj-rijeci",
+        title: "Brojevne riječi",
+        emoji: "✍️",
+        desc: "Trag: brojka ↔ riječ, pa i izračunaj i napiši riječima.",
+        roundSize: 10,
+        bank: brojRijeci
       },
       {
         id: "mat-racun",
         title: "Zbrajanje i oduzimanje",
         emoji: "➕",
-        desc: "Trag: zbrajanje, oduzimanje i lančani računi tipa 7 + 3 − 2.",
+        desc: "Trag: + i − do 20, zamjena pribrojnika i veza s oduzimanjem.",
         roundSize: 12,
         bank: racun
+      },
+      {
+        id: "mat-lanac",
+        title: "Lančani računi",
+        emoji: "🔗",
+        desc: "Trag: zbrajaj i oduzimaj po redu, s tri ili četiri broja.",
+        roundSize: 10,
+        bank: lanac
       },
       {
         id: "mat-jednadzbe",
@@ -833,12 +1275,12 @@
         bank: rijeci
       },
       {
-        id: "mat-oblici",
-        title: "Oblici",
-        emoji: "🔷",
-        desc: "Trag: krug, trokut, kvadrat i pravokutnik.",
+        id: "mat-zadaci",
+        title: "Zadaci i novac",
+        emoji: "💶",
+        desc: "Trag: životni zadaci, cijene i ostatak novca.",
         roundSize: 10,
-        bank: oblici
+        bank: zadaci
       }
     ]
   };

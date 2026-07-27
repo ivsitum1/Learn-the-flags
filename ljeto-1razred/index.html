@@ -12,7 +12,21 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
 </head>
 <body>
-  <div class="sky" aria-hidden="true"></div>
+  <div class="sky" aria-hidden="true">
+    <div class="sky-sun"></div>
+    <div class="sky-cloud sky-cloud--1"></div>
+    <div class="sky-cloud sky-cloud--2"></div>
+    <div class="sky-cloud sky-cloud--3"></div>
+    <div class="sky-sparks">
+      <span class="sky-spark"></span>
+      <span class="sky-spark"></span>
+      <span class="sky-spark"></span>
+      <span class="sky-spark"></span>
+      <span class="sky-spark"></span>
+      <span class="sky-spark"></span>
+    </div>
+    <div class="sky-ground"></div>
+  </div>
 
   <header class="topbar">
     <button type="button" class="back-btn hidden" id="btnBack" aria-label="Natrag">←</button>
@@ -32,6 +46,46 @@
         <p class="hero-kicker">Ljetni park · 1. razred</p>
         <h1 class="hero-title">Potraga za blagom</h1>
         <p class="hero-sub">Prati staze kroz tri regije otoka — svaka stanica otključava sljedeći trag.</p>
+      </div>
+      <div class="island-scene gusar-locked" id="islandScene" aria-hidden="true">
+        <svg class="island-svg" viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <defs>
+            <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7ec8f5"/>
+              <stop offset="100%" stop-color="#3d8ec9"/>
+            </linearGradient>
+          </defs>
+          <rect width="360" height="220" fill="url(#seaGrad)" rx="18"/>
+          <!-- main island -->
+          <ellipse cx="175" cy="130" rx="130" ry="58" fill="#6fbf73"/>
+          <ellipse cx="175" cy="118" rx="118" ry="48" fill="#8fd18a"/>
+          <!-- mat zone -->
+          <g class="island-zone island-zone--mat">
+            <ellipse cx="110" cy="115" rx="38" ry="28" fill="#2f8f6b"/>
+            <text x="110" y="120" text-anchor="middle" font-size="22">🔢</text>
+          </g>
+          <!-- hrv zone -->
+          <g class="island-zone island-zone--hrv">
+            <ellipse cx="175" cy="95" rx="36" ry="26" fill="#d97706"/>
+            <text x="175" y="100" text-anchor="middle" font-size="22">📖</text>
+          </g>
+          <!-- pid zone -->
+          <g class="island-zone island-zone--pid">
+            <ellipse cx="240" cy="120" rx="38" ry="28" fill="#2563a8"/>
+            <text x="240" y="125" text-anchor="middle" font-size="22">🌿</text>
+          </g>
+          <!-- paths -->
+          <path class="island-path" d="M140 115 Q175 105 210 118" fill="none" stroke="#ffc93c" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round"/>
+          <path class="island-path" d="M175 118 Q200 140 230 130" fill="none" stroke="#ffc93c" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round"/>
+          <!-- bridge / mist to gusar -->
+          <path class="island-bridge" d="M285 145 Q310 150 325 155" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-dasharray="4 6"/>
+          <!-- gusar islet -->
+          <g class="island-zone island-zone--gus">
+            <ellipse cx="325" cy="165" rx="28" ry="18" fill="#1e3a4c"/>
+            <text class="gus-flag" x="325" y="168" text-anchor="middle" font-size="18">🏴‍☠️</text>
+            <text class="gus-lock" x="325" y="170" text-anchor="middle" font-size="16">🔒</text>
+          </g>
+        </svg>
       </div>
       <div class="subject-grid" id="subjectGrid"></div>
     </section>
@@ -86,6 +140,18 @@
       <div class="play-actions" id="playActions"></div>
     </section>
 
+    <!-- QUEST (Potraga za blagom) -->
+    <section class="view" id="view-quest" data-view="quest">
+      <div class="quest-head">
+        <h2 id="questTitle">Potraga za blagom</h2>
+        <p id="questStory" class="quest-story"></p>
+      </div>
+      <div class="quest-map" id="questMap" aria-hidden="true"></div>
+      <div class="panel play-panel" id="questPanel"></div>
+      <div class="feedback hidden" id="questFeedback"></div>
+      <div class="play-actions" id="questActions"></div>
+    </section>
+
     <!-- RESULT -->
     <section class="view" id="view-result" data-view="result">
       <div class="panel result-panel">
@@ -105,6 +171,7 @@
   <script src="js/engine.js"></script>
   <script src="js/rewards.js"></script>
   <script src="js/content/matematika.js"></script>
+  <script src="js/content/nina-tino-hrvatski.js"></script>
   <script src="js/content/hrvatski.js"></script>
   <script src="js/content/priroda.js"></script>
   <script src="js/content/gusarski.js"></script>

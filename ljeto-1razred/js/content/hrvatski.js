@@ -1142,37 +1142,233 @@
     )
   );
 
+  /* ===================== PARTICIJA U 9 STANICA + DOPUNE ===================== */
+  function idStarts(q, prefixes) {
+    var id = String(q.id || "");
+    var p;
+    for (p = 0; p < prefixes.length; p++) {
+      if (id.indexOf(prefixes[p]) === 0) return true;
+    }
+    return false;
+  }
+
+  function pickBank(source, prefixes) {
+    return source.filter(function (q) {
+      return idStarts(q, prefixes);
+    });
+  }
+
+  var prvoZadnje = pickBank(slova, ["first-", "last-"]);
+  var duljina = pickBank(slova, ["len-"]);
+  var velikaMala = pickBank(slova, ["case-", "upper-", "match-diac-"]);
+  var abeceda = pickBank(slova, ["after-", "before-", "ord-", "tf-ord-", "tf-a-first"]);
+  var slogBroj = slogovi.filter(function (q) {
+    var id = String(q.id || "");
+    if (id.indexOf("syl-order-") === 0) return false;
+    return (
+      id.indexOf("syl-") === 0 ||
+      id.indexOf("tf-syl-") === 0 ||
+      id.indexOf("which-syl-") === 0
+    );
+  });
+  var slogSastavi = pickBank(slogovi, ["join-", "concat-", "syl-order-"]);
+  var recenica = pickBank(slova, [
+    "tf-sent-cap",
+    "tf-end-dot",
+    "tf-space",
+    "tf-lowercase-start",
+    "tf-missing-dot"
+  ]).concat(
+    pickBank(citanje, [
+      "cap-",
+      "sent-write-",
+      "tf-dot",
+      "tf-qmark",
+      "tf-nospace",
+      "tf-wrong-",
+      "end-mark"
+    ])
+  );
+  var citanjeKratko = pickBank(citanje, [
+    "read-pet-",
+    "read-place-",
+    "read-color-",
+    "read-food-",
+    "read-drink-",
+    "read-obj-",
+    "read-act-"
+  ]);
+  var razumijevanje = pickBank(citanje, ["read-long", "read-infer-"]);
+
+  // Dopuna: nedostajuće slovo u riječi (Profil — slova / riječi)
+  var nedostaje = [];
+  for (i = 0; i < words.length; i++) {
+    w = words[i];
+    if (w[0].length < 3) continue;
+    if (i % 2 !== 0) continue;
+    var mid = Math.floor(w[0].length / 2);
+    var missing = w[0].charAt(mid);
+    var blank =
+      w[0].slice(0, mid) + "_" + w[0].slice(mid + 1);
+    nedostaje.push(
+      mcq(
+        "miss-" + w[0],
+        "Koje slovo nedostaje: „" + blank + "“?",
+        missing,
+        uniqChoices(
+          missing,
+          shuffleInPlace(
+            MALA.slice().concat(SLOVA.map(function (s) {
+              return s.toLowerCase();
+            }))
+          )
+        ),
+        "Riječ je „" + w[0] + "“ — nedostaje „" + missing + "“.",
+        { kind: "text", text: blank },
+        2
+      )
+    );
+  }
+
+  // Dopuna: upitna vs obična rečenica
+  [
+    ["Gdje je lopta?", "upitna", 1],
+    ["Pas laje.", "obična", 1],
+    ["Što radi Ana?", "upitna", 1],
+    ["Sunce sja.", "obična", 1],
+    ["Kada ideš u školu?", "upitna", 2],
+    ["Mama peče kolač.", "obična", 1],
+    ["Zašto kiša pada?", "upitna", 2],
+    ["Djeca čitaju knjigu.", "obična", 1]
+  ].forEach(function (row, idx) {
+    recenica.push(
+      mcq(
+        "sent-type-" + idx,
+        "Je li ovo obična ili upitna rečenica?\n\n„" + row[0] + "“",
+        row[1],
+        ["obična", "upitna"],
+        row[1] === "upitna"
+          ? "Završava upitnikom — upitna rečenica."
+          : "Završava točkom — obična rečenica.",
+        null,
+        row[2]
+      )
+    );
+  });
+
+  // Dopuna: spoji početak i nastavak riječi (dvosložne)
+  var spoji = [];
+  for (i = 0; i < words.length; i++) {
+    w = words[i];
+    if (!w[4] || w[4].length !== 2) continue;
+    var wrongEnds = words
+      .filter(function (x) {
+        return x[4] && x[4].length === 2 && x[0] !== w[0];
+      })
+      .map(function (x) {
+        return x[4][1];
+      });
+    spoji.push(
+      mcq(
+        "pair-end-" + w[0],
+        "Što ide uz „" + w[4][0] + "“ da nastane riječ?",
+        w[4][1],
+        uniqChoices(w[4][1], shuffleInPlace(wrongEnds.slice())),
+        w[4][0] + " + " + w[4][1] + " = " + w[0] + ".",
+        null,
+        2
+      )
+    );
+  }
+
+  duljina = duljina.concat(nedostaje);
+  slogSastavi = slogSastavi.concat(spoji);
+
+  var hrvGames = [
+    {
+      id: "hrv-prvo-zadnje",
+      title: "Prvo i zadnje slovo",
+      emoji: "🔠",
+      desc: "Trag: koje slovo stoji na početku ili na kraju riječi.",
+      roundSize: 12,
+      bank: prvoZadnje
+    },
+    {
+      id: "hrv-duljina",
+      title: "Broj slova",
+      emoji: "🔢",
+      desc: "Trag: koliko slova ima riječ i koje nedostaje.",
+      roundSize: 10,
+      bank: duljina
+    },
+    {
+      id: "hrv-velika-mala",
+      title: "Velika i mala slova",
+      emoji: "🔤",
+      desc: "Trag: spoji veliko i malo slovo (i dijakritike).",
+      roundSize: 12,
+      bank: velikaMala
+    },
+    {
+      id: "hrv-abeceda",
+      title: "Abeceda",
+      emoji: "🔠",
+      desc: "Trag: što dolazi prije i poslije, poredaj slova.",
+      roundSize: 12,
+      bank: abeceda
+    },
+    {
+      id: "hrv-slogovi",
+      title: "Broj slogova",
+      emoji: "🧩",
+      desc: "Trag: koliko slogova ima riječ.",
+      roundSize: 12,
+      bank: slogBroj
+    },
+    {
+      id: "hrv-sastavi",
+      title: "Sastavi riječ",
+      emoji: "🧱",
+      desc: "Trag: spoji slogove i sastavi riječ.",
+      roundSize: 10,
+      bank: slogSastavi
+    },
+    {
+      id: "hrv-recenica",
+      title: "Rečenica i pravopis",
+      emoji: "✏️",
+      desc: "Trag: veliko slovo, točka, upitnik i razmak.",
+      roundSize: 10,
+      bank: recenica
+    },
+    {
+      id: "hrv-citanje",
+      title: "Čitanje",
+      emoji: "📚",
+      desc: "Trag: kratki tekst — tko, što, gdje, koja boja.",
+      roundSize: 10,
+      bank: citanjeKratko
+    },
+    {
+      id: "hrv-razumijevanje",
+      title: "Razumijevanje",
+      emoji: "🕵️",
+      desc: "Trag: duža priča — zaključuj iz teksta.",
+      roundSize: 10,
+      bank: razumijevanje
+    }
+  ];
+
+  var ntGames =
+    (global.CONTENT_NINA_TINO_HRV && global.CONTENT_NINA_TINO_HRV.games) || [];
+
   global.CONTENT_HRVATSKI = {
     id: "hrvatski",
     title: "Hrvatski",
     icon: "📖",
-    blurb: "Potraga za blagom: slova, slogovi i čitanje — srednje do teže 1. razred.",
+    blurb:
+      "Potraga za blagom: stanice slova i čitanja + Nina i Tino (1. razred).",
     color: "hrv",
-    games: [
-      {
-        id: "hrv-slova",
-        title: "Slova i abeceda",
-        emoji: "🔤",
-        desc: "Trag: prvo i zadnje slovo, velika/mala slova, red u abecedi.",
-        roundSize: 12,
-        bank: slova
-      },
-      {
-        id: "hrv-slogovi",
-        title: "Slogovi i riječi",
-        emoji: "🧩",
-        desc: "Trag: broji slogove i sastavljaj riječi — velika banka.",
-        roundSize: 12,
-        bank: slogovi
-      },
-      {
-        id: "hrv-citanje",
-        title: "Čitanje",
-        emoji: "📚",
-        desc: "Trag: pročitaj priču i odgovori — mnogo različitih tekstova.",
-        roundSize: 10,
-        bank: citanje
-      }
-    ]
+    games: hrvGames.concat(ntGames)
   };
 })(window);

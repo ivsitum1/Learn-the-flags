@@ -8,9 +8,46 @@
   ];
 
   var STATION_ORDER = {
-    matematika: ["mat-brojevi", "mat-racun", "mat-jednadzbe", "mat-rijeci", "mat-oblici"],
-    hrvatski: ["hrv-slova", "hrv-slogovi", "hrv-citanje"],
-    priroda: ["pid-godisnja", "pid-ziva", "pid-okolina"]
+    matematika: [
+      "mat-prostor",
+      "mat-oblici",
+      "mat-brojevi",
+      "mat-redni",
+      "mat-broj-rijeci",
+      "mat-racun",
+      "mat-lanac",
+      "mat-jednadzbe",
+      "mat-rijeci",
+      "mat-zadaci"
+    ],
+    hrvatski: [
+      "hrv-prvo-zadnje",
+      "hrv-duljina",
+      "hrv-velika-mala",
+      "hrv-abeceda",
+      "hrv-slogovi",
+      "hrv-sastavi",
+      "hrv-recenica",
+      "hrv-citanje",
+      "hrv-razumijevanje",
+      "hrv-nt-glasovi",
+      "hrv-nt-usporedbe",
+      "hrv-nt-rijeci",
+      "hrv-nt-recenice",
+      "hrv-nt-slova",
+      "hrv-nt-skola"
+    ],
+    priroda: [
+      "pid-godisnja",
+      "pid-mjeseci",
+      "pid-vrijeme",
+      "pid-zivo",
+      "pid-zivotinje",
+      "pid-biljke",
+      "pid-tijelo",
+      "pid-dani",
+      "pid-okolina"
+    ]
   };
 
   var REGION_COPY = {
@@ -20,10 +57,19 @@
   };
 
   Progress.ensureUnlockedDefaults({
-    matematika: "mat-brojevi",
-    hrvatski: "hrv-slova",
+    matematika: "mat-prostor",
+    hrvatski: "hrv-prvo-zadnje",
     priroda: "pid-godisnja"
   });
+
+  // Ako je stari save već otključao matematiku, dodaj novu prvu stanicu.
+  if (
+    !Progress.isUnlocked("matematika", "mat-prostor") &&
+    (Progress.isUnlocked("matematika", "mat-brojevi") ||
+      Progress.isUnlocked("matematika", "mat-oblici"))
+  ) {
+    Progress.unlockGame("matematika", "mat-prostor");
+  }
 
   var state = {
     view: "hub",
@@ -100,6 +146,12 @@
     };
   }
 
+  function syncIslandScene(unlocked) {
+    var scene = document.getElementById("islandScene");
+    if (!scene) return;
+    scene.classList.toggle("gusar-locked", !unlocked);
+  }
+
   function renderHub() {
     els.subjectGrid.className = "island-map";
     els.subjectGrid.innerHTML = "";
@@ -167,6 +219,7 @@
       });
     }
     els.subjectGrid.appendChild(btn);
+    syncIslandScene(!!(gusarContent && unlocked));
   }
 
   function openShop() {

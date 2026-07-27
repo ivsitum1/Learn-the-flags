@@ -12,7 +12,6 @@ on:
   push:
     branches:
       - claude/flags-learning-app-plan-tpos3s
-      - feat/ljeto-1razred
   workflow_dispatch:
 
 permissions:
