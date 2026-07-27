@@ -355,6 +355,58 @@ main {
   line-height: 1.4;
 }
 
+.island-scene {
+  margin: 0 auto 1.25rem;
+  max-width: 420px;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 24px rgba(30, 58, 76, 0.18));
+  animation: island-reveal 0.7s ease both;
+}
+
+.island-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+}
+
+.island-zone--mat,
+.island-zone--hrv,
+.island-zone--pid {
+  filter: drop-shadow(0 0 6px rgba(255, 201, 60, 0.35));
+}
+
+.island-zone--gus .gus-lock { display: none; }
+.island-zone--gus .gus-flag { display: inline; }
+
+.island-scene.gusar-locked .island-zone--gus {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+}
+.island-scene.gusar-locked .island-zone--gus .gus-lock { display: inline; }
+.island-scene.gusar-locked .island-zone--gus .gus-flag { display: none; }
+
+.island-scene:not(.gusar-locked) .island-zone--gus {
+  animation: gus-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes island-reveal {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes gus-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 201, 60, 0.25)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255, 201, 60, 0.75)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .island-scene,
+  .island-scene:not(.gusar-locked) .island-zone--gus {
+    animation: none !important;
+  }
+}
+
 .subject-grid,
 .game-grid {
   display: grid;

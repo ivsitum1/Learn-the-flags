@@ -9,6 +9,8 @@
 
   var STATION_ORDER = {
     matematika: [
+      "mat-prostor",
+      "mat-oblici",
       "mat-brojevi",
       "mat-redni",
       "mat-broj-rijeci",
@@ -16,8 +18,7 @@
       "mat-lanac",
       "mat-jednadzbe",
       "mat-rijeci",
-      "mat-zadaci",
-      "mat-oblici"
+      "mat-zadaci"
     ],
     hrvatski: [
       "hrv-prvo-zadnje",
@@ -28,7 +29,13 @@
       "hrv-sastavi",
       "hrv-recenica",
       "hrv-citanje",
-      "hrv-razumijevanje"
+      "hrv-razumijevanje",
+      "hrv-nt-glasovi",
+      "hrv-nt-usporedbe",
+      "hrv-nt-rijeci",
+      "hrv-nt-recenice",
+      "hrv-nt-slova",
+      "hrv-nt-skola"
     ],
     priroda: [
       "pid-godisnja",
@@ -50,10 +57,19 @@
   };
 
   Progress.ensureUnlockedDefaults({
-    matematika: "mat-brojevi",
+    matematika: "mat-prostor",
     hrvatski: "hrv-prvo-zadnje",
     priroda: "pid-godisnja"
   });
+
+  // Ako je stari save već otključao matematiku, dodaj novu prvu stanicu.
+  if (
+    !Progress.isUnlocked("matematika", "mat-prostor") &&
+    (Progress.isUnlocked("matematika", "mat-brojevi") ||
+      Progress.isUnlocked("matematika", "mat-oblici"))
+  ) {
+    Progress.unlockGame("matematika", "mat-prostor");
+  }
 
   var state = {
     view: "hub",
@@ -130,6 +146,12 @@
     };
   }
 
+  function syncIslandScene(unlocked) {
+    var scene = document.getElementById("islandScene");
+    if (!scene) return;
+    scene.classList.toggle("gusar-locked", !unlocked);
+  }
+
   function renderHub() {
     els.subjectGrid.className = "island-map";
     els.subjectGrid.innerHTML = "";
@@ -197,6 +219,7 @@
       });
     }
     els.subjectGrid.appendChild(btn);
+    syncIslandScene(!!(gusarContent && unlocked));
   }
 
   function openShop() {
