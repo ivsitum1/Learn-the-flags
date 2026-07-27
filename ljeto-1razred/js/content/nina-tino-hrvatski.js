@@ -154,6 +154,76 @@
       ["VAU!", "ššš", "BRRR!", "BUUM!"],
       "„ššš“ je tih glas.",
       1
+    ),
+    match(
+      "nt-glas-zivotinje2",
+      "Spoji životinju i glas. (Nina i Tino — škola stranih jezika)",
+      [
+        ["sova", "HUU-HUU"],
+        ["golub", "GUGU-GUGU"],
+        ["koza", "MEEE"],
+        ["pijetao", "KUKURIKUUU"],
+        ["vrabac", "ŽIV-ŽIV"],
+        ["miš", "CIJUU-CIJUU"]
+      ],
+      "Svaka životinja ima svoj glas.",
+      2
+    ),
+    mcq(
+      "nt-glas-pogresno-ovca",
+      "Što je zbrkano: ovca kaže KRE-KRE?",
+      "ovca kaže BEE / MEEE, ne KRE-KRE",
+      ["ovca kaže BEE / MEEE, ne KRE-KRE", "ovce ne postoje", "KRE-KRE je glas ovce", "sve je točno"],
+      "U knjizi životinje zamijene glasove — ovca ne kreketá.",
+      2
+    ),
+    mcq(
+      "nt-glas-pogresno-krava",
+      "Što je zbrkano: krava kaže MIJAU?",
+      "krava kaže MUU, ne MIJAU",
+      ["krava kaže MUU, ne MIJAU", "krave mjauču", "MIJAU je glas krave", "sve je točno"],
+      "Krava muče: MUU.",
+      2
+    ),
+    mcq(
+      "nt-glas-uljez-pčela",
+      "U nizu glasova MIJAU, VAU-VAU, MUU, KOKODA, ŽIV-ŽIV — koja životinja NEMA svoj glas u nizu?",
+      "pčela",
+      ["pas", "mačka", "pčela", "krava"],
+      "Pčela zumzi; njezin glas nije u tom nizu.",
+      2
+    ),
+    mcq(
+      "nt-glas-hrana-mis",
+      "Što ide mišu kao hrana u zadatku s tragom?",
+      "sir",
+      ["sir", "kost", "mrkva", "banana"],
+      "Sir → miš.",
+      1
+    ),
+    mcq(
+      "nt-glas-hrana-pas",
+      "Što ide psu kao hrana u zadatku s tragom?",
+      "kost",
+      ["sir", "kost", "mrkva", "med"],
+      "Kost → pas.",
+      1
+    ),
+    mcq(
+      "nt-glas-hrana-zec",
+      "Što ide zecu kao hrana u zadatku s tragom?",
+      "mrkva",
+      ["sir", "kost", "mrkva", "kostim"],
+      "Mrkva → zec.",
+      1
+    ),
+    mcq(
+      "nt-glas-m-zivotinja",
+      "Koja životinja počinje glasom M?",
+      "mačka",
+      ["pas", "mačka", "ptica", "riba"],
+      "Mačka → M.",
+      1
     )
   ];
 
@@ -239,6 +309,45 @@
       "šiljilo",
       ["vilica", "šiljilo", "čarapa", "kišobran"],
       "Olovka se šilji šiljilom.",
+      1
+    ),
+    mcq(
+      "nt-usp-uljez-more",
+      "Što je ULJEZ u morskoj sceni (rak, riba, jež, zvijezda…)?",
+      "pijetao ili slon",
+      ["rak", "riba", "pijetao ili slon", "morska zvijezda"],
+      "Pijetao i slon ne pripadaju moru.",
+      2
+    ),
+    mcq(
+      "nt-usp-knjiga-vrati",
+      "Kako treba izgledati slikovnica koju vraćaš u knjižnicu?",
+      "uredna i čista",
+      ["uredna i čista", "išarana", "sa savijenim kutovima", "s ispadajućim listovima"],
+      "Vraćamo urednu knjigu.",
+      1
+    ),
+    mcq(
+      "nt-usp-ne-pripada-knjige",
+      "Što NE pripada među knjige/novine: kuharica, novine, mačka, slikovnica, bicikl?",
+      "mačka i bicikl",
+      ["kuharica", "novine", "mačka i bicikl", "slikovnica"],
+      "Mačka i bicikl nisu knjige.",
+      2
+    ),
+    mcq(
+      "nt-usp-bio",
+      "Što ide u BIO OTPAD?",
+      "jezgra jabuke / kore banane",
+      ["plastična boca", "jezgra jabuke / kore banane", "novine", "staklenka"],
+      "Bio otpad su ostaci hrane.",
+      2
+    ),
+    tf(
+      "nt-tf-semafor",
+      "Na prometnom semaforu crvena znači stati.",
+      true,
+      "Crveno = stoj.",
       1
     )
   ];
@@ -332,6 +441,54 @@
       false,
       "Lubenica JE crvena.",
       1
+    ),
+    match(
+      "nt-rij-isti-glas",
+      "Što počinje istim glasom? Spoji parove.",
+      [
+        ["miš", "mrav"],
+        ["golub", "grožđe"],
+        ["puž", "pčela"],
+        ["jagoda", "jabuka"]
+      ],
+      "Isti početni glas: M, G, P, J.",
+      2
+    ),
+    match(
+      "nt-rij-zrcalo",
+      "Pročitaj zrcalne riječi i spoji s ispravnim oblikom.",
+      [
+        ["ITSORPO", "OPROSTI"],
+        ["ILOVZI", "IZVOLI"],
+        ["ALAVH", "HVALA"],
+        ["MILOM", "MOLIM"]
+      ],
+      "Zrcalni zapis lijepe riječi.",
+      3
+    ),
+    mcq(
+      "nt-rij-tino-bicikl",
+      "Pročitaj: Tino JE NA…",
+      "biciklu",
+      ["biciklu", "krovu", "mjesecu", "stolu"],
+      "Tino JE NA biciklu.",
+      1
+    ),
+    mcq(
+      "nt-rij-nina-lopta",
+      "Pročitaj: Nina IMA…",
+      "loptu",
+      ["loptu", "brod", "šator", "kladivo"],
+      "Nina IMA loptu.",
+      1
+    ),
+    mcq(
+      "nt-rij-lopta-gol",
+      "Pročitaj: lopta JE U…",
+      "golu",
+      ["golu", "krevetu", "akvariju", "pečnici"],
+      "Lopta JE U golu.",
+      1
     )
   ];
 
@@ -418,6 +575,50 @@
       ["iznad njega", "ispod njega", "pored učiteljice", "kod kuće"],
       "Trag kaže: Marta je iznad Tonija.",
       2
+    ),
+    tf(
+      "nt-tf-sport-cestitam",
+      "Pravi sportaši: pobjedniku se čestita na pobjedi.",
+      true,
+      "To je lijepo sportsko ponašanje.",
+      1
+    ),
+    tf(
+      "nt-tf-sport-rugati",
+      "Pravi sportaši: tko pobijedi, smije se rugati.",
+      false,
+      "Ruganje nije fer-plej.",
+      1
+    ),
+    tf(
+      "nt-tf-sport-lose",
+      "Ako izgubiš, znači da si loš.",
+      false,
+      "Normalno je pobjeđivati i gubiti.",
+      1
+    ),
+    tf(
+      "nt-tf-sport-normalno",
+      "Normalno je pobjeđivati i gubiti.",
+      true,
+      "Tako stoji u knjizi o pravim sportašima.",
+      1
+    ),
+    mcq(
+      "nt-rec-knjiznica-bt",
+      "U knjižnici: što kaže knjižničar kad daje knjigu?",
+      "Izvoli.",
+      ["Izvoli.", "Brzo!", "Šuti!", "Bježi!"],
+      "Bon ton: Izvoli.",
+      1
+    ),
+    mcq(
+      "nt-rec-tiho-znak",
+      "Što znači prst na ustima u knjižnici?",
+      "treba biti tiho",
+      ["treba biti tiho", "viči glasnije", "trči", "jedi"],
+      "Znak za tišinu.",
+      1
     )
   ];
 
