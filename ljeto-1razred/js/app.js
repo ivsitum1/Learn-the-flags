@@ -353,7 +353,6 @@
       result.choices &&
       (q.type === "mcq" || q.type === "truefalse" || q.type === "count")
     ) {
-      q.choices = result.choices;
       var allowed = {};
       result.choices.forEach(function (c) {
         allowed[String(c)] = true;
