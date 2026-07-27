@@ -15,6 +15,7 @@ python -m http.server 8000
 ## Što ima
 
 - **Hub „Potraga za blagom“** — adventure mapa s tri regije (matematika, hrvatski, PiD) i **Skrivenim gusarskim otokom**
+- **Vizual** — ilustrirani otok na hubu, ambient nebo (oblaci/sunce/čestice), dramatski unlock i blago; poštuje `prefers-reduced-motion`
 - **Staze sa stanicama** — prva stanica otključana; sljedeća nakon runde s ≥1 ⭐
 - **Gusarski otok** — otključava se kad imaš ≥1 ⭐ u svakom predmetu; miješana runda 2. razreda s besplatnim hintovima (1× po zadatku)
 - Po **9 stanica** u matematici i PiD-u; hrvatski ima **9 + Nina i Tino** tematskih stanica (runde 8–12 zadataka)

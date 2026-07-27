@@ -33,5 +33,8 @@ pass("hint-shimmer", /hint-shimmer/.test(css));
 pass("hint-slide", /hint-slide/.test(css));
 pass("app star-shower hook", /star-shower/.test(app));
 pass("app hint-shimmer hook", /hint-shimmer/.test(app));
+pass("initSkyParallax", /function\s+initSkyParallax\s*\(/.test(app));
+pass("parallax respects reduced motion", /prefers-reduced-motion/.test(app));
+pass("parallax will-change hooks", /\.sky-sparks[\s\S]*will-change:\s*transform/.test(css) && /\.sky-ground[\s\S]*will-change:\s*transform/.test(css));
 var failed = results.filter(function (r) { return !r.ok; });
 process.exit(failed.length ? 1 : 0);

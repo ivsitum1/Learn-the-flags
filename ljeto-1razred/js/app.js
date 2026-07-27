@@ -526,6 +526,21 @@
     openSubject(state.subject);
   });
 
+  function initSkyParallax() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var ground = document.querySelector(".sky-ground");
+    var sparks = document.querySelector(".sky-sparks");
+    if (!ground && !sparks) return;
+    function onScroll() {
+      var y = window.scrollY || 0;
+      if (sparks) sparks.style.transform = "translate3d(0," + (y * 0.08) + "px,0)";
+      if (ground) ground.style.transform = "translate3d(0," + (y * 0.12) + "px,0)";
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
   renderHub();
+  initSkyParallax();
   showView("hub");
 })();
