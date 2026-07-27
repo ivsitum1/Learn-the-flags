@@ -12,8 +12,177 @@
     return a;
   }
 
-  function pickRound(bank, n) {
-    return shuffle(bank).slice(0, Math.min(n, bank.length));
+  function uniqueStrings(arr) {
+    var set = {};
+    var out = [];
+    (arr || []).forEach(function (v) {
+      var k = String(v);
+      if (set[k]) return;
+      set[k] = true;
+      out.push(v);
+    });
+    return out;
+  }
+
+  function pickRandom(arr, n) {
+    if (n >= arr.length) return shuffle(arr);
+    var copy = arr.slice();
+    var out = [];
+    var i;
+    for (i = 0; i < n; i++) {
+      var j = i + Math.floor(Math.random() * (copy.length - i));
+      var t = copy[i];
+      copy[i] = copy[j];
+      copy[j] = t;
+      out.push(copy[i]);
+    }
+    return out;
+  }
+
+  function questionDiff(q) {
+    if (q && typeof q.diff === "number") {
+      return Math.max(1, Math.min(3, Math.round(q.diff)));
+    }
+    if (!q) return 2;
+    if (q.type === "match" || q.type === "order") return 3;
+    var p = String(q.prompt || "");
+    if (p.length > 140 || (p.match(/\n/g) || []).length >= 2) return 3;
+    if (p.length < 45) return 1;
+    return 2;
+  }
+
+  function targetDiffForSlot(i, n) {
+    if (n <= 1) return 2;
+    if (i < 2) return 1;
+    if (i >= n - 2) return 3;
+    if (i >= n - 4) return 3;
+    if (i < Math.ceil(n * 0.4)) return 2;
+    return 2;
+  }
+
+  function takeFromPool(pool, used, wantDiff, count) {
+    var out = [];
+
+    function collect(d) {
+      var list = [];
+      var i;
+      for (i = 0; i < pool.length; i++) {
+        var q = pool[i];
+        var id = q.id != null ? String(q.id) : "i" + i;
+        if (used[id]) continue;
+        if (questionDiff(q) !== d) continue;
+        list.push(q);
+      }
+      return shuffle(list);
+    }
+
+    function takeDiff(d) {
+      var list = collect(d);
+      var i;
+      for (i = 0; i < list.length && out.length < count; i++) {
+        var q = list[i];
+        var id = q.id != null ? String(q.id) : "t" + i + "-" + out.length;
+        if (used[id]) continue;
+        used[id] = true;
+        out.push(q);
+      }
+    }
+
+    takeDiff(wantDiff);
+    if (out.length < count) takeDiff(wantDiff === 1 ? 2 : wantDiff === 3 ? 2 : 1);
+    if (out.length < count) takeDiff(wantDiff === 3 ? 1 : 3);
+    if (out.length < count) {
+      var rest = [];
+      var j;
+      for (j = 0; j < pool.length; j++) {
+        var q2 = pool[j];
+        var id2 = q2.id != null ? String(q2.id) : "j" + j;
+        if (used[id2]) continue;
+        rest.push(q2);
+      }
+      rest = shuffle(rest);
+      for (j = 0; j < rest.length && out.length < count; j++) {
+        var q3 = rest[j];
+        var id3 = q3.id != null ? String(q3.id) : "r" + j;
+        used[id3] = true;
+        out.push(q3);
+      }
+    }
+    return out;
+  }
+
+  function orderByDifficulty(picked) {
+    var n = picked.length;
+    if (n <= 2) return picked;
+    var used = {};
+    var ordered = [];
+    var i;
+    for (i = 0; i < n; i++) {
+      var want = targetDiffForSlot(i, n);
+      var one = takeFromPool(picked, used, want, 1);
+      if (one.length) ordered.push(one[0]);
+    }
+    // safety: append anything missed
+    picked.forEach(function (q, idx) {
+      var id = q.id != null ? String(q.id) : "x" + idx;
+      if (!used[id]) ordered.push(q);
+    });
+    return ordered.slice(0, n);
+  }
+
+  function pickRound(bank, n, gameId) {
+    var want = Math.min(n, bank.length);
+    if (!bank.length) return [];
+    var pool;
+    if (!gameId || !global.Progress) {
+      pool = pickRandom(bank, want);
+      return orderByDifficulty(pool);
+    }
+
+    var seen = global.Progress.getSeen(gameId);
+    var seenSet = {};
+    seen.forEach(function (id) {
+      seenSet[String(id)] = true;
+    });
+
+    var fresh = [];
+    var usedQs = [];
+    var i;
+    for (i = 0; i < bank.length; i++) {
+      var q = bank[i];
+      var id = q.id != null ? String(q.id) : null;
+      if (id && seenSet[id]) usedQs.push(q);
+      else fresh.push(q);
+    }
+
+    if (fresh.length < want) {
+      global.Progress.clearSeen(gameId);
+      fresh = bank;
+      usedQs = [];
+    }
+
+    // Biraj po težini iz svježeg skupa, pa po potrebi dopuni
+    var used = {};
+    var picked = [];
+    for (i = 0; i < want; i++) {
+      var slotDiff = targetDiffForSlot(i, want);
+      var got = takeFromPool(fresh, used, slotDiff, 1);
+      if (got.length) picked.push(got[0]);
+    }
+    if (picked.length < want) {
+      picked = picked.concat(takeFromPool(fresh, used, 2, want - picked.length));
+    }
+    if (picked.length < want) {
+      picked = picked.concat(takeFromPool(usedQs, used, 2, want - picked.length));
+    }
+
+    global.Progress.markSeen(
+      gameId,
+      picked.map(function (q) {
+        return q.id;
+      })
+    );
+    return orderByDifficulty(picked);
   }
 
   function starsFromScore(correct, total) {
@@ -115,7 +284,12 @@
     var type = q.type || "mcq";
 
     if (type === "mcq" || type === "truefalse" || type === "count") {
-      var choices = shuffle((q.choices || []).slice());
+      var choices = uniqueStrings(q.choices || []);
+      // Uvijek uključi točan odgovor ako ga banka slučajno izgubi.
+      if (q.answer != null && choices.indexOf(String(q.answer)) === -1) {
+        choices.push(String(q.answer));
+      }
+      choices = shuffle(choices);
       choices.forEach(function (c) {
         var btn = el("button", "btn choice", String(c));
         btn.type = "button";
@@ -145,7 +319,9 @@
       function redrawSlots() {
         slots.innerHTML = "";
         for (var i = 0; i < q.answer.length; i++) {
-          var slot = el("div", "order-slot" + (picked[i] != null ? " filled" : ""), picked[i] != null ? String(picked[i]) : "");
+          var filled = picked[i] != null;
+          var label = filled ? String(picked[i].val) : "";
+          var slot = el("div", "order-slot" + (filled ? " filled" : ""), label);
           slots.appendChild(slot);
         }
       }
@@ -153,7 +329,7 @@
       function checkComplete() {
         if (picked.length < q.answer.length) return;
         var ok = picked.every(function (v, i) {
-          return String(v) === String(q.answer[i]);
+          return String(v.val) === String(q.answer[i]);
         });
         Array.prototype.forEach.call(pool.querySelectorAll(".btn.chip"), function (b) {
           b.disabled = true;
@@ -161,13 +337,15 @@
         finish(ok);
       }
 
-      items.forEach(function (item) {
+      items.forEach(function (item, idx) {
         var chip = el("button", "btn chip", String(item));
         chip.type = "button";
+        chip.dataset.chipId = String(idx);
+        chip.dataset.val = String(item);
         chip.addEventListener("click", function () {
           if (answered || chip.classList.contains("used")) return;
           chip.classList.add("used");
-          picked.push(item);
+          picked.push({ val: item, chipId: chip.dataset.chipId });
           redrawSlots();
           checkComplete();
         });
@@ -182,7 +360,7 @@
         if (answered || !picked.length) return;
         var last = picked.pop();
         Array.prototype.forEach.call(pool.querySelectorAll(".btn.chip"), function (b) {
-          if (b.textContent === String(last) && b.classList.contains("used")) {
+          if (b.dataset.chipId === last.chipId) {
             b.classList.remove("used");
             b.disabled = false;
           }
@@ -270,10 +448,35 @@
     return String(q.answer);
   }
 
+  function applyHint(q) {
+    var type = (q && q.type) || "mcq";
+    if (type === "mcq" || type === "truefalse" || type === "count") {
+      var choices = uniqueStrings((q.choices || []).slice());
+      if (q.answer != null && choices.indexOf(String(q.answer)) === -1) {
+        choices.push(String(q.answer));
+      }
+      var wrong = choices.filter(function (c) {
+        return String(c) !== String(q.answer);
+      });
+      // makni do 2 distraktora; ostavi ≥1 wrong ako postoji, ukupno ≥2 choices
+      var remove = Math.min(2, Math.max(0, wrong.length - 1));
+      var shuffledWrong = shuffle(wrong);
+      var keepWrong = shuffledWrong.slice(remove);
+      var next = shuffle([String(q.answer)].concat(keepWrong));
+      if (next.length < 2 && q.hint) {
+        return { choices: choices, hintText: String(q.hint) };
+      }
+      return { choices: next, hintText: q.hint ? String(q.hint) : null };
+    }
+    if (q && q.hint) return { hintText: String(q.hint) };
+    return { hintText: "Pogledaj pažljivo pitanje još jednom." };
+  }
+
   global.Engine = {
     shuffle: shuffle,
     pickRound: pickRound,
     starsFromScore: starsFromScore,
-    mountQuestion: mountQuestion
+    mountQuestion: mountQuestion,
+    applyHint: applyHint
   };
 })(window);

@@ -20,18 +20,33 @@
       <span class="brand-sun">☀️</span>
       <span>Ljetni park</span>
     </div>
-    <div class="stars-total" id="starsTotal" title="Ukupne zvjezdice">⭐ 0</div>
+    <button type="button" class="stars-total" id="starsTotal"
+      title="Novčanik — otvori dućan"
+      aria-label="Novčanik — otvori dućan">🎒 Novčanik ⭐ 0</button>
   </header>
 
   <main>
     <!-- HUB -->
     <section class="view active" id="view-hub" data-view="hub">
       <div class="hero">
-        <p class="hero-kicker">1. razred · ljetno ponavljanje</p>
-        <h1 class="hero-title">Ljetni park</h1>
-        <p class="hero-sub">Uči kroz igru — matematika, hrvatski i priroda i društvo.</p>
+        <p class="hero-kicker">Ljetni park · 1. razred</p>
+        <h1 class="hero-title">Potraga za blagom</h1>
+        <p class="hero-sub">Prati staze kroz tri regije otoka — svaka stanica otključava sljedeći trag.</p>
       </div>
       <div class="subject-grid" id="subjectGrid"></div>
+    </section>
+
+    <!-- SHOP -->
+    <section class="view" id="view-shop" data-view="shop">
+      <div class="shop-head">
+        <h2>Dućan nagrada</h2>
+        <p class="shop-blurb">Potroši zvjezdice na stvarne nagrade — roditelj ih obavi.</p>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+      <div class="shop-history">
+        <h3>Nedavno iskorišteno</h3>
+        <ul id="shopHistory"></ul>
+      </div>
     </section>
 
     <!-- SUBJECT -->
@@ -100,10 +115,11 @@
 
   <script src="js/progress.js"></script>
   <script src="js/engine.js"></script>
+  <script src="js/rewards.js"></script>
   <script src="js/content/matematika.js"></script>
   <script src="js/content/hrvatski.js"></script>
   <script src="js/content/priroda.js"></script>
-  <script src="js/content/izazov.js"></script>
+  <script src="js/content/gusarski.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

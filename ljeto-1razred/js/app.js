@@ -7,8 +7,33 @@
     window.CONTENT_PRIRODA
   ];
 
-  var QUEST = window.CONTENT_IZAZOV;
-  var QUEST_GAME_ID = "izazov-blago";
+  var STATION_ORDER = {
+    matematika: [
+      "mat-brojevi",
+      "mat-redni",
+      "mat-broj-rijeci",
+      "mat-racun",
+      "mat-lanac",
+      "mat-jednadzbe",
+      "mat-rijeci",
+      "mat-zadaci",
+      "mat-oblici"
+    ],
+    hrvatski: ["hrv-slova", "hrv-slogovi", "hrv-citanje"],
+    priroda: ["pid-godisnja", "pid-ziva", "pid-okolina"]
+  };
+
+  var REGION_COPY = {
+    matematika: "Brojčana laguna — prvi trag blaga",
+    hrvatski: "Književna šuma — riječi i tragovi",
+    priroda: "Zelena dolina — priroda i društvo"
+  };
+
+  Progress.ensureUnlockedDefaults({
+    matematika: "mat-brojevi",
+    hrvatski: "hrv-slova",
+    priroda: "pid-godisnja"
+  });
 
   var state = {
     view: "hub",
@@ -16,21 +41,25 @@
     game: null,
     queue: [],
     index: 0,
-    correct: 0
+    correct: 0,
+    justUnlockedGameId: null,
+    hintUsed: false
   };
 
   var els = {
     views: {
       hub: document.getElementById("view-hub"),
+      shop: document.getElementById("view-shop"),
       subject: document.getElementById("view-subject"),
       intro: document.getElementById("view-intro"),
       play: document.getElementById("view-play"),
-      quest: document.getElementById("view-quest"),
       result: document.getElementById("view-result")
     },
     btnBack: document.getElementById("btnBack"),
     starsTotal: document.getElementById("starsTotal"),
     subjectGrid: document.getElementById("subjectGrid"),
+    shopGrid: document.getElementById("shopGrid"),
+    shopHistory: document.getElementById("shopHistory"),
     subjectIcon: document.getElementById("subjectIcon"),
     subjectTitle: document.getElementById("subjectTitle"),
     subjectBlurb: document.getElementById("subjectBlurb"),
@@ -51,16 +80,8 @@
     resultMsg: document.getElementById("resultMsg"),
     resultScore: document.getElementById("resultScore"),
     btnReplay: document.getElementById("btnReplay"),
-    btnToSubject: document.getElementById("btnToSubject"),
-    questTitle: document.getElementById("questTitle"),
-    questStory: document.getElementById("questStory"),
-    questMap: document.getElementById("questMap"),
-    questPanel: document.getElementById("questPanel"),
-    questFeedback: document.getElementById("questFeedback"),
-    questActions: document.getElementById("questActions")
+    btnToSubject: document.getElementById("btnToSubject")
   };
-
-  var quest = { queue: [], index: 0, correct: 0, results: [], done: false };
 
   function showView(name) {
     state.view = name;
@@ -72,7 +93,7 @@
   }
 
   function refreshStars() {
-    els.starsTotal.textContent = "⭐ " + Progress.totalStars();
+    els.starsTotal.textContent = "🎒 Novčanik ⭐ " + Progress.wallet();
   }
 
   function gameIdsFor(subject) {
@@ -81,14 +102,23 @@
     });
   }
 
+  function gusarSubjectGameIds() {
+    return {
+      matematika: STATION_ORDER.matematika,
+      hrvatski: STATION_ORDER.hrvatski,
+      priroda: STATION_ORDER.priroda
+    };
+  }
+
   function renderHub() {
+    els.subjectGrid.className = "island-map";
     els.subjectGrid.innerHTML = "";
     SUBJECTS.forEach(function (sub) {
       var max = sub.games.length * 3;
       var got = Progress.subjectStars(gameIdsFor(sub));
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "subject-card";
+      btn.className = "map-region";
       btn.dataset.id = sub.id;
       btn.innerHTML =
         '<span class="icon">' +
@@ -96,7 +126,7 @@
         "</span><div><h3>" +
         sub.title +
         "</h3><p>" +
-        sub.blurb +
+        (REGION_COPY[sub.id] || sub.blurb) +
         '</p></div><span class="pill-stars">⭐ ' +
         got +
         "/" +
@@ -107,35 +137,172 @@
       });
       els.subjectGrid.appendChild(btn);
     });
+    renderGusarRegion();
+  }
 
-    if (QUEST) {
-      var qStars = Progress.getStars(QUEST_GAME_ID);
-      var qBtn = document.createElement("button");
-      qBtn.type = "button";
-      qBtn.className = "subject-card quest-card";
-      qBtn.innerHTML =
-        '<span class="icon">' + QUEST.icon + "</span><div><h3>" + QUEST.title +
-        "</h3><p>" + QUEST.blurb + '</p></div><span class="pill-stars">' +
-        starText(qStars) + "</span>";
-      qBtn.addEventListener("click", openQuest);
-      els.subjectGrid.appendChild(qBtn);
+  function renderGusarRegion() {
+    var gusarContent = window.CONTENT_GUSARSKI;
+    var unlocked = Progress.gusarUnlocked(gusarSubjectGameIds());
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "map-region gusar";
+    if (!gusarContent || !unlocked) {
+      btn.classList.add("locked");
+      btn.innerHTML =
+        '<span class="icon">🏴‍☠️</span><div><h3>🔒 Skriveni gusarski otok</h3><p>' +
+        (gusarContent
+          ? "Treba barem 1 ⭐ u svakom predmetu da otključaš otok."
+          : "Skrivena zona — sadržaj stiže uskoro. Prvo završi potragu u regijama.") +
+        "</p></div>";
+      btn.addEventListener("click", function () {
+        if (!gusarContent) {
+          window.alert(
+            "Gusarski otok još nije spreman. Prati staze u svim regijama!"
+          );
+        } else {
+          window.alert(
+            "Treba barem 1 ⭐ u matematici, hrvatskom i prirodi da otključaš skriveni otok."
+          );
+        }
+      });
+    } else {
+      var game = gusarContent.games[0];
+      btn.innerHTML =
+        '<span class="icon">🏴‍☠️</span><div><h3>' +
+        gusarContent.title +
+        "</h3><p>Miješana potraga 2. razreda — posljednji trag blaga.</p></div>";
+      btn.addEventListener("click", function () {
+        state.subject = gusarContent;
+        openIntro(game);
+      });
     }
+    els.subjectGrid.appendChild(btn);
+  }
+
+  function openShop() {
+    if (state.view === "shop") return;
+    renderShop();
+    showView("shop");
+  }
+
+  function renderShop() {
+    var bal = Progress.wallet();
+    els.shopGrid.innerHTML = "";
+    (window.REWARDS || []).forEach(function (reward) {
+      var card = document.createElement("div");
+      card.className = "shop-card";
+      var need = reward.cost - bal;
+      var action = document.createElement("div");
+      action.className = "shop-action";
+      if (need > 0) {
+        var needEl = document.createElement("p");
+        needEl.className = "shop-need";
+        needEl.textContent = "Trebaš još " + need + " ⭐";
+        action.appendChild(needEl);
+        var disabled = document.createElement("button");
+        disabled.type = "button";
+        disabled.className = "btn primary";
+        disabled.textContent = "Iskoristi";
+        disabled.disabled = true;
+        action.appendChild(disabled);
+      } else {
+        var buy = document.createElement("button");
+        buy.type = "button";
+        buy.className = "btn primary";
+        buy.textContent = "Iskoristi";
+        buy.addEventListener("click", function () {
+          var msg =
+            "Stvarno potrošiti " +
+            reward.cost +
+            "⭐ za " +
+            reward.title +
+            "?";
+          if (!window.confirm(msg)) return;
+          var res = Progress.spend(reward);
+          if (!res.ok) return;
+          refreshStars();
+          renderShop();
+        });
+        action.appendChild(buy);
+      }
+      card.innerHTML =
+        '<span class="icon">' +
+        reward.emoji +
+        "</span><div><h3>" +
+        reward.title +
+        '</h3><p class="shop-cost">⭐ ' +
+        reward.cost +
+        "</p></div>";
+      card.appendChild(action);
+      els.shopGrid.appendChild(card);
+    });
+    renderHistory();
+  }
+
+  function renderHistory() {
+    var list = Progress.getSpent().slice(0, 10);
+    els.shopHistory.innerHTML = "";
+    if (!list.length) {
+      var empty = document.createElement("li");
+      empty.className = "shop-history-empty";
+      empty.textContent = "Još nema iskorištenih nagrada.";
+      els.shopHistory.appendChild(empty);
+      return;
+    }
+    list.forEach(function (item) {
+      var li = document.createElement("li");
+      var when = "";
+      try {
+        when = new Date(item.at).toLocaleDateString("hr-HR");
+      } catch (e) {
+        when = "";
+      }
+      li.innerHTML =
+        "<span>" +
+        item.title +
+        " · ⭐ " +
+        item.cost +
+        '</span><span class="shop-hist-meta">' +
+        when +
+        "</span>";
+      els.shopHistory.appendChild(li);
+    });
   }
 
   function openSubject(sub) {
     state.subject = sub;
     els.subjectIcon.textContent = sub.icon;
     els.subjectTitle.textContent = sub.title;
-    els.subjectBlurb.textContent = sub.blurb;
+    els.subjectBlurb.textContent = REGION_COPY[sub.id] || sub.blurb;
+    els.gameGrid.className = "station-trail";
     els.gameGrid.innerHTML = "";
-    sub.games.forEach(function (game) {
+    var gamesById = {};
+    sub.games.forEach(function (g) {
+      gamesById[g.id] = g;
+    });
+    var order = STATION_ORDER[sub.id] || sub.games.map(function (g) {
+      return g.id;
+    });
+    order.forEach(function (gid, i) {
+      var game = gamesById[gid];
+      if (!game) return;
+      if (i > 0) {
+        var link = document.createElement("div");
+        link.className = "station-link";
+        link.setAttribute("aria-hidden", "true");
+        els.gameGrid.appendChild(link);
+      }
+      var unlocked = Progress.isUnlocked(sub.id, game.id);
       var stars = Progress.getStars(game.id);
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "game-card";
+      btn.className = "station-node" + (unlocked ? "" : " locked");
+      if (state.justUnlockedGameId === game.id) {
+        btn.classList.add("just-unlocked");
+      }
       btn.innerHTML =
         '<span class="icon">' +
-        game.emoji +
+        (unlocked ? game.emoji : "🔒") +
         "</span><div><h3>" +
         game.title +
         "</h3><p>" +
@@ -143,11 +310,16 @@
         '</p></div><span class="pill-stars">' +
         starText(stars) +
         "</span>";
-      btn.addEventListener("click", function () {
-        openIntro(game);
-      });
+      if (unlocked) {
+        btn.addEventListener("click", function () {
+          openIntro(game);
+        });
+      } else {
+        btn.disabled = true;
+      }
       els.gameGrid.appendChild(btn);
     });
+    state.justUnlockedGameId = null;
     showView("subject");
   }
 
@@ -160,7 +332,7 @@
   function openIntro(game) {
     state.game = game;
     els.introEmoji.textContent = game.emoji;
-    els.introTitle.textContent = game.title;
+    els.introTitle.textContent = "Trag: " + game.title;
     els.introDesc.textContent = game.desc;
     els.introCount.textContent = String(game.roundSize || 10);
     showView("intro");
@@ -169,11 +341,50 @@
   function startGame() {
     var game = state.game;
     if (!game) return;
-    state.queue = Engine.pickRound(game.bank, game.roundSize || 10);
+    state.queue = Engine.pickRound(game.bank, game.roundSize || 10, game.id);
     state.index = 0;
     state.correct = 0;
     showView("play");
     showQuestion();
+  }
+
+  function applyHintToQuestion(q, panel, hintBtn) {
+    if (state.hintUsed) return;
+    state.hintUsed = true;
+    if (hintBtn) hintBtn.disabled = true;
+
+    var result = Engine.applyHint(q);
+    if (result.hintText) {
+      els.feedback.className = "feedback info";
+      els.feedback.textContent = result.hintText;
+      els.feedback.classList.remove("hidden");
+    }
+    if (
+      result.choices &&
+      (q.type === "mcq" || q.type === "truefalse" || q.type === "count")
+    ) {
+      var allowed = {};
+      result.choices.forEach(function (c) {
+        allowed[String(c)] = true;
+      });
+      Array.prototype.forEach.call(panel.querySelectorAll(".btn.choice"), function (btn) {
+        if (!allowed[btn.textContent]) btn.remove();
+      });
+    }
+  }
+
+  function mountHintButton(q, panel) {
+    if (!state.game || !state.game.allowHint) return;
+    state.hintUsed = false;
+    var hintBtn = document.createElement("button");
+    hintBtn.type = "button";
+    hintBtn.className = "btn ghost hint-btn";
+    hintBtn.id = "btnHint";
+    hintBtn.textContent = "💡 Hint";
+    hintBtn.addEventListener("click", function () {
+      applyHintToQuestion(q, panel, hintBtn);
+    });
+    els.playActions.insertBefore(hintBtn, els.playActions.firstChild);
   }
 
   function showQuestion() {
@@ -199,15 +410,40 @@
         }
       }
     );
+    mountHintButton(q, els.playPanel);
   }
 
   function finishGame() {
     var total = state.queue.length;
     var stars = Engine.starsFromScore(state.correct, total);
     Progress.setStars(state.game.id, stars, state.correct);
+    Progress.addToWallet(stars);
+    if (
+      stars >= 1 &&
+      state.game &&
+      state.game.id !== "gus-otok" &&
+      state.subject &&
+      STATION_ORDER[state.subject.id]
+    ) {
+      var order = STATION_ORDER[state.subject.id];
+      var idx = order.indexOf(state.game.id);
+      Progress.unlockNext(state.subject.id, order, state.game.id);
+      if (idx >= 0 && idx < order.length - 1) {
+        state.justUnlockedGameId = order[idx + 1];
+      }
+    }
     els.resultStars.textContent = starText(stars);
+    els.resultStars.classList.remove("treasure-pop");
+    void els.resultStars.offsetWidth;
+    if (stars >= 1) els.resultStars.classList.add("treasure-pop");
     els.resultScore.textContent =
-      "Točno " + state.correct + " od " + total + " zadataka";
+      "Točno " +
+      state.correct +
+      " od " +
+      total +
+      " zadataka · +" +
+      stars +
+      " ⭐ u novčanik";
     if (stars === 3) {
       els.resultTitle.textContent = "Sjajno!";
       els.resultMsg.textContent = "Skoro savršeno — skupio/la si 3 zvjezdice!";
@@ -225,127 +461,8 @@
     showView("result");
   }
 
-  // ---- Potraga za blagom (izazov) ----
-  function openQuest() {
-    quest.queue = Engine.pickRound(QUEST.bank, QUEST.roundSize || 8);
-    quest.index = 0;
-    quest.correct = 0;
-    quest.results = [];
-    quest.done = false;
-    els.questTitle.textContent = QUEST.title;
-    els.questStory.textContent = QUEST.story;
-    showView("quest");
-    questStep();
-  }
-
-  function renderQuestMap() {
-    els.questMap.innerHTML = "";
-    var total = quest.queue.length;
-    for (var i = 0; i < total; i++) {
-      var stop = document.createElement("span");
-      stop.className = "quest-stop";
-      var isLast = i === total - 1;
-      var label;
-      if (quest.results[i] === true) {
-        stop.classList.add("solved");
-        label = "💎";
-      } else if (quest.results[i] === false) {
-        stop.classList.add("missed");
-        label = "•";
-      } else if (i === quest.index && !quest.done) {
-        stop.classList.add("current");
-        label = isLast ? "🗝️" : "📍";
-      } else {
-        stop.classList.add("locked");
-        label = isLast ? "🧰" : "•";
-      }
-      if (quest.done && isLast) label = "💰";
-      stop.textContent = label;
-      var name = (QUEST.stations && QUEST.stations[i]) || ("Postaja " + (i + 1));
-      stop.title = name;
-      els.questMap.appendChild(stop);
-      if (!isLast) {
-        var link = document.createElement("span");
-        link.className = "quest-link" + (quest.results[i] != null ? " passed" : "");
-        els.questMap.appendChild(link);
-      }
-    }
-  }
-
-  function questStep() {
-    renderQuestMap();
-    var total = quest.queue.length;
-    var i = quest.index;
-    var name = (QUEST.stations && QUEST.stations[i]) || ("Postaja " + (i + 1));
-    var q = quest.queue[i];
-    Engine.mountQuestion(q, els.questPanel, els.questActions, els.questFeedback, function (ok) {
-      quest.results[i] = ok;
-      if (ok) quest.correct++;
-      quest.index++;
-      if (quest.index >= total) finishQuest();
-      else questStep();
-    });
-    var tag = document.createElement("p");
-    tag.className = "quest-station-tag";
-    tag.textContent = "Postaja " + (i + 1) + "/" + total + " · " + name;
-    els.questPanel.insertBefore(tag, els.questPanel.firstChild);
-  }
-
-  function finishQuest() {
-    quest.done = true;
-    renderQuestMap();
-    var total = quest.queue.length;
-    var correct = quest.correct;
-    var stars = Engine.starsFromScore(correct, total);
-    Progress.setStars(QUEST_GAME_ID, stars, correct);
-    els.questFeedback.className = "feedback hidden";
-    els.questFeedback.textContent = "";
-
-    var chest, title, msg;
-    if (stars === 3) {
-      chest = "💎"; title = "Blago je tvoje!";
-      msg = "Nevjerojatno — otključao/la si zlatnu škrinju! Ti si pravi istraživač.";
-    } else if (stars === 2) {
-      chest = "🏆"; title = "Skoro pa blago!";
-      msg = "Sjajno snalaženje na karti — probaj opet za zlatnu škrinju.";
-    } else if (stars === 1) {
-      chest = "🧭"; title = "Dobar trag!";
-      msg = "Na pravom si putu. Još malo vježbe i blago je tvoje.";
-    } else {
-      chest = "🗺️"; title = "Potraga se nastavlja!";
-      msg = "Svaka zagonetka te uči. Kreni ponovno i naći ćeš blago!";
-    }
-
-    els.questPanel.innerHTML =
-      '<div class="quest-treasure">' +
-      '<div class="quest-chest">' + chest + "</div>" +
-      "<h3>" + title + "</h3>" +
-      '<div class="result-stars">' + starText(stars) + "</div>" +
-      "<p class=\"result-msg\">" + msg + "</p>" +
-      '<p class="result-score">Skupljeno drago kamenje: ' + correct + " / " + total + "</p>" +
-      "</div>";
-
-    els.questActions.innerHTML = "";
-    var again = document.createElement("button");
-    again.type = "button";
-    again.className = "btn primary";
-    again.textContent = "Nova potraga";
-    again.addEventListener("click", openQuest);
-    var home = document.createElement("button");
-    home.type = "button";
-    home.className = "btn ghost";
-    home.textContent = "Natrag u park";
-    home.addEventListener("click", function () {
-      renderHub();
-      showView("hub");
-    });
-    els.questActions.appendChild(again);
-    els.questActions.appendChild(home);
-    refreshStars();
-  }
-
   function goBack() {
-    if (state.view === "quest") {
+    if (state.view === "shop") {
       renderHub();
       showView("hub");
       return;
@@ -366,6 +483,7 @@
   }
 
   els.btnBack.addEventListener("click", goBack);
+  els.starsTotal.addEventListener("click", openShop);
   els.btnStart.addEventListener("click", startGame);
   els.btnReplay.addEventListener("click", function () {
     openIntro(state.game);
