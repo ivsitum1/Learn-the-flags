@@ -7,3 +7,4 @@
 - Profil: Nina i Tino 1 / Pogled u svijet 1
 - Gusarski: Nina i Tino 2 / Pogled u svijet 2
 - Kurikulumski ishodi 1.–2. razred (teme)
+- Stanice (1. razred): godišnja doba, mjeseci, vrijeme/odjeća, živo/neživo, životinje, biljke, tijelo, dani/doba dana, ja i okolina

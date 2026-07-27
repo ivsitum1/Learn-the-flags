@@ -30,7 +30,17 @@
       "hrv-citanje",
       "hrv-razumijevanje"
     ],
-    priroda: ["pid-godisnja", "pid-ziva", "pid-okolina"]
+    priroda: [
+      "pid-godisnja",
+      "pid-mjeseci",
+      "pid-vrijeme",
+      "pid-zivo",
+      "pid-zivotinje",
+      "pid-biljke",
+      "pid-tijelo",
+      "pid-dani",
+      "pid-okolina"
+    ]
   };
 
   var REGION_COPY = {

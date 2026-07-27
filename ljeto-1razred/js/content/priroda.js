@@ -859,36 +859,291 @@
     }
   }
 
+  /* ===================== PARTICIJA U 9 STANICA + DOPUNE ===================== */
+  function idStarts(q, prefixes) {
+    var id = String(q.id || "");
+    var p;
+    for (p = 0; p < prefixes.length; p++) {
+      if (id.indexOf(prefixes[p]) === 0) return true;
+    }
+    return false;
+  }
+
+  function pickBank(source, prefixes) {
+    return source.filter(function (q) {
+      return idStarts(q, prefixes);
+    });
+  }
+
+  function pickExact(source, ids) {
+    var set = {};
+    ids.forEach(function (id) {
+      set[id] = true;
+    });
+    return source.filter(function (q) {
+      return set[q.id];
+    });
+  }
+
+  var bankDoba = pickBank(godisnja, [
+    "ord-seasons",
+    "fact-",
+    "emoji-",
+    "tf-next-"
+  ]).concat(
+    pickExact(godisnja, ["tf-autumn-cold", "tf-summer-hot", "tf-winter-hot"])
+  );
+
+  var bankMjeseci = pickBank(godisnja, [
+    "month-",
+    "tf-month-",
+    "which-month-",
+    "ord-months-"
+  ]);
+
+  var bankVrijeme = pickBank(godisnja, [
+    "clothes-",
+    "weather-",
+    "tf-cloth-",
+    "match-season-weather"
+  ]).concat(pickExact(godisnja, ["tf-clouds", "tf-snow-always"]));
+
+  var bankZivo = pickBank(ziva, [
+    "tf-nonlive-",
+    "live-or-not-",
+    "is-live-",
+    "live-mix-"
+  ]);
+
+  var bankZivotinje = pickBank(ziva, [
+    "dom-",
+    "hab-",
+    "legs-",
+    "tf-dom-",
+    "cmp-legs-",
+    "tf-same-type-",
+    "animal-or-plant-",
+    "match-animal-home",
+    "match-legs",
+    "need-animal",
+    "tf-fish-air"
+  ]);
+
+  var bankBiljke = pickBank(ziva, [
+    "plant-type-",
+    "plant-where-",
+    "plant-or-animal-",
+    "need-plant",
+    "tf-plants-water"
+  ]);
+
+  var bankTijelo = pickBank(okolina, [
+    "body-",
+    "tf-body-",
+    "match-body-",
+    "tf-bodywrong-",
+    "tf-teeth",
+    "sick"
+  ]);
+
+  var bankDani = pickBank(okolina, [
+    "weekday-",
+    "ord-week-",
+    "ord-day",
+    "ord-yesterday-today-tomorrow",
+    "rel-day-",
+    "tf-tomorrow-",
+    "tf-yesterday-",
+    "tf-today-",
+    "dayact-",
+    "tf-dayord-"
+  ]);
+
+  var bankOkolina = pickBank(okolina, [
+    "family-",
+    "tf-family-",
+    "tf-notfam-",
+    "school-",
+    "teacher",
+    "light-",
+    "tf-light-",
+    "match-light",
+    "cross",
+    "helmet",
+    "tf-red-go",
+    "tf-green-careful",
+    "place-",
+    "tf-placewrong-",
+    "match-place-action",
+    "country",
+    "capital",
+    "sea",
+    "tf-hr",
+    "trash",
+    "tf-litter",
+    "listen",
+    "tf-respect"
+  ]);
+
+  // Dopuna: dijelovi biljke (Profil / 1. razred)
+  [
+    ["korijen", "dio biljke u zemlji", ["korijen", "list", "cvijet", "plod"]],
+    ["list", "zeleni dio koji hvata svjetlost", ["korijen", "list", "sjeme", "stabljika samo u zemlji"]],
+    ["stabljika", "dio koji drži biljku uspravno", ["korijen", "stabljika", "voda", "kamen"]],
+    ["cvijet", "šareni dio mnogih biljaka", ["cvijet", "korijen", "kamen", "auto"]]
+  ].forEach(function (row, idx) {
+    bankBiljke.push(
+      mcq(
+        "plant-part-" + idx,
+        "Što je " + row[0] + "?",
+        row[1],
+        uniqChoices(row[1], [
+          row[1],
+          "životinja u šumi",
+          "dio auta",
+          "oblak na nebu",
+          "igračka"
+        ]),
+        row[0].charAt(0).toUpperCase() + row[0].slice(1) + " — " + row[1] + ".",
+        null,
+        2
+      )
+    );
+    bankBiljke.push(
+      mcq(
+        "plant-name-" + idx,
+        "Kako zovemo " + row[1] + "?",
+        row[0],
+        row[2],
+        "To je " + row[0] + ".",
+        null,
+        2
+      )
+    );
+  });
+
+  // Dopuna: vremenske pojave
+  [
+    ["kiša", "Što pada s neba kad je mokro?", ["snijeg uvijek", "kiša", "pijesak", "lišće samo"]],
+    ["snijeg", "Što je bijelo i pada zimi?", ["kiša", "snijeg", "pijesak", "dim"]],
+    ["sunce", "Što grije Zemlju danju?", ["mjesec", "sunce", "zvijezde noću", "oblaci samo"]],
+    ["vjetar", "Što miče grane i zastave?", ["vjetar", "kamen", "stol", "knjiga"]]
+  ].forEach(function (row, idx) {
+    bankVrijeme.push(
+      mcq(
+        "wx-extra-" + idx,
+        row[1],
+        row[0],
+        row[2],
+        "Točno: " + row[0] + ".",
+        null,
+        1
+      )
+    );
+  });
+
+  bankVrijeme.push(
+    tf("tf-wx-umbrella", "Kad pada kiša, koristan je kišobran.", true, "Kišobran štiti od kiše.", 1)
+  );
+  bankVrijeme.push(
+    tf("tf-wx-swim-snow", "Po snijegu se kupaš u moru.", false, "U snijegu je hladno — more je za plivanje ljeti.", 2)
+  );
+
+  // Dopuna: briga o okolini
+  bankOkolina.push(
+    mcq(
+      "recycle-hint",
+      "Što radimo s papirom, plastikom i staklom kad možemo?",
+      "odvajamo otpad",
+      ["bacamo sve u rijeku", "odvajamo otpad", "palimo u šumi", "ostavljamo na cesti"],
+      "Odvajamo otpad da manje zagađujemo.",
+      null,
+      2
+    )
+  );
+  bankOkolina.push(
+    tf("tf-water-save", "Vodu treba trošiti pažljivo, ne uzalud.", true, "Voda je dragocjena.", 2)
+  );
+
   global.CONTENT_PRIRODA = {
     id: "priroda",
     title: "Priroda i društvo",
     icon: "🌿",
-    blurb: "Potraga za blagom: godišnja doba, živa bića i ja u okolini — 1. razred.",
+    blurb:
+      "Potraga za blagom: 9 stanica — doba, mjeseci, živa bića, tijelo i okolina (1. razred).",
     color: "pid",
     games: [
       {
         id: "pid-godisnja",
         title: "Godišnja doba",
-        emoji: "🌤️",
-        desc: "Trag: mjeseci, doba, vrijeme i odjeća — velika banka.",
+        emoji: "🌸",
+        desc: "Trag: proljeće, ljeto, jesen, zima — redoslijed i znakovi.",
         roundSize: 12,
-        bank: godisnja
+        bank: bankDoba
       },
       {
-        id: "pid-ziva",
-        title: "Živa bića",
-        emoji: "🐾",
-        desc: "Trag: biljke i životinje, domaće i divlje — više MCQ nego laki TF.",
+        id: "pid-mjeseci",
+        title: "Mjeseci",
+        emoji: "📅",
+        desc: "Trag: koji mjesec pripada kojem godišnjem dobu.",
         roundSize: 12,
-        bank: ziva
+        bank: bankMjeseci
+      },
+      {
+        id: "pid-vrijeme",
+        title: "Vrijeme i odjeća",
+        emoji: "☔",
+        desc: "Trag: kiša, sunce, snijeg i što nosimo.",
+        roundSize: 10,
+        bank: bankVrijeme
+      },
+      {
+        id: "pid-zivo",
+        title: "Živo i neživo",
+        emoji: "✨",
+        desc: "Trag: što je živo biće, a što nije.",
+        roundSize: 10,
+        bank: bankZivo
+      },
+      {
+        id: "pid-zivotinje",
+        title: "Životinje",
+        emoji: "🐾",
+        desc: "Trag: domaće i divlje, stanište i noge.",
+        roundSize: 12,
+        bank: bankZivotinje
+      },
+      {
+        id: "pid-biljke",
+        title: "Biljke",
+        emoji: "🌱",
+        desc: "Trag: biljke, dijelovi i što trebaju za rast.",
+        roundSize: 10,
+        bank: bankBiljke
+      },
+      {
+        id: "pid-tijelo",
+        title: "Moje tijelo",
+        emoji: "🧍",
+        desc: "Trag: dijelovi tijela, osjetila i zdravlje.",
+        roundSize: 10,
+        bank: bankTijelo
+      },
+      {
+        id: "pid-dani",
+        title: "Dani i doba dana",
+        emoji: "🗓️",
+        desc: "Trag: dani u tjednu, jutro–večer, jučer–sutra.",
+        roundSize: 12,
+        bank: bankDani
       },
       {
         id: "pid-okolina",
         title: "Ja i okolina",
         emoji: "🏠",
-        desc: "Trag: tijelo, obitelj, škola, promet, vrijeme i Hrvatska.",
+        desc: "Trag: obitelj, škola, promet, Hrvatska i briga o okolini.",
         roundSize: 12,
-        bank: okolina
+        bank: bankOkolina
       }
     ]
   };
