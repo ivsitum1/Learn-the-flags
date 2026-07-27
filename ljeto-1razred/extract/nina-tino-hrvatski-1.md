@@ -18,6 +18,22 @@ Napomena: crtanje/bojanje/usmeno → u app kao digitalni ekvivalenti (MCQ/match/
 | `hrv-nt-slova` | Slova i glasovi | broj slova, početni glasovi |
 | `hrv-nt-skola` | Prvi dani | škola, uredno/neuredno, jutarnje rutine |
 
+## Status ekstrakcije
+
+| Raspon flip | Datoteka | Stanje |
+|-------------|----------|--------|
+| 1–20 | `nina-tino-hrvatski-1.md` | gotovo |
+| 21–31 | `nina-tino-hrvatski-1-flips-21-31.md` | gotovo |
+| 32–50 | `nina-tino-hrvatski-1-flips-32-50.md` | gotovo |
+| 51–63 | `nina-tino-hrvatski-1-flips-51-63.md` | gotovo |
+| 64–90 | `nina-tino-hrvatski-1-flips-64-90.md` | gotovo (27 vježbi, 0 skip) |
+| 91–120 | `nina-tino-hrvatski-1-flips-91-120.md` | gotovo (86 blokova; E→O→zagonetke→U→T→M→N→L) |
+| 121–154 | `nina-tino-hrvatski-1-flips-121-154.md` | gotovo (31 vježbi, 3 SKIP: prazno + korica) |
+
+**Sve flip stranice 1–154 pokrivene.** Slike u `extract/pages/` (gitignore).
+
+App stanice (`hrv-nt-*`) napunjene digitalnim ekvivalentima kroz cijeli ekstrakt.
+
 ## Vježbe
 
 ### Flip 1–5

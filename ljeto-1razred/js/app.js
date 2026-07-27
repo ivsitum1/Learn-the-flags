@@ -144,7 +144,7 @@
       var got = Progress.subjectStars(gameIdsFor(sub));
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "map-region";
+      btn.className = "map-region map-region--enter";
       btn.dataset.id = sub.id;
       btn.innerHTML =
         '<span class="icon">' +
@@ -171,7 +171,7 @@
     var unlocked = Progress.gusarUnlocked(gusarSubjectGameIds());
     var btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "map-region gusar";
+    btn.className = "map-region gusar map-region--enter";
     if (!gusarContent || !unlocked) {
       btn.classList.add("locked");
       btn.innerHTML =
@@ -382,7 +382,7 @@
 
     var result = Engine.applyHint(q);
     if (result.hintText) {
-      els.feedback.className = "feedback info";
+      els.feedback.className = "feedback info hint-slide";
       els.feedback.textContent = result.hintText;
       els.feedback.classList.remove("hidden");
     }
@@ -406,6 +406,7 @@
     var hintBtn = document.createElement("button");
     hintBtn.type = "button";
     hintBtn.className = "btn ghost hint-btn";
+    hintBtn.classList.add("hint-shimmer");
     hintBtn.id = "btnHint";
     hintBtn.textContent = "💡 Hint";
     hintBtn.addEventListener("click", function () {
@@ -463,6 +464,12 @@
     els.resultStars.classList.remove("treasure-pop");
     void els.resultStars.offsetWidth;
     if (stars >= 1) els.resultStars.classList.add("treasure-pop");
+    var resultPanel = els.resultStars.closest(".result-panel");
+    if (resultPanel) {
+      resultPanel.classList.remove("has-star-shower");
+      void resultPanel.offsetWidth;
+      if (stars >= 1) resultPanel.classList.add("has-star-shower");
+    }
     els.resultScore.textContent =
       "Točno " +
       state.correct +
@@ -519,6 +526,21 @@
     openSubject(state.subject);
   });
 
+  function initSkyParallax() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var ground = document.querySelector(".sky-ground");
+    var sparks = document.querySelector(".sky-sparks");
+    if (!ground && !sparks) return;
+    function onScroll() {
+      var y = window.scrollY || 0;
+      if (sparks) sparks.style.transform = "translate3d(0," + (y * 0.08) + "px,0)";
+      if (ground) ground.style.transform = "translate3d(0," + (y * 0.12) + "px,0)";
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
   renderHub();
+  initSkyParallax();
   showView("hub");
 })();

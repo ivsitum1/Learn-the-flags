@@ -151,6 +151,7 @@ body {
   inset: 0;
   pointer-events: none;
   overflow: hidden;
+  will-change: transform;
 }
 
 .sky-spark {
@@ -178,6 +179,7 @@ body {
   height: 22%;
   background: linear-gradient(180deg, transparent, rgba(61, 154, 95, 0.28));
   pointer-events: none;
+  will-change: transform;
 }
 
 @keyframes sun-pulse {
@@ -492,6 +494,26 @@ main {
   cursor: not-allowed;
 }
 
+@keyframes region-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.map-region.map-region--enter {
+  animation: region-enter 0.45s ease both;
+}
+
+.map-region.map-region--enter:nth-child(1) { animation-delay: 0.05s; }
+.map-region.map-region--enter:nth-child(2) { animation-delay: 0.12s; }
+.map-region.map-region--enter:nth-child(3) { animation-delay: 0.19s; }
+.map-region.map-region--enter:nth-child(4) { animation-delay: 0.26s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .map-region.map-region--enter {
+    animation: none !important;
+  }
+}
+
 .station-trail {
   display: flex;
   flex-direction: column;
@@ -499,12 +521,32 @@ main {
   gap: 0;
 }
 
+/* trail-polish */
 .station-link {
   width: 4px;
-  height: 1.25rem;
+  height: 1.35rem;
   margin: 0 auto;
-  background: linear-gradient(180deg, rgba(255, 201, 60, 0.5), rgba(61, 154, 95, 0.45));
+  background: linear-gradient(180deg, rgba(255, 201, 60, 0.75), rgba(61, 154, 95, 0.65));
   border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 201, 60, 0.45);
+  position: relative;
+}
+
+.station-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--sun);
+  box-shadow: 0 0 8px rgba(255, 201, 60, 0.8);
+}
+
+.station-node:not(.locked) {
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255, 201, 60, 0.25);
 }
 
 .station-node {
@@ -560,26 +602,36 @@ main {
 }
 
 .station-node.just-unlocked {
-  animation: node-unlock 0.4s ease;
+  animation: node-unlock 0.55s ease;
+  position: relative;
+  overflow: visible;
+}
+
+.station-node.just-unlocked::before {
+  content: "✨";
+  position: absolute;
+  right: 0.6rem;
+  top: -0.35rem;
+  font-size: 1.4rem;
+  animation: unlock-burst 0.7s ease both;
+  pointer-events: none;
+}
+
+@keyframes unlock-burst {
+  0% { transform: scale(0.4) translateY(8px); opacity: 0; }
+  40% { transform: scale(1.3) translateY(-4px); opacity: 1; }
+  100% { transform: scale(1) translateY(-12px); opacity: 0; }
 }
 
 @keyframes node-unlock {
-  0% {
-    transform: scale(0.92);
-    box-shadow: 0 0 0 0 rgba(255, 201, 60, 0);
-  }
-  50% {
-    transform: scale(1.04);
-    box-shadow: 0 0 24px rgba(255, 201, 60, 0.55);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: var(--shadow);
-  }
+  0% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(255, 201, 60, 0); }
+  50% { transform: scale(1.05); box-shadow: 0 0 28px rgba(255, 201, 60, 0.7); }
+  100% { transform: scale(1); box-shadow: var(--shadow); }
 }
 
 .result-stars.treasure-pop {
-  animation: treasure-pop 0.55s ease;
+  animation: treasure-pop 0.65s ease;
+  position: relative;
 }
 
 @keyframes treasure-pop {
@@ -593,6 +645,54 @@ main {
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+.result-panel.has-star-shower::after {
+  content: "⭐ ✦ ⭐ ✦ ⭐";
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  letter-spacing: 0.35em;
+  font-size: 1.1rem;
+  animation: star-shower 1.1s ease both;
+  pointer-events: none;
+}
+
+@keyframes star-shower {
+  0% { opacity: 0; transform: translate(-50%, -8px) scale(0.7); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, 28px) scale(1.1); }
+}
+
+.hint-btn.hint-shimmer {
+  animation: hint-shimmer 0.85s ease;
+}
+
+@keyframes hint-shimmer {
+  0% { box-shadow: 0 0 0 rgba(255, 201, 60, 0); }
+  40% { box-shadow: 0 0 18px rgba(255, 201, 60, 0.65); }
+  100% { box-shadow: var(--shadow); }
+}
+
+.feedback.info.hint-slide {
+  animation: hint-slide 0.4s ease both;
+}
+
+@keyframes hint-slide {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .station-node.just-unlocked,
+  .station-node.just-unlocked::before,
+  .result-stars.treasure-pop,
+  .result-panel.has-star-shower::after,
+  .hint-btn.hint-shimmer,
+  .feedback.info.hint-slide {
+    animation: none !important;
   }
 }
 
@@ -707,6 +807,10 @@ main {
   max-width: 420px;
   margin: 1.5rem auto 0;
   animation: pop 0.4s ease;
+}
+
+.result-panel {
+  position: relative;
 }
 
 .intro-emoji {
