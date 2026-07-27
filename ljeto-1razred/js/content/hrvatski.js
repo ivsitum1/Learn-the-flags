@@ -42,6 +42,17 @@
     };
   }
 
+  function match(id, prompt, pairs, explain, diff) {
+    return {
+      id: id,
+      type: "match",
+      prompt: prompt,
+      pairs: pairs,
+      explain: explain,
+      diff: diff == null ? 2 : diff
+    };
+  }
+
   function uniqChoices(answer, pool, n) {
     var set = {};
     var out = [];
@@ -201,7 +212,8 @@
         w[1],
         uniqChoices(w[1], shuffleInPlace(SLOVA.slice())),
         "Riječ „" + w[0] + "“ počinje slovom " + w[1] + ".",
-        { kind: "text", text: w[0] }
+        { kind: "text", text: w[0] },
+        1
       )
     );
     slova.push(
@@ -211,7 +223,8 @@
         w[2],
         uniqChoices(w[2], shuffleInPlace(MALA.slice().concat(SLOVA.map(function (s) { return s.toLowerCase(); })))),
         "Riječ „" + w[0] + "“ završava slovom " + w[2] + ".",
-        { kind: "text", text: w[0] }
+        { kind: "text", text: w[0] },
+        1
       )
     );
     slova.push(
@@ -221,7 +234,8 @@
         w[0].length,
         uniqChoices(w[0].length, [w[0].length - 1, w[0].length + 1, w[0].length + 2, w[0].length - 2, 2, 3, 4, 5, 6, 7, 8].filter(function (n) { return n > 0; })),
         "Riječ „" + w[0] + "“ ima " + w[0].length + " slova.",
-        { kind: "text", text: w[0] }
+        { kind: "text", text: w[0] },
+        2
       )
     );
   }
@@ -233,7 +247,9 @@
         "Koje je malo slovo za " + SLOVA[i] + "?",
         MALA[i],
         uniqChoices(MALA[i], shuffleInPlace(MALA.slice())),
-        "Veliko " + SLOVA[i] + " → malo " + MALA[i] + "."
+        "Veliko " + SLOVA[i] + " → malo " + MALA[i] + ".",
+        null,
+        2
       )
     );
     slova.push(
@@ -242,7 +258,9 @@
         "Koje je veliko slovo za „" + MALA[i] + "“?",
         SLOVA[i],
         uniqChoices(SLOVA[i], shuffleInPlace(SLOVA.slice())),
-        "Malo " + MALA[i] + " → veliko " + SLOVA[i] + "."
+        "Malo " + MALA[i] + " → veliko " + SLOVA[i] + ".",
+        null,
+        2
       )
     );
   }
@@ -255,7 +273,9 @@
         "Koje slovo dolazi poslije " + SLOVA[i] + "?",
         next,
         uniqChoices(next, shuffleInPlace(SLOVA.slice())),
-        "Poslije " + SLOVA[i] + " ide " + next + "."
+        "Poslije " + SLOVA[i] + " ide " + next + ".",
+        null,
+        i % 2 === 0 ? 2 : 3
       )
     );
   }
@@ -267,7 +287,9 @@
         "Koje slovo dolazi prije " + SLOVA[i] + "?",
         prev,
         uniqChoices(prev, shuffleInPlace(SLOVA.slice())),
-        "Prije " + SLOVA[i] + " ide " + prev + "."
+        "Prije " + SLOVA[i] + " ide " + prev + ".",
+        null,
+        i % 2 === 0 ? 3 : 2
       )
     );
   }
@@ -282,7 +304,8 @@
           "ord-" + SLOVA[i] + "-" + SLOVA[j] + "-" + SLOVA[k],
           "Poredaj slova abecednim redom.",
           [SLOVA[i], SLOVA[j], SLOVA[k]],
-          SLOVA[i] + ", pa " + SLOVA[j] + ", pa " + SLOVA[k] + "."
+          SLOVA[i] + ", pa " + SLOVA[j] + ", pa " + SLOVA[k] + ".",
+          2 + ((i + j) % 2)
         )
       );
     }
@@ -299,16 +322,55 @@
           i < j,
           i < j
             ? SLOVA[i] + " dolazi prije " + SLOVA[j] + "."
-            : SLOVA[i] + " ne dolazi prije " + SLOVA[j] + "."
+            : SLOVA[i] + " ne dolazi prije " + SLOVA[j] + ".",
+          2 + (i % 2)
         )
       );
     }
   }
 
-  slova.push(tf("tf-a-first", "Slovo A je prvo slovo hrvatske abecede (u našem popisu bez digrafa).", true, "Abeceda počinje slovom A."));
-  slova.push(tf("tf-sent-cap", "Na početku rečenice pišemo veliko slovo.", true, "Rečenica počinje velikim slovom."));
-  slova.push(tf("tf-end-dot", "Na kraju obične rečenice stavljamo točku.", true, "Obična rečenica završava točkom."));
-  slova.push(tf("tf-space", "Riječi u rečenici pišemo bez razmaka.", false, "Između riječi ide razmak."));
+  slova.push(match(
+    "match-diac-all",
+    "Spoji veliko slovo s odgovarajućim malim.",
+    [["Č", "č"], ["Ć", "ć"], ["Š", "š"], ["Ž", "ž"]],
+    "Č–č, Ć–ć, Š–š, Ž–ž.",
+    2
+  ));
+  slova.push(match(
+    "match-diac-caron",
+    "Spoji slova s kvačicom (caron).",
+    [["Č", "č"], ["Š", "š"]],
+    "Č ide s č, Š ide s š.",
+    2
+  ));
+  slova.push(match(
+    "match-diac-acute",
+    "Spoji slova s akutom.",
+    [["Ć", "ć"], ["Ž", "ž"]],
+    "Ć ide s ć, Ž ide s ž.",
+    2
+  ));
+  slova.push(match(
+    "match-diac-c-c",
+    "Spoji slična slova Č i Ć s malim oblicima.",
+    [["Č", "č"], ["Ć", "ć"]],
+    "Pazi: Č i Ć nisu isto slovo.",
+    3
+  ));
+  slova.push(match(
+    "match-diac-s-z",
+    "Spoji Š i Ž s malim oblicima.",
+    [["Š", "š"], ["Ž", "ž"]],
+    "Š–š, Ž–ž.",
+    3
+  ));
+
+  slova.push(tf("tf-a-first", "Slovo A je prvo slovo hrvatske abecede (u našem popisu bez digrafa).", true, "Abeceda počinje slovom A.", 1));
+  slova.push(tf("tf-sent-cap", "Na početku rečenice pišemo veliko slovo.", true, "Rečenica počinje velikim slovom.", 1));
+  slova.push(tf("tf-end-dot", "Na kraju obične rečenice stavljamo točku.", true, "Obična rečenica završava točkom.", 1));
+  slova.push(tf("tf-space", "Riječi u rečenici pišemo bez razmaka.", false, "Između riječi ide razmak.", 1));
+  slova.push(tf("tf-lowercase-start", 'Rečenica „mama peče kolač." počinje velikim slovom.', false, 'Na početku treba „Mama", ne „mama".', 2));
+  slova.push(tf("tf-missing-dot", 'Rečenica „Pas trči brzo" završava točkom.', false, "Nedostaje točka na kraju.", 2));
 
   /* ===================== SLOGOVI ===================== */
   var slogovi = [];
@@ -322,15 +384,8 @@
         sylCount,
         uniqChoices(sylCount, [1, 2, 3, 4, 5, sylCount - 1, sylCount + 1].filter(function (n) { return n >= 1; })),
         "Riječ „" + w[0] + "“ ima " + sylCount + " sloga/slogova.",
-        { kind: "text", text: w[0] }
-      )
-    );
-    slogovi.push(
-      tf(
-        "tf-syl-" + w[0] + "-" + sylCount,
-        "Riječ „" + w[0] + "“ ima " + sylCount + " sloga/slogova.",
-        true,
-        "Točno: " + w[0] + " → " + sylCount + "."
+        { kind: "text", text: w[0] },
+        sylCount >= 3 ? 3 : 2
       )
     );
     if (sylCount > 1) {
@@ -339,9 +394,21 @@
           "tf-syl-wrong-" + w[0],
           "Riječ „" + w[0] + "“ ima " + (sylCount - 1) + " sloga/slogova.",
           false,
-          "Netočno: „" + w[0] + "“ ima " + sylCount + " sloga/slogova."
+          "Netočno: „" + w[0] + "“ ima " + sylCount + " sloga/slogova.",
+          sylCount >= 3 ? 3 : 2
         )
       );
+      if (sylCount < 5) {
+        slogovi.push(
+          tf(
+            "tf-syl-wrong2-" + w[0],
+            "Riječ „" + w[0] + "“ ima " + (sylCount + 1) + " sloga/slogova.",
+            false,
+            "Netočno: „" + w[0] + "“ ima " + sylCount + " sloga/slogova.",
+            sylCount >= 3 ? 3 : 2
+          )
+        );
+      }
     }
     if (w[4] && w[4].length >= 2 && w[4].length <= 3) {
       slogovi.push(
@@ -349,11 +416,34 @@
           "join-" + w[0],
           "Složi slogove u riječ „" + w[0] + "“.",
           w[4].slice(),
-          w[4].join(" + ") + " = " + w[0] + "."
+          w[4].join(" + ") + " = " + w[0] + ".",
+          2
         )
       );
     }
   }
+
+  var multiSylOrder = [
+    ["jabuka", ["ja", "bu", "ka"]],
+    ["olovka", ["o", "lov", "ka"]],
+    ["planina", ["pla", "ni", "na"]],
+    ["čokolada", ["čo", "ko", "la", "da"]],
+    ["rečenica", ["re", "če", "ni", "ca"]],
+    ["abeceda", ["a", "be", "ce", "da"]],
+    ["učitelj", ["uči", "te", "lj"]],
+    ["prijatelj", ["pri", "ja", "telj"]]
+  ];
+  multiSylOrder.forEach(function (row, idx) {
+    slogovi.push(
+      order(
+        "syl-order-" + row[0],
+        "Poredaj slogove riječi „" + row[0] + "“.",
+        row[1].slice(),
+        row[1].join(" + ") + " = " + row[0] + ".",
+        row[1].length >= 4 ? 3 : 2
+      )
+    );
+  });
 
   // Spoji dva sloga → riječ (samo dvosložne)
   for (i = 0; i < words.length; i++) {
@@ -1007,20 +1097,39 @@
         1
       )
     );
+  }
+
+  var sentenceWrite = [
+    ["Ana voli crvenu jabuku.", ["ana voli crvenu jabuku.", "Ana voli crvenu jabuku", "Anavoli crvenu jabuku.", "Ana voli Crvenu jabuku."]],
+    ["Luka trči u park.", ["Luka trči u park", "luka trči u park.", "Luka  trči u park.", "Luka trči u Park."]],
+    ["Mama peče kolač.", ["mama peče kolač.", "Mama peče kolač", "Mama peče  kolač.", "Mama Peče kolač."]],
+    ["Pas spava na krevetu.", ["Pas spava na krevetu", "pas spava na krevetu.", "Pas spava nakrevetu.", "Pas spava na Krevetu."]],
+    ["Sunce sja danas.", ["sunce sja danas.", "Sunce sja danas", "Sunce  sja danas.", "Sunce Sja danas."]],
+    ["Ema čita knjigu.", ["ema čita knjigu.", "Ema čita knjigu", "Emacita knjigu.", "Ema Čita knjigu."]],
+    ["Kiša pada cijeli dan.", ["Kiša pada cijeli dan", "kiša pada cijeli dan.", "Kiša pada  cijeli dan.", "Kiša Pada cijeli dan."]],
+    ["Marko piše domaću zadaću.", ["marko piše domaću zadaću.", "Marko piše domaću zadaću", "Marko piše domaćuzadaću.", "Marko Piše domaću zadaću."]],
+    ["Ptica pjeva ujutro.", ["Ptica pjeva ujutro", "ptica pjeva ujutro.", "Ptica  pjeva ujutro.", "Ptica Pjeva ujutro."]],
+    ["Ivan ide u školu autobusom.", ["ivan ide u školu autobusom.", "Ivan ide u školu autobusom", "Ivan ide u Školu autobusom.", "Ivanide u školu autobusom."]]
+  ];
+  sentenceWrite.forEach(function (row, idx) {
     citanje.push(
-      tf(
-        "tf-cap-" + i,
-        "Rečenica „" + sentences[i][0] + "“ počinje velikim slovom.",
-        true,
-        "Da — počinje s „" + sentences[i][1] + "“.",
-        1
+      mcq(
+        "sent-write-" + idx,
+        "Koja rečenica je točno napisana?",
+        row[0],
+        uniqChoices(row[0], row[1]),
+        "Točno: „" + row[0] + "“ — veliko slovo na početku i točka na kraju.",
+        null,
+        2
       )
     );
-  }
+  });
 
   citanje.push(tf("tf-dot", "Na kraju rečenice stavljamo točku.", true, "Obična rečenica završava točkom.", 1));
   citanje.push(tf("tf-qmark", "Upitna rečenica završava upitnikom.", true, "Pitanje završava znakom ?.", 1));
   citanje.push(tf("tf-nospace", "Riječi pišemo jednu uz drugu bez razmaka.", false, "Između riječi ide razmak.", 1));
+  citanje.push(tf("tf-wrong-cap", 'Rečenica „tata ide na posao." je pravilno napisana.', false, 'Na početku treba veliko slovo: „Tata".', 2));
+  citanje.push(tf("tf-wrong-end", 'Rečenica „Mama peče kolač" završava točkom.', false, "Nedostaje točka na kraju.", 2));
   citanje.push(
     mcq(
       "end-mark",
@@ -1037,14 +1146,14 @@
     id: "hrvatski",
     title: "Hrvatski",
     icon: "📖",
-    blurb: "Tisuće zadataka: slova, slogovi i čitanje s razumijevanjem.",
+    blurb: "Potraga za blagom: slova, slogovi i čitanje — srednje do teže 1. razred.",
     color: "hrv",
     games: [
       {
         id: "hrv-slova",
         title: "Slova i abeceda",
         emoji: "🔤",
-        desc: "Prvo i zadnje slovo, velika/mala slova, red u abecedi.",
+        desc: "Trag: prvo i zadnje slovo, velika/mala slova, red u abecedi.",
         roundSize: 12,
         bank: slova
       },
@@ -1052,7 +1161,7 @@
         id: "hrv-slogovi",
         title: "Slogovi i riječi",
         emoji: "🧩",
-        desc: "Broji slogove i sastavljaj riječi — velika banka.",
+        desc: "Trag: broji slogove i sastavljaj riječi — velika banka.",
         roundSize: 12,
         bank: slogovi
       },
@@ -1060,7 +1169,7 @@
         id: "hrv-citanje",
         title: "Čitanje",
         emoji: "📚",
-        desc: "Pročitaj priču i odgovori — mnogo različitih tekstova.",
+        desc: "Trag: pročitaj priču i odgovori — mnogo različitih tekstova.",
         roundSize: 10,
         bank: citanje
       }
