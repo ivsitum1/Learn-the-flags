@@ -9,8 +9,6 @@
 
   var STATION_ORDER = {
     matematika: [
-      "mat-prostor",
-      "mat-oblici",
       "mat-brojevi",
       "mat-redni",
       "mat-broj-rijeci",
@@ -18,7 +16,8 @@
       "mat-lanac",
       "mat-jednadzbe",
       "mat-rijeci",
-      "mat-zadaci"
+      "mat-zadaci",
+      "mat-oblici"
     ],
     hrvatski: [
       "hrv-prvo-zadnje",
@@ -29,13 +28,7 @@
       "hrv-sastavi",
       "hrv-recenica",
       "hrv-citanje",
-      "hrv-razumijevanje",
-      "hrv-nt-glasovi",
-      "hrv-nt-usporedbe",
-      "hrv-nt-rijeci",
-      "hrv-nt-recenice",
-      "hrv-nt-slova",
-      "hrv-nt-skola"
+      "hrv-razumijevanje"
     ],
     priroda: [
       "pid-godisnja",
@@ -57,19 +50,10 @@
   };
 
   Progress.ensureUnlockedDefaults({
-    matematika: "mat-prostor",
+    matematika: "mat-brojevi",
     hrvatski: "hrv-prvo-zadnje",
     priroda: "pid-godisnja"
   });
-
-  // Ako je stari save već otključao matematiku, dodaj novu prvu stanicu.
-  if (
-    !Progress.isUnlocked("matematika", "mat-prostor") &&
-    (Progress.isUnlocked("matematika", "mat-brojevi") ||
-      Progress.isUnlocked("matematika", "mat-oblici"))
-  ) {
-    Progress.unlockGame("matematika", "mat-prostor");
-  }
 
   var state = {
     view: "hub",
