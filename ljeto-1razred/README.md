@@ -17,7 +17,7 @@ python -m http.server 8000
 - **Hub „Potraga za blagom“** — adventure mapa s tri regije (matematika, hrvatski, PiD) i **Skrivenim gusarskim otokom**
 - **Staze sa stanicama** — prva stanica otključana; sljedeća nakon runde s ≥1 ⭐
 - **Gusarski otok** — otključava se kad imaš ≥1 ⭐ u svakom predmetu; miješana runda 2. razreda s besplatnim hintovima (1× po zadatku)
-- Po **3–5 mini-igara** u svakom predmetu (runde 8–12 zadataka)
+- Po **9 stanica** u matematici i hrvatskom, **3** u PiD-u (runde 8–12 zadataka)
 - **Novčanik zvjezdica** — sticky gumb 🎒 Novčanik u headeru; klik otvara **dućan** stvarnih nagrada
 - Najbolji rezultat po stanici na karticama; napredak u `localStorage` (`ljeto1_progress`)
 - Objašnjenje nakon pogrešnog odgovora

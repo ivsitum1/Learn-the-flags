@@ -19,7 +19,17 @@
       "mat-zadaci",
       "mat-oblici"
     ],
-    hrvatski: ["hrv-slova", "hrv-slogovi", "hrv-citanje"],
+    hrvatski: [
+      "hrv-prvo-zadnje",
+      "hrv-duljina",
+      "hrv-velika-mala",
+      "hrv-abeceda",
+      "hrv-slogovi",
+      "hrv-sastavi",
+      "hrv-recenica",
+      "hrv-citanje",
+      "hrv-razumijevanje"
+    ],
     priroda: ["pid-godisnja", "pid-ziva", "pid-okolina"]
   };
 
@@ -31,7 +41,7 @@
 
   Progress.ensureUnlockedDefaults({
     matematika: "mat-brojevi",
-    hrvatski: "hrv-slova",
+    hrvatski: "hrv-prvo-zadnje",
     priroda: "pid-godisnja"
   });
 
