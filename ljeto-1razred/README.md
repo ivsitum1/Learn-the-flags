@@ -14,11 +14,17 @@ python -m http.server 8000
 
 ## Što ima
 
-- **Hub „Ljetni park“** s tri predmeta
-- Po **3–5 mini-igara** u svakom predmetu (runde 8–10 zadataka)
-- **Novčanik zvjezdica** — svaka runda dodaje ⭐; klik na ⭐ u headeru otvara **dućan** stvarnih nagrada
-- Najbolji rezultat po igri i dalje na karticama; napredak u `localStorage` (`ljeto1_progress`)
+- **Hub „Potraga za blagom“** — adventure mapa s tri regije (matematika, hrvatski, PiD) i **Skrivenim gusarskim otokom**
+- **Staze sa stanicama** — prva stanica otključana; sljedeća nakon runde s ≥1 ⭐
+- **Gusarski otok** — otključava se kad imaš ≥1 ⭐ u svakom predmetu; miješana runda 2. razreda s besplatnim hintovima (1× po zadatku)
+- Po **3–5 mini-igara** u svakom predmetu (runde 8–12 zadataka)
+- **Novčanik zvjezdica** — sticky gumb 🎒 Novčanik u headeru; klik otvara **dućan** stvarnih nagrada
+- Najbolji rezultat po stanici na karticama; napredak u `localStorage` (`ljeto1_progress`)
 - Objašnjenje nakon pogrešnog odgovora
+
+## Izvori sadržaja
+
+Gradivo usklađeno s **Profil Klett** udžbenicima i kurikulumskim ishodima — vidi [`SOURCES.md`](SOURCES.md).
 
 ## Struktura
 
@@ -32,4 +38,6 @@ js/rewards.js
 js/content/matematika.js
 js/content/hrvatski.js
 js/content/priroda.js
+js/content/gusarski.js
+SOURCES.md
 ```

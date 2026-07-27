@@ -25,7 +25,11 @@
     return out.slice(0, 4);
   }
 
-  function mcq(id, prompt, answer, choices, explain, visual) {
+  function mcq(id, prompt, answer, choices, explain, visual, diff) {
+    if (typeof visual === "number") {
+      diff = visual;
+      visual = null;
+    }
     return {
       id: id,
       type: "mcq",
@@ -33,33 +37,51 @@
       answer: answer,
       choices: choices,
       explain: explain || ("Točno je " + answer + "."),
-      visual: visual || null
+      visual: visual || null,
+      diff: diff == null ? 2 : diff
     };
   }
 
-  function numQ(id, prompt, answer, explain, visual) {
-    return mcq(id, prompt, answer, uniqChoices(answer), explain, visual);
+  function numQ(id, prompt, answer, explain, visual, diff) {
+    if (typeof visual === "number") {
+      diff = visual;
+      visual = null;
+    }
+    return mcq(id, prompt, answer, uniqChoices(answer), explain, visual, diff);
   }
 
-  function tf(id, prompt, answer, explain) {
+  function tf(id, prompt, answer, explain, diff) {
     return {
       id: id,
       type: "truefalse",
       prompt: prompt,
       answer: answer ? "Točno" : "Netočno",
       choices: ["Točno", "Netočno"],
-      explain: explain
+      explain: explain,
+      diff: diff == null ? 2 : diff
     };
   }
 
-  function order(id, prompt, answer, explain) {
+  function order(id, prompt, answer, explain, diff) {
     return {
       id: id,
       type: "order",
       prompt: prompt,
       answer: answer,
       items: answer.slice(),
-      explain: explain || ("Redoslijed: " + answer.join(", "))
+      explain: explain || ("Redoslijed: " + answer.join(", ")),
+      diff: diff == null ? 2 : diff
+    };
+  }
+
+  function match(id, prompt, pairs, explain, diff) {
+    return {
+      id: id,
+      type: "match",
+      prompt: prompt,
+      pairs: pairs,
+      explain: explain,
+      diff: diff == null ? 2 : diff
     };
   }
 
@@ -76,7 +98,9 @@
           "Što stoji između " + a + " i " + b + "?",
           cmp,
           ["<", "=", ">"],
-          a + " " + cmp + " " + b + "."
+          a + " " + cmp + " " + b + ".",
+          null,
+          a <= 5 && b <= 5 ? 1 : 2
         )
       );
     }
@@ -84,12 +108,12 @@
 
   for (n = 0; n < MAX; n++) {
     brojevi.push(
-      numQ("after-" + n, "Koji broj dolazi poslije " + n + "?", n + 1, "Poslije " + n + " ide " + (n + 1) + ".")
+      numQ("after-" + n, "Koji broj dolazi poslije " + n + "?", n + 1, "Poslije " + n + " ide " + (n + 1) + ".", null, 1)
     );
   }
   for (n = 1; n <= MAX; n++) {
     brojevi.push(
-      numQ("before-" + n, "Koji broj dolazi prije " + n + "?", n - 1, "Prije " + n + " ide " + (n - 1) + ".")
+      numQ("before-" + n, "Koji broj dolazi prije " + n + "?", n - 1, "Prije " + n + " ide " + (n - 1) + ".", null, 1)
     );
   }
 
@@ -100,7 +124,9 @@
         "miss-" + start,
         "Koji broj nedostaje: " + start + ", " + (start + 1) + ", ?, " + (start + 3) + "?",
         miss,
-        "Niz: " + start + ", " + (start + 1) + ", " + miss + ", " + (start + 3) + "."
+        "Niz: " + start + ", " + (start + 1) + ", " + miss + ", " + (start + 3) + ".",
+        null,
+        2
       )
     );
   }
@@ -113,7 +139,8 @@
             "ord-asc-" + a + "-" + b + "-" + n,
             "Poredaj brojeve od najmanjeg do najvećeg.",
             [a, b, n],
-            "Od najmanjeg: " + a + ", " + b + ", " + n + "."
+            "Od najmanjeg: " + a + ", " + b + ", " + n + ".",
+            3
           )
         );
         brojevi.push(
@@ -121,7 +148,8 @@
             "ord-desc-" + n + "-" + b + "-" + a,
             "Poredaj brojeve od najvećeg do najmanjeg.",
             [n, b, a],
-            "Od najvećeg: " + n + ", " + b + ", " + a + "."
+            "Od najvećeg: " + n + ", " + b + ", " + a + ".",
+            3
           )
         );
       }
@@ -156,6 +184,7 @@
   for (a = 0; a <= MAX; a++) {
     for (b = 0; a + b <= MAX; b++) {
       var sum = a + b;
+      var addDiff = sum <= 10 ? 1 : 2;
       racun.push(
         numQ(
           "add-" + a + "-" + b,
@@ -164,11 +193,12 @@
           a + " + " + b + " = " + sum + ".",
           a > 0 && b > 0 && a + b <= 12
             ? { kind: "groups", groups: [a, b], token: tokens[(a + b) % tokens.length], op: "+", suffix: "= ?" }
-            : null
+            : null,
+          addDiff
         )
       );
       racun.push(
-        tf("tf-add-" + a + "-" + b, a + " + " + b + " = " + sum, true, a + " + " + b + " = " + sum + ".")
+        tf("tf-add-" + a + "-" + b, a + " + " + b + " = " + sum, true, a + " + " + b + " = " + sum + ".", addDiff)
       );
       if (sum < MAX) {
         racun.push(
@@ -185,16 +215,18 @@
 
   for (a = 0; a <= MAX; a++) {
     for (b = 0; b <= a; b++) {
-      var diff = a - b;
+      var subAns = a - b;
+      var subDiff = a <= 10 ? 1 : 2;
       racun.push(
         numQ(
           "sub-" + a + "-" + b,
           "Koliko je " + a + " − " + b + "?",
-          diff,
-          a + " − " + b + " = " + diff + ".",
+          subAns,
+          a + " − " + b + " = " + subAns + ".",
           a <= 12 && b > 0
             ? { kind: "groups", groups: [a], token: "🔵", suffix: "  (−" + b + ")" }
-            : null
+            : null,
+          subDiff
         )
       );
     }
@@ -206,12 +238,15 @@
     for (b = 0; a + b <= MAX; b++) {
       for (c = 0; c <= a + b; c++) {
         var chain = a + b - c;
+        var chainDiff = c > 0 ? 3 : 2;
         racun.push(
           numQ(
             "chain-ap-" + a + "-" + b + "-" + c,
             "Koliko je " + a + " + " + b + " − " + c + "?",
             chain,
-            a + " + " + b + " = " + (a + b) + ", zatim " + (a + b) + " − " + c + " = " + chain + "."
+            a + " + " + b + " = " + (a + b) + ", zatim " + (a + b) + " − " + c + " = " + chain + ".",
+            null,
+            chainDiff
           )
         );
       }
@@ -222,12 +257,15 @@
     for (b = 0; b <= a; b++) {
       for (c = 0; a - b + c <= MAX; c++) {
         var chain2 = a - b + c;
+        var chain2Diff = c > 0 && b > 0 ? 3 : 2;
         racun.push(
           numQ(
             "chain-sa-" + a + "-" + b + "-" + c,
             "Koliko je " + a + " − " + b + " + " + c + "?",
             chain2,
-            a + " − " + b + " = " + (a - b) + ", zatim " + (a - b) + " + " + c + " = " + chain2 + "."
+            a + " − " + b + " = " + (a - b) + ", zatim " + (a - b) + " + " + c + " = " + chain2 + ".",
+            null,
+            chain2Diff
           )
         );
       }
@@ -244,7 +282,9 @@
             "add3-" + a + "-" + b + "-" + c,
             "Koliko je " + a + " + " + b + " + " + c + "?",
             a + b + c,
-            a + " + " + b + " + " + c + " = " + (a + b + c) + "."
+            a + " + " + b + " + " + c + " = " + (a + b + c) + ".",
+            null,
+            2
           )
         );
       }
@@ -261,7 +301,9 @@
             "sub2-" + a + "-" + b + "-" + c,
             "Koliko je " + a + " − " + b + " − " + c + "?",
             a - b - c,
-            a + " − " + b + " = " + (a - b) + ", zatim " + (a - b) + " − " + c + " = " + (a - b - c) + "."
+            a + " − " + b + " = " + (a - b) + ", zatim " + (a - b) + " − " + c + " = " + (a - b - c) + ".",
+            null,
+            3
           )
         );
       }
@@ -281,7 +323,9 @@
               "mix4-" + a + "-" + b + "-" + c + "-" + d,
               "Koliko je " + a + " − " + b + " + " + c + " − " + d + "?",
               mix,
-              "Korak po korak: " + a + " − " + b + " = " + (a - b) + ", + " + c + " = " + (a - b + c) + ", − " + d + " = " + mix + "."
+              "Korak po korak: " + a + " − " + b + " = " + (a - b) + ", + " + c + " = " + (a - b + c) + ", − " + d + " = " + mix + ".",
+              null,
+              3
             )
           );
         }
@@ -298,7 +342,7 @@
     for (b = 0; a + b <= MAX; b++) {
       x = a + b;
       jednadzbe.push(
-        numQ("eq-abx-" + a + "-" + b, "Nađi x:  " + a + " + " + b + " = x", x, a + " + " + b + " = " + x + ", dakle x = " + x + ".")
+        numQ("eq-abx-" + a + "-" + b, "Nađi x:  " + a + " + " + b + " = x", x, a + " + " + b + " = " + x + ", dakle x = " + x + ".", null, 2)
       );
       jednadzbe.push(
         numQ("eq-xab-" + a + "-" + b, "Nađi x:  x = " + a + " + " + b, x, "x = " + a + " + " + b + " = " + x + ".")
@@ -326,7 +370,9 @@
             "eq-bal-add-" + a + "-" + b + "-" + c,
             "Nađi x:  " + a + " + " + b + " = x + " + c,
             x,
-            "Lijeva strana je " + (a + b) + ". Dakle x + " + c + " = " + (a + b) + ", pa je x = " + x + "."
+            "Lijeva strana je " + (a + b) + ". Dakle x + " + c + " = " + (a + b) + ", pa je x = " + x + ".",
+            null,
+            3
           )
         );
       }
@@ -343,7 +389,9 @@
             "eq-bal-sub-" + a + "-" + b + "-" + c,
             "Nađi x:  " + a + " + " + b + " = x − " + c,
             x,
-            "Lijeva strana je " + (a + b) + ". Dakle x − " + c + " = " + (a + b) + ", pa je x = " + x + "."
+            "Lijeva strana je " + (a + b) + ". Dakle x − " + c + " = " + (a + b) + ", pa je x = " + x + ".",
+            null,
+            3
           )
         );
       }
@@ -415,7 +463,9 @@
             "eq-axbc-" + a + "-" + b + "-" + c,
             "Nađi x:  " + a + " + x = " + b + " + " + c,
             x,
-            "Desna strana je " + (b + c) + ". Dakle " + a + " + x = " + (b + c) + ", pa je x = " + x + "."
+            "Desna strana je " + (b + c) + ". Dakle " + a + " + x = " + (b + c) + ", pa je x = " + x + ".",
+            null,
+            3
           )
         );
       }
@@ -432,7 +482,9 @@
             "eq-sub2x-" + a + "-" + b + "-" + c,
             "Nađi x:  " + a + " − " + b + " − " + c + " = x",
             x,
-            a + " − " + b + " − " + c + " = " + x + "."
+            a + " − " + b + " − " + c + " = " + x + ".",
+            null,
+            3
           )
         );
       }
@@ -490,7 +542,9 @@
               "w-add-" + ni + "-" + ti + "-" + a + "-" + b,
               name + " ima " + a + " " + thingForm(thing, a) + ". Dobila/dobio je još " + b + ". Koliko ih sada ima?",
               a + b,
-              name + " ima " + a + " + " + b + " = " + (a + b) + "."
+              name + " ima " + a + " + " + b + " = " + (a + b) + ".",
+              null,
+              2
             )
           );
         }
@@ -530,7 +584,9 @@
                 c +
                 ". Koliko ih ostaje?",
               a + b - c,
-              a + " + " + b + " − " + c + " = " + (a + b - c) + "."
+              a + " + " + b + " − " + c + " = " + (a + b - c) + ".",
+              null,
+              3
             )
           );
         }
@@ -610,7 +666,9 @@
                 c +
                 ". Koliko ih sada ima?",
               a - b + c,
-              a + " − " + b + " + " + c + " = " + (a - b + c) + "."
+              a + " − " + b + " + " + c + " = " + (a - b + c) + ".",
+              null,
+              3
             )
           );
         }
@@ -638,7 +696,9 @@
                 c +
                 ". Koliko ih ima ukupno?",
               a + b + c,
-              a + " + " + b + " + " + c + " = " + (a + b + c) + "."
+              a + " + " + b + " + " + c + " = " + (a + b + c) + ".",
+              null,
+              3
             )
           );
         }
@@ -699,7 +759,9 @@
           "mix-tri-sq-" + a + "-" + b,
           "Imaš " + a + " trokuta i " + b + " kvadrata. Koliko stranica imaš ukupno?",
           a * 3 + b * 4,
-          a + " × 3 + " + b + " × 4 = " + (a * 3 + b * 4) + "."
+          a + " × 3 + " + b + " × 4 = " + (a * 3 + b * 4) + ".",
+          null,
+          3
         )
       );
       oblici.push(
@@ -707,7 +769,9 @@
           "mix-tri-rect-" + a + "-" + b,
           "Imaš " + a + " trokuta i " + b + " pravokutnika. Koliko stranica imaš ukupno?",
           a * 3 + b * 4,
-          a + " × 3 + " + b + " × 4 = " + (a * 3 + b * 4) + "."
+          a + " × 3 + " + b + " × 4 = " + (a * 3 + b * 4) + ".",
+          null,
+          3
         )
       );
     }
@@ -717,13 +781,7 @@
   oblici.push(tf("tf-krug4", "Krug ima 4 stranice.", false, "Krug nema stranica."));
   oblici.push(tf("tf-tri3", "Trokut ima 3 kuta.", true, "Trokut ima tri kuta i tri stranice."));
   oblici.push(tf("tf-both4", "Kvadrat i pravokutnik imaju 4 stranice.", true, "Oba imaju četiri stranice."));
-  oblici.push({
-    id: "match-sides",
-    type: "match",
-    prompt: "Spoji oblik s brojem stranica.",
-    pairs: [["trokut", "3"], ["kvadrat", "4"], ["krug", "0"]],
-    explain: "Trokut 3, kvadrat 4, krug 0 stranica."
-  });
+  oblici.push(match("match-sides", "Spoji oblik s brojem stranica.", [["trokut", "3"], ["kvadrat", "4"], ["krug", "0"]], "Trokut 3, kvadrat 4, krug 0 stranica.", 3));
   [
     ["lopta je slična…", "krug"],
     ["prozor je često…", "pravokutnik"],
@@ -739,14 +797,14 @@
     id: "matematika",
     title: "Matematika",
     icon: "🔢",
-    blurb: "Tisuće zadataka: brojevi, račun, jednačenja i zadaci s riječima.",
+    blurb: "Potraga za blagom: brojevi do 20, račun, jednačenja i zadaci s riječima — srednje do teže 1. razred.",
     color: "mat",
     games: [
       {
         id: "mat-brojevi",
         title: "Brojevi do 20",
         emoji: "🔢",
-        desc: "Usporedi, nađi što nedostaje i poredaj — velika banka zadataka.",
+        desc: "Trag: usporedi brojeve, nađi što nedostaje i poredaj — velika banka.",
         roundSize: 12,
         bank: brojevi
       },
@@ -754,7 +812,7 @@
         id: "mat-racun",
         title: "Zbrajanje i oduzimanje",
         emoji: "➕",
-        desc: "Zbrajanje, oduzimanje i lanci tipa 7 + 3 − 2.",
+        desc: "Trag: zbrajanje, oduzimanje i lančani računi tipa 7 + 3 − 2.",
         roundSize: 12,
         bank: racun
       },
@@ -762,7 +820,7 @@
         id: "mat-jednadzbe",
         title: "Jednačenja",
         emoji: "⚖️",
-        desc: "Nađi x: npr. 7 + 3 = x + 5 ili x − 4 = 9.",
+        desc: "Trag: nađi x — npr. 7 + 3 = x + 5 ili x − 4 = 9.",
         roundSize: 12,
         bank: jednadzbe
       },
@@ -770,7 +828,7 @@
         id: "mat-rijeci",
         title: "Zadaci s riječima",
         emoji: "📝",
-        desc: "Priče s brojevima — zbrajanje, oduzimanje i lanci.",
+        desc: "Trag: priče s brojevima — zbrajanje, oduzimanje i višekoraci.",
         roundSize: 10,
         bank: rijeci
       },
@@ -778,7 +836,7 @@
         id: "mat-oblici",
         title: "Oblici",
         emoji: "🔷",
-        desc: "Krug, trokut, kvadrat i pravokutnik.",
+        desc: "Trag: krug, trokut, kvadrat i pravokutnik.",
         roundSize: 10,
         bank: oblici
       }

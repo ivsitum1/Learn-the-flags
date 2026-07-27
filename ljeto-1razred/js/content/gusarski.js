@@ -163,7 +163,7 @@
     ),
     mcq(
       "gus-m-14",
-      "U sanduku je 53 biser, u vreći 47. Koliko biseri ukupno?",
+      "U sanduku je 53 biser, u vreći 47. Koliko bisera ukupno?",
       "100",
       uniqChoices("100", ["90", "100", "110", "94"]),
       "53 + 47 = 100 bisera.",
