@@ -431,8 +431,8 @@
     match(
       "match-legs",
       "Spoji životinju i broj nogu (tipično).",
-      [["žaba", "4"], ["pčela", "6"], ["riba", "0"], ["pas", "4"]],
-      "Žaba i pas imaju 4 noge, pčela 6, riba nema noge za hodanje.",
+      [["žaba", "4 noge"], ["pčela", "6 nogu"], ["riba", "0 nogu"], ["pauk", "8 nogu"]],
+      "Žaba ima 4 noge, pčela 6, pauk 8, a riba nema noge za hodanje.",
       3
     )
   );

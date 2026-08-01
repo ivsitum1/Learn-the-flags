@@ -654,15 +654,24 @@
   /* ===================== TEKSTUALNI ZADACI ===================== */
   var rijeci = [];
   var names = ["Ana", "Ivan", "Mia", "Luka", "Ema", "Marko", "Iva", "Petar", "Lara", "Tin"];
+  // [jedan, dva–četiri, pet i više]. Uz brojeve 2–4 imenice muškog roda idu u
+  // genitiv jednine („dva balona“), a ne u nominativ množine („dva baloni“).
   var things = [
     ["jabuka", "jabuke", "jabuka"],
     ["olovka", "olovke", "olovaka"],
-    ["balon", "baloni", "balona"],
-    ["kolač", "kolači", "kolača"],
+    ["balon", "balona", "balona"],
+    ["kolač", "kolača", "kolača"],
     ["naljepnica", "naljepnice", "naljepnica"],
     ["kockica", "kockice", "kockica"],
-    ["cvijet", "cvjetovi", "cvjetova"],
-    ["štapić", "štapići", "štapića"]
+    ["cvijet", "cvijeta", "cvjetova"],
+    ["štapić", "štapića", "štapića"],
+    // Predmeti s „pravopisnim“ glasovima (č, ć, dž, đ, ije/je) — dijete ih
+    // usput čita i u zadacima s riječima, a ne samo na satu hrvatskoga.
+    ["kolačić", "kolačića", "kolačića"],
+    ["medvjedić", "medvjedića", "medvjedića"],
+    ["čokoladica", "čokoladice", "čokoladica"],
+    ["ključić", "ključića", "ključića"],
+    ["đurđica", "đurđice", "đurđica"]
   ];
 
   function thingForm(thing, count) {
@@ -671,12 +680,20 @@
     return thing[2];
   }
 
-  var ni, ti, name, thing;
+  // „Na stolu JE 1 jabuka“, „na stolu SU 2 jabuke“, „na stolu JE 5 jabuka“.
+  function jeSu(count) {
+    return count >= 2 && count <= 4 ? "su" : "je";
+  }
 
-  // Zbrajanje i oduzimanje — sve kombinacije, svi likovi i predmeti
+  var ni, ti, tk, name, thing;
+
+  // Zbrajanje i oduzimanje. Svakom liku pridružimo nekoliko predmeta umjesto
+  // svih kombinacija — raznolikost ostaje ista, a banka ne naraste na desetke
+  // tisuća zadataka koje stariji tablet mora držati u memoriji.
   for (ni = 0; ni < names.length; ni++) {
     name = names[ni];
-    for (ti = 0; ti < things.length; ti++) {
+    for (tk = 0; tk < 2; tk++) {
+      ti = (ni * 2 + tk) % things.length;
       thing = things[ti];
       for (a = 1; a <= MAX; a++) {
         for (b = 1; a + b <= MAX; b++) {
@@ -778,7 +795,7 @@
         rijeci.push(
           numQ(
             "w-basket-" + ti + "-" + a + "-" + b,
-            "U košari je " + a + " " + thingForm(thing, a) + " i još " + b + " " + thingForm(thing, b) + ". Koliko ih ima ukupno?",
+            "U košari " + jeSu(a) + " " + a + " " + thingForm(thing, a) + " i još " + b + " " + thingForm(thing, b) + ". Koliko ih ima ukupno?",
             a + b,
             a + " + " + b + " = " + (a + b) + "."
           )
@@ -829,7 +846,9 @@
           rijeci.push(
             numQ(
               "w-three-" + ti + "-" + a + "-" + b + "-" + c,
-              "Na stolu je " +
+              "Na stolu " +
+                jeSu(a) +
+                " " +
                 a +
                 " " +
                 thingForm(thing, a) +
@@ -1195,6 +1214,171 @@
     2
   ));
 
+  /* ===================== PRAVOPIS U ZADACIMA S RIJEČIMA =====================
+     Zadatak s riječima treba se i pročitati i točno napisati. Ovi zadaci
+     provjeravaju ije/je, č/ć i dž/đ unutar matematičke priče — označeni su
+     oznakom „pravopis“ pa ih Engine ubaci nekoliko u svaku rundu.
+     ========================================================================= */
+  function pravopisQ(q) {
+    q.tag = "pravopis";
+    return q;
+  }
+
+  var pravopisRijeci = [];
+
+  // Brojevne riječi — najčešće pravopisne zamke u brojevima do 20.
+  [
+    ["4", "četiri", ["ćetiri", "cetiri", "četri"], "Broj 4 pišemo četiri — s č."],
+    ["14", "četrnaest", ["ćetrnaest", "četernaest", "cetrnaest"], "Broj 14 pišemo četrnaest — s č."],
+    ["11", "jedanaest", ["jedanajst", "jedannaest", "jednaest"], "Broj 11 pišemo jedanaest."],
+    ["16", "šesnaest", ["šestnaest", "šesnajst", "sesnaest"], "Broj 16 pišemo šesnaest — bez t."],
+    ["17", "sedamnaest", ["sedmnaest", "sedamnajst", "sedamdeset"], "Broj 17 pišemo sedamnaest."],
+    ["19", "devetnaest", ["devetnajst", "devetnaes", "devednaest"], "Broj 19 pišemo devetnaest."],
+    ["9", "devet", ["djevet", "devjet", "devjed"], "Broj 9 pišemo devet."],
+    ["10", "deset", ["djeset", "desed", "desat"], "Broj 10 pišemo deset."]
+  ].forEach(function (row, i) {
+    pravopisRijeci.push(
+      pravopisQ(
+        mcq(
+          "mw-broj-" + i,
+          "U zadatku broj " + row[0] + " treba napisati riječima. Kako se piše točno?",
+          row[1],
+          [row[1]].concat(row[2]),
+          row[3],
+          null,
+          2
+        )
+      )
+    );
+  });
+
+  // Dvije/dva — rod uz broj (i klasična zamka dvje/dve).
+  [
+    ["mw-dvije-1", "Ana ima 2 olovke. Kako to zapisujemo riječima?", "dvije olovke", ["dvje olovke", "dve olovke", "dva olovke"], "Uz riječi ženskog roda kažemo dvije: dvije olovke."],
+    ["mw-dvije-2", "Na stolu su 2 ključa. Kako to zapisujemo riječima?", "dva ključa", ["dvije ključa", "dvje ključa", "dva kljuća"], "Uz riječi muškog roda kažemo dva: dva ključa."],
+    ["mw-dvije-3", "U vazi su 2 ruže. Kako to zapisujemo riječima?", "dvije ruže", ["dvje ruže", "dve ruže", "dva ruže"], "Dvije ruže — ženski rod."]
+  ].forEach(function (row) {
+    pravopisRijeci.push(
+      pravopisQ(mcq(row[0], row[1], row[2], [row[2]].concat(row[3]), row[4], null, 2))
+    );
+  });
+
+  // Množina iza broja — jat i č/ć u imenici iz zadatka.
+  [
+    ["mw-mn-cvijet", "U vazi je 5 ___. (jedan cvijet, a više njih?)", "cvjetova", ["cvijetova", "cvetova", "cvijeta"], "Jedan cvijet, ali pet cvjetova — u množini je kratko je."],
+    ["mw-mn-dijete", "U dvorištu se igra 6 ___. (jedno dijete, a više njih?)", "djece", ["dijece", "dece", "dijeteta"], "Jedno dijete, ali šest djece."],
+    ["mw-mn-kolac", "Baka je ispekla 3 ___. (jedan kolač)", "kolača", ["kolaća", "kolaći", "kolačeva"], "Tri kolača — s č, kao i kolač."],
+    ["mw-mn-macka", "U dvorištu su 4 ___. (jedna mačka)", "mačke", ["maćke", "macke", "mačkove"], "Četiri mačke — s č."],
+    ["mw-mn-kljuc", "Na polici je 7 ___. (jedan ključ)", "ključeva", ["kljućeva", "kljuceva", "ključova"], "Sedam ključeva — s č."],
+    ["mw-mn-medvjed", "U šumi su 2 ___. (jedan medvjed)", "medvjeda", ["medvijeda", "medveda", "medvjedova"], "Dva medvjeda — s je."]
+  ].forEach(function (row) {
+    pravopisRijeci.push(
+      pravopisQ(mcq(row[0], row[1], row[2], [row[2]].concat(row[3]), row[4], null, 3))
+    );
+  });
+
+  // Slovo koje nedostaje u tekstu zadatka.
+  [
+    ["mw-slovo-kolac", "U zadatku piše: „Ivan ima 5 kola__a i pojede 2.“ Što nedostaje?", "č", ["ć", "c"], "Piše se kolača — s č."],
+    ["mw-slovo-macka", "U zadatku piše: „U vrtu je 6 ma__aka.“ Što nedostaje?", "č", ["ć", "c"], "Piše se mačaka — s č."],
+    ["mw-slovo-cevap", "U zadatku piše: „Na tanjuru su 3 __evapa.“ Što nedostaje?", "ć", ["č", "c"], "Piše se ćevapa — s ć."],
+    ["mw-slovo-dzem", "U zadatku piše: „U staklenki su 4 žlice __ema.“ Što nedostaje?", "dž", ["đ", "ž"], "Piše se džema — s dž."],
+    ["mw-slovo-dak", "U zadatku piše: „U razredu je 12 __aka.“ Što nedostaje?", "đ", ["dž", "d"], "Piše se đaka — s đ. Džak je vreća!"],
+    ["mw-slovo-kuca", "U zadatku piše: „U ulici je 8 ku__a.“ Što nedostaje?", "ć", ["č", "c"], "Piše se kuća — s ć."],
+    ["mw-slovo-cvijet", "U zadatku piše: „Ana je ubrala 9 cv__tova.“ Što nedostaje?", "je", ["ije", "e"], "U množini je cvjetova — kratko je."],
+    ["mw-slovo-dijete", "U zadatku piše: „Jedno d__te ima 3 balona.“ Što nedostaje?", "ije", ["je", "e"], "Jedno dijete — dugo ije."]
+  ].forEach(function (row) {
+    pravopisRijeci.push(
+      pravopisQ(
+        mcq(row[0], row[1], row[2], [row[2]].concat(row[3]), row[4], null, 2)
+      )
+    );
+  });
+
+  // Izračunaj pa napiši rezultat riječima (broj + pravopis u istom koraku).
+  [
+    ["mw-rac-4", "Koliko je 2 + 2? Napiši rezultat riječima.", "četiri", ["ćetiri", "cetiri", "tri"], "2 + 2 = 4, a to pišemo četiri."],
+    ["mw-rac-14", "Koliko je 10 + 4? Napiši rezultat riječima.", "četrnaest", ["ćetrnaest", "četernaest", "četiri"], "10 + 4 = 14 — četrnaest."],
+    ["mw-rac-11", "Koliko je 6 + 5? Napiši rezultat riječima.", "jedanaest", ["jedanajst", "jednaest", "dvanaest"], "6 + 5 = 11 — jedanaest."],
+    ["mw-rac-16", "Koliko je 20 − 4? Napiši rezultat riječima.", "šesnaest", ["šestnaest", "šesnajst", "sesnaest"], "20 − 4 = 16 — šesnaest."],
+    ["mw-rac-9", "Koliko je 12 − 3? Napiši rezultat riječima.", "devet", ["djevet", "devjet", "deset"], "12 − 3 = 9 — devet."]
+  ].forEach(function (row) {
+    pravopisRijeci.push(
+      pravopisQ(mcq(row[0], row[1], row[2], [row[2]].concat(row[3]), row[4], null, 3))
+    );
+  });
+
+  // Provjera cijele rečenice iz zadatka.
+  [
+    ["mw-rec-1", "Marko ne zna koliko ima kuglica.", "Marko nezna koliko ima kuglica.", "Riječca „ne“ uz glagol piše se odvojeno: ne zna."],
+    ["mw-rec-2", "U košari su dvije jabuke i tri kruške.", "U košari su dvje jabuke i tri kruške.", "Piše se dvije — s ije."],
+    ["mw-rec-3", "Ana je ubrala pet cvjetova.", "Ana je ubrala pet cvijetova.", "U množini je cvjetova — kratko je."],
+    ["mw-rec-4", "Djeca su podijelila četiri kolača.", "Dijeca su podijelila ćetiri kolaća.", "Djeca (je), četiri i kolača (č)."]
+  ].forEach(function (row) {
+    pravopisRijeci.push(
+      pravopisQ(
+        mcq(row[0], "Koja je rečenica zadatka napisana točno?", row[1], [row[1], row[2]], row[3], null, 2)
+      )
+    );
+  });
+
+  // --- Isto, ali u zadacima s novcem i svakodnevnim kupnjama ---
+  [
+    ["mz-slovo-cokolada", "Na računu piše: „__okolada — 3 eura.“ Što nedostaje?", "č", ["ć", "c"], "Piše se čokolada — s č."],
+    ["mz-slovo-rucak", "Na računu piše: „Ru__ak — 8 eura.“ Što nedostaje?", "č", ["ć", "c"], "Piše se ručak — s č."],
+    ["mz-slovo-dzep", "U zadatku piše: „U __epu ima 4 eura.“ Što nedostaje?", "dž", ["đ", "ž"], "Piše se džepu — s dž."],
+    // Namjerno bez ponude „g“ — „krug“ je stvarna riječ pa bi zadatak imao
+    // dva obranjiva odgovora.
+    ["mz-slovo-kruh", "Na računu piše: „Kru__ — 2 eura.“ Što nedostaje?", "h", ["v", "f"], "Piše se kruh — s glasom h na kraju."],
+    ["mz-slovo-voce", "Na računu piše: „Vo__e — 5 eura.“ Što nedostaje?", "ć", ["č", "c"], "Piše se voće — s ć."]
+  ].forEach(function (row) {
+    zadaci.push(
+      pravopisQ(mcq(row[0], row[1], row[2], [row[2]].concat(row[3]), row[4], null, 2))
+    );
+  });
+  [
+    ["mz-rec-1", "Ana ne može kupiti sladoled.", "Ana nemože kupiti sladoled.", "„Ne“ uz glagol piše se odvojeno: ne može."],
+    ["mz-rec-2", "Tin je platio dvije čokolade.", "Tin je platio dvje ćokolade.", "Dvije (ije) i čokolade (č)."],
+    ["mz-rec-3", "Za ručak smo platili devet eura.", "Za rućak smo platili djevet eura.", "Ručak se piše s č, a devet bez j."]
+  ].forEach(function (row) {
+    zadaci.push(
+      pravopisQ(
+        mcq(row[0], "Koja je rečenica zadatka napisana točno?", row[1], [row[1], row[2]], row[3], null, 2)
+      )
+    );
+  });
+  [
+    ["mz-cijena-1", "Igračka košta 12 eura. Kako cijenu pišemo riječima?", "dvanaest eura", ["dvanajst eura", "dvanest eura", "dvadeset eura"], "12 = dvanaest."],
+    ["mz-cijena-2", "Knjiga košta 4 eura. Kako cijenu pišemo riječima?", "četiri eura", ["ćetiri eura", "cetiri eura", "četri eura"], "4 = četiri — s č."],
+    ["mz-cijena-3", "Sladoled košta 3 eura, a sok 2 eura. Koliko je to ukupno riječima?", "pet eura", ["šest eura", "pjet eura", "pet euro"], "3 + 2 = 5 — pet eura."]
+  ].forEach(function (row) {
+    zadaci.push(
+      pravopisQ(mcq(row[0], row[1], row[2], [row[2]].concat(row[3]), row[4], null, 3))
+    );
+  });
+
+  /* ===================== VELIČINA BANKI =====================
+     Generatori kombinatorno naprave i po nekoliko desetaka tisuća zadataka.
+     Dijete kroz cijelo ljeto vidi nekoliko stotina, a tablet mora sve držati
+     u memoriji. Zato banke prorijedimo ravnomjerno — raspon brojeva i tipovi
+     zadataka ostaju isti, samo ih je manje od svakoga.
+     ========================================================== */
+  function thin(bank, cap) {
+    if (!bank || bank.length <= cap) return bank;
+    var out = [];
+    var step = bank.length / cap;
+    for (var t = 0; out.length < cap && Math.floor(t) < bank.length; t += step) {
+      out.push(bank[Math.floor(t)]);
+    }
+    return out;
+  }
+
+  brojevi = thin(brojevi, 1200);
+  racun = thin(racun, 2500);
+  jednadzbe = thin(jednadzbe, 2000);
+  // Pravopisni zadaci se ne prorjeđuju — dodaj ih nakon prorjeđivanja.
+  rijeci = thin(rijeci, 2500).concat(pravopisRijeci);
+
   global.CONTENT_MATEMATIKA = {
     id: "matematika",
     title: "Matematika",
@@ -1270,16 +1454,18 @@
         id: "mat-rijeci",
         title: "Zadaci s riječima",
         emoji: "📝",
-        desc: "Trag: priče s brojevima — zbrajanje, oduzimanje i višekoraci.",
+        desc: "Trag: priče s brojevima + pravopis (ije/je, č/ć, dž/đ).",
         roundSize: 10,
+        quota: { pravopis: 3 },
         bank: rijeci
       },
       {
         id: "mat-zadaci",
         title: "Zadaci i novac",
         emoji: "💶",
-        desc: "Trag: životni zadaci, cijene i ostatak novca.",
+        desc: "Trag: životni zadaci, cijene, ostatak novca i pravopis.",
         roundSize: 10,
+        quota: { pravopis: 3 },
         bank: zadaci
       }
     ]

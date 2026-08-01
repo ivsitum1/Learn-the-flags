@@ -5,10 +5,13 @@
     window.CONTENT_MATEMATIKA,
     window.CONTENT_HRVATSKI,
     window.CONTENT_PRIRODA
-  ];
+  ].filter(function (sub) {
+    return sub && Array.isArray(sub.games) && sub.games.length;
+  });
 
   var STATION_ORDER = {
     matematika: [
+      "mat-prostor",
       "mat-brojevi",
       "mat-redni",
       "mat-broj-rijeci",
@@ -27,8 +30,15 @@
       "hrv-slogovi",
       "hrv-sastavi",
       "hrv-recenica",
+      "hrv-pravopis",
       "hrv-citanje",
-      "hrv-razumijevanje"
+      "hrv-razumijevanje",
+      "hrv-nt-glasovi",
+      "hrv-nt-slova",
+      "hrv-nt-rijeci",
+      "hrv-nt-usporedbe",
+      "hrv-nt-recenice",
+      "hrv-nt-skola"
     ],
     priroda: [
       "pid-godisnja",
@@ -49,11 +59,27 @@
     priroda: "Zelena dolina — priroda i društvo"
   };
 
-  Progress.ensureUnlockedDefaults({
-    matematika: "mat-brojevi",
-    hrvatski: "hrv-prvo-zadnje",
-    priroda: "pid-godisnja"
+  // Iz redoslijeda stanica izbaci one kojih nema u sadržaju (npr. ako neka
+  // datoteka sa zadacima nije učitana) da staza nikad ne pokazuje prazan čvor.
+  function availableOrder(subject) {
+    var have = {};
+    (subject.games || []).forEach(function (g) {
+      have[g.id] = true;
+    });
+    var order = (STATION_ORDER[subject.id] || []).filter(function (gid) {
+      return have[gid];
+    });
+    (subject.games || []).forEach(function (g) {
+      if (order.indexOf(g.id) === -1) order.push(g.id);
+    });
+    return order;
+  }
+
+  SUBJECTS.forEach(function (sub) {
+    if (sub) STATION_ORDER[sub.id] = availableOrder(sub);
   });
+
+  Progress.ensureUnlockedDefaults(STATION_ORDER);
 
   var state = {
     view: "hub",
@@ -117,16 +143,16 @@
   }
 
   function gameIdsFor(subject) {
-    return subject.games.map(function (g) {
+    return STATION_ORDER[subject.id] || subject.games.map(function (g) {
       return g.id;
     });
   }
 
   function gusarSubjectGameIds() {
     return {
-      matematika: STATION_ORDER.matematika,
-      hrvatski: STATION_ORDER.hrvatski,
-      priroda: STATION_ORDER.priroda
+      matematika: STATION_ORDER.matematika || [],
+      hrvatski: STATION_ORDER.hrvatski || [],
+      priroda: STATION_ORDER.priroda || []
     };
   }
 
@@ -140,8 +166,9 @@
     els.subjectGrid.className = "island-map";
     els.subjectGrid.innerHTML = "";
     SUBJECTS.forEach(function (sub) {
-      var max = sub.games.length * 3;
-      var got = Progress.subjectStars(gameIdsFor(sub));
+      var ids = gameIdsFor(sub);
+      var max = ids.length * 3;
+      var got = Progress.subjectStars(ids);
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "map-region map-region--enter";
@@ -307,9 +334,12 @@
     sub.games.forEach(function (g) {
       gamesById[g.id] = g;
     });
-    var order = STATION_ORDER[sub.id] || sub.games.map(function (g) {
-      return g.id;
-    });
+    var order = gameIdsFor(sub);
+    // Sigurnosna brava: ulaz u predmet mora biti otvoren i onda kad je
+    // spremljeno stanje iz starije verzije aplikacije.
+    if (order.length && !Progress.isUnlocked(sub.id, order[0])) {
+      Progress.unlockGame(sub.id, order[0]);
+    }
     order.forEach(function (gid, i) {
       var game = gamesById[gid];
       if (!game) return;
@@ -368,15 +398,30 @@
   function startGame() {
     var game = state.game;
     if (!game) return;
-    state.queue = Engine.pickRound(game.bank, game.roundSize || 10, game.id);
+    state.queue = Engine.pickRound(
+      game.bank,
+      game.roundSize || 10,
+      game.id,
+      game.quota
+    );
     state.index = 0;
     state.correct = 0;
     showView("play");
     showQuestion();
   }
 
+  // Engine na odgovor postavi razred „ok“ ili „bad“ na povratnu informaciju.
+  function questionAnswered() {
+    return /(^|\s)(ok|bad)(\s|$)/.test(els.feedback.className);
+  }
+
   function applyHintToQuestion(q, panel, hintBtn) {
-    if (state.hintUsed) return;
+    // Nakon odgovora natuknica bi micala ponuđene odgovore ispod već
+    // prikazanog rješenja — tada je gumb neaktivan.
+    if (state.hintUsed || questionAnswered()) {
+      if (hintBtn) hintBtn.disabled = true;
+      return;
+    }
     state.hintUsed = true;
     if (hintBtn) hintBtn.disabled = true;
 
@@ -444,8 +489,12 @@
   function finishGame() {
     var total = state.queue.length;
     var stars = Engine.starsFromScore(state.correct, total);
+    // U novčanik ide samo napredak. Inače bi se ista, najlakša stanica mogla
+    // igrati u krug i skupiti nagrade iz dućana bez ijedne nove stanice.
+    var before = Progress.getStars(state.game.id);
+    var earned = Math.max(0, stars - before);
     Progress.setStars(state.game.id, stars, state.correct);
-    Progress.addToWallet(stars);
+    Progress.addToWallet(earned);
     if (
       stars >= 1 &&
       state.game &&
@@ -475,9 +524,10 @@
       state.correct +
       " od " +
       total +
-      " zadataka · +" +
-      stars +
-      " ⭐ u novčanik";
+      " zadataka · " +
+      (earned > 0
+        ? "+" + earned + " ⭐ u novčanik"
+        : "najbolji rezultat ostaje " + starText(before));
     if (stars === 3) {
       els.resultTitle.textContent = "Sjajno!";
       els.resultMsg.textContent = "Skoro savršeno — skupio/la si 3 zvjezdice!";

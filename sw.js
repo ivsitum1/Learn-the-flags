@@ -7,13 +7,30 @@
    verzije — npr. popravci se nisu vidjeli.)
    Verziju cachea povećaj pri svakoj promjeni da se stari obriše.
    =========================================================================== */
-var CACHE = "ntz-cache-v2";
+var CACHE = "ntz-cache-v3";
 
 // Relativno na opseg (scope) service workera — radi i na /Learn-the-flags/.
 var ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./js/update-notice.js",
+  "./ljeto-1razred/index.html",
+  "./ljeto-1razred/manifest.webmanifest",
+  "./ljeto-1razred/icons/icon-192.png",
+  "./ljeto-1razred/icons/icon-512.png",
+  "./ljeto-1razred/icons/icon-maskable-512.png",
+  "./ljeto-1razred/icons/apple-touch-icon.png",
+  "./ljeto-1razred/css/styles.css",
+  "./ljeto-1razred/js/progress.js",
+  "./ljeto-1razred/js/engine.js",
+  "./ljeto-1razred/js/rewards.js",
+  "./ljeto-1razred/js/app.js",
+  "./ljeto-1razred/js/content/matematika.js",
+  "./ljeto-1razred/js/content/nina-tino-hrvatski.js",
+  "./ljeto-1razred/js/content/hrvatski.js",
+  "./ljeto-1razred/js/content/priroda.js",
+  "./ljeto-1razred/js/content/gusarski.js",
   "./css/styles.css",
   "./js/countries.js",
   "./js/coords.js",
@@ -47,6 +64,12 @@ self.addEventListener("activate", function (e) {
         .map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
+});
+
+// Skočni gumb „Osvježi“ (js/update-notice.js) traži da novi worker odmah
+// preuzme kontrolu umjesto da čeka zatvaranje svih kartica.
+self.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 // Network-first: pokušaj mrežu, spremi svježe u cache; ako mreže nema, vrati cache.

@@ -7,9 +7,27 @@
   <meta name="description" content="Zabavno ljetno ponavljanje gradiva prvog razreda: matematika, hrvatski jezik, priroda i društvo." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
+  <!-- Fontovi se učitavaju bez blokiranja prikaza: dok ne stignu (ili ako
+       nema mreže), tekst se ispisuje sistemskim fontom iz --font-body.
+       Prije je spor pristup Google Fontsu držao ekran praznim po desetak
+       sekundi — na tabletu je izgledalo kao da se aplikacija ne otvara. -->
+  <link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Fredoka:wght@500;600;700&display=swap" />
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Fredoka:wght@500;600;700&display=swap" />
+  </noscript>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
+
+  <!-- PWA: instalacija na početni zaslon tableta -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#3d8ec9" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Ljetni park" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 </head>
 <body>
   <div class="sky" aria-hidden="true">
@@ -140,18 +158,6 @@
       <div class="play-actions" id="playActions"></div>
     </section>
 
-    <!-- QUEST (Potraga za blagom) -->
-    <section class="view" id="view-quest" data-view="quest">
-      <div class="quest-head">
-        <h2 id="questTitle">Potraga za blagom</h2>
-        <p id="questStory" class="quest-story"></p>
-      </div>
-      <div class="quest-map" id="questMap" aria-hidden="true"></div>
-      <div class="panel play-panel" id="questPanel"></div>
-      <div class="feedback hidden" id="questFeedback"></div>
-      <div class="play-actions" id="questActions"></div>
-    </section>
-
     <!-- RESULT -->
     <section class="view" id="view-result" data-view="result">
       <div class="panel result-panel">
@@ -171,9 +177,13 @@
   <script src="js/engine.js"></script>
   <script src="js/rewards.js"></script>
   <script src="js/content/matematika.js"></script>
+  <!-- Mora doći prije hrvatski.js — ondje se te stanice dodaju na stazu. -->
+  <script src="js/content/nina-tino-hrvatski.js"></script>
   <script src="js/content/hrvatski.js"></script>
   <script src="js/content/priroda.js"></script>
   <script src="js/content/gusarski.js"></script>
   <script src="js/app.js"></script>
+  <!-- Skočni gumb „Osvježi“ kad je objavljena nova verzija (dijeli se s glavnom aplikacijom). -->
+  <script src="../js/update-notice.js"></script>
 </body>
 </html>

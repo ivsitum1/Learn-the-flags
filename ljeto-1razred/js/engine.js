@@ -130,9 +130,44 @@
     return ordered.slice(0, n);
   }
 
-  function pickRound(bank, n, gameId) {
+  /**
+   * Runda s obveznim udjelom označenih zadataka.
+   * `quota` = { pravopis: 3 } znači: barem 3 zadatka s q.tag === "pravopis"
+   * (koliko ih banka uopće ima). Ostatak se bira kao i inače.
+   */
+  function pickRoundWithQuota(bank, n, gameId, quota) {
+    var tags = Object.keys(quota);
+    var taggedIds = {};
+    var picked = [];
+    tags.forEach(function (tag) {
+      var pool = bank.filter(function (q) {
+        return q && q.tag === tag;
+      });
+      if (!pool.length) return;
+      var need = Math.min(quota[tag], pool.length, Math.max(0, n - picked.length));
+      if (need <= 0) return;
+      pickRound(pool, need, gameId ? gameId + ":" + tag : null).forEach(function (q) {
+        picked.push(q);
+        if (q.id != null) taggedIds[String(q.id)] = true;
+      });
+    });
+    if (!picked.length) return null;
+
+    var rest = bank.filter(function (q) {
+      return !(q && q.tag && quota[q.tag]) && !(q && q.id != null && taggedIds[String(q.id)]);
+    });
+    var remaining = Math.max(0, n - picked.length);
+    var filler = remaining ? pickRound(rest, remaining, gameId) : [];
+    return orderByDifficulty(picked.concat(filler));
+  }
+
+  function pickRound(bank, n, gameId, quota) {
+    if (!bank || !bank.length) return [];
+    if (quota) {
+      var withQuota = pickRoundWithQuota(bank, n, gameId, quota);
+      if (withQuota) return withQuota;
+    }
     var want = Math.min(n, bank.length);
-    if (!bank.length) return [];
     var pool;
     if (!gameId || !global.Progress) {
       pool = pickRandom(bank, want);

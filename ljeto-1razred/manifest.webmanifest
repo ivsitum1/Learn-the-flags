@@ -1,0 +1,19 @@
+{
+  "name": "Ljetni park — ponavljanje 1. razreda",
+  "short_name": "Ljetni park",
+  "description": "Zabavno ljetno ponavljanje gradiva prvog razreda: matematika, hrvatski jezik, priroda i društvo.",
+  "lang": "hr",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eaf6ff",
+  "theme_color": "#3d8ec9",
+  "categories": ["education", "games", "kids"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

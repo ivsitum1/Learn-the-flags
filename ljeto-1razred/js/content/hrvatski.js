@@ -1200,6 +1200,398 @@
   ]);
   var razumijevanje = pickBank(citanje, ["read-long", "read-infer-"]);
 
+  /* ===================== PRAVOPIS =====================
+     ije/je, č/ć, dž/đ, glas h, lj/nj i pisanje „ne“ uz glagol.
+     Priprema za 2. razred: dijete bira točno napisanu riječ, dopunjava
+     slovo koje nedostaje i prepoznaje pogrešno napisanu riječ.
+     ==================================================== */
+
+  // grupa: "ije" i "je" (jat), "cc" (č/ć), "dzdj" (dž/đ), "ostalo"
+  var PRAVOPIS_RIJECI = [
+    // --- ije (dugi jat) ---
+    { ok: "cvijet", bad: ["cvjet", "cvet"], grupa: "ije", dio: "ije",
+      sent: "Na livadi je izrastao žuti ___.",
+      why: "Jedan cvijet piše se s ije, a više njih su cvjetovi — s je." },
+    { ok: "mlijeko", bad: ["mljeko", "mleko"], grupa: "ije", dio: "ije",
+      sent: "Ujutro pijem toplo ___.",
+      why: "Mlijeko ima ije, ali mliječni proizvodi imaju je." },
+    { ok: "dijete", bad: ["djete", "dete"], grupa: "ije", dio: "ije",
+      sent: "Malo ___ spava u kolijevci.",
+      why: "Jedno dijete piše se s ije, a više njih su djeca — s je." },
+    { ok: "snijeg", bad: ["snjeg", "sneg"], grupa: "ije", dio: "ije",
+      sent: "Zimi s neba pada bijeli ___.",
+      why: "Snijeg ima ije, a snjegović i snježno imaju je." },
+    { ok: "lijep", bad: ["ljep", "lep"], grupa: "ije", dio: "ije",
+      sent: "Danas je ___ i sunčan dan.",
+      why: "Lijep ima ije, a ljepota i ljepši imaju je." },
+    { ok: "vrijeme", bad: ["vrjeme", "vreme"], grupa: "ije", dio: "ije",
+      sent: "Vani je sunčano ___.",
+      why: "Vrijeme ima ije, ali u množini kažemo vremena." },
+    { ok: "riječ", bad: ["rječ", "reč"], grupa: "ije", dio: "ije",
+      sent: "Napiši jednu ___ na ploču.",
+      why: "Riječ ima ije, a rječnik i rječica imaju je." },
+    { ok: "bijela", bad: ["bjela", "bela"], grupa: "ije", dio: "ije",
+      sent: "Ovca ima meku ___ vunu.",
+      why: "Bijela ima ije, a bjelina i bjelkast imaju je." },
+    { ok: "dvije", bad: ["dvje", "dve"], grupa: "ije", dio: "ije",
+      sent: "Na stolu su ___ jabuke.",
+      why: "Kažemo dvije jabuke (ženski rod) i dva ključa (muški rod)." },
+    { ok: "cvijeće", bad: ["cvjeće", "cveće"], grupa: "ije", dio: "ije",
+      sent: "U vazi je mirisno ___.",
+      why: "Cvijeće ima ije — kao i cvijet." },
+    { ok: "lijek", bad: ["ljek", "lek"], grupa: "ije", dio: "ije",
+      sent: "Kad smo bolesni, uzimamo ___.",
+      why: "Lijek ima ije, a ljekarna i ljekovit imaju je." },
+    { ok: "rijeka", bad: ["rjeka", "reka"], grupa: "ije", dio: "ije",
+      sent: "Kroz naš grad teče velika ___.",
+      why: "Rijeka ima ije, a rječica (mala rijeka) ima je." },
+    { ok: "sijeno", bad: ["sjeno", "seno"], grupa: "ije", dio: "ije",
+      sent: "Konj u staji jede suho ___.",
+      why: "Sijeno se piše s ije." },
+    { ok: "bijeg", bad: ["bjeg", "beg"], grupa: "ije", dio: "ije",
+      sent: "Zec je nagli u ___.",
+      why: "Bijeg ima ije, a bježati ima je." },
+
+    // --- je (kratki jat) ---
+    { ok: "mjesec", bad: ["mijesec", "mesec"], grupa: "je", dio: "je",
+      sent: "Noću na nebu sja ___.",
+      why: "Mjesec se piše s je — kratko, bez i." },
+    { ok: "djeca", bad: ["dijeca", "deca"], grupa: "je", dio: "je",
+      sent: "U dvorištu se igraju vesela ___.",
+      why: "Jedno je dijete (ije), a više njih su djeca (je)." },
+    { ok: "vjetar", bad: ["vijetar", "vetar"], grupa: "je", dio: "je",
+      sent: "Nad morem puše jak ___.",
+      why: "Vjetar se piše s je." },
+    { ok: "pjesma", bad: ["pijesma", "pesma"], grupa: "je", dio: "je",
+      sent: "U školi smo naučili novu ___.",
+      why: "Pjesma i pjevati pišu se s je." },
+    { ok: "vjeverica", bad: ["vijeverica", "veverica"], grupa: "je", dio: "je",
+      sent: "Po granama skakuće riđa ___.",
+      why: "Vjeverica se piše s je." },
+    { ok: "medvjed", bad: ["medvijed", "medved"], grupa: "je", dio: "je",
+      sent: "U šumskoj špilji spava smeđi ___.",
+      why: "Medvjed se piše s je." },
+    { ok: "djevojčica", bad: ["dijevojčica", "devojčica"], grupa: "je", dio: "je",
+      sent: "___ crta cvijet u bilježnicu.",
+      why: "Djevojčica ima je na početku i č u sredini." },
+    { ok: "mjesto", bad: ["mijesto", "mesto"], grupa: "je", dio: "je",
+      sent: "Vrati se na svoje ___ u klupi.",
+      why: "Mjesto se piše s je." },
+    { ok: "snjegović", bad: ["snijegović", "snegović"], grupa: "je", dio: "je",
+      sent: "Od snijega smo napravili velikog ___a.",
+      why: "Snijeg ima ije, ali snjegović ima je." },
+    { ok: "sjeme", bad: ["sijeme", "seme"], grupa: "je", dio: "je",
+      sent: "U zemlju smo posadili ___ suncokreta.",
+      why: "Sjeme se piše s je." },
+    { ok: "tjedan", bad: ["tijedan", "tedan"], grupa: "je", dio: "je",
+      sent: "Jedan ___ ima sedam dana.",
+      why: "Tjedan se piše s je." },
+    { ok: "djed", bad: ["dijed", "ded"], grupa: "je", dio: "je",
+      sent: "Moj ___ ima bijelu bradu.",
+      why: "Djed se piše s je — kao i djeca." },
+    { ok: "ljeto", bad: ["lijeto", "leto"], grupa: "je", dio: "je",
+      sent: "Nakon proljeća dolazi vruće ___.",
+      why: "Ljeto se piše s je, iza slova lj." },
+    { ok: "proljeće", bad: ["prolijeće", "proleće"], grupa: "je", dio: "je",
+      sent: "U ___ cvjetaju voćke.",
+      why: "Proljeće se piše s je." },
+
+    // --- č / ć ---
+    { ok: "čokolada", bad: ["ćokolada", "cokolada"], grupa: "cc", dio: "č",
+      sent: "Za desert smo pojeli slatku ___.",
+      why: "Čokolada počinje glasom č." },
+    { ok: "čarapa", bad: ["ćarapa", "carapa"], grupa: "cc", dio: "č",
+      sent: "Obuci toplu vunenu ___.",
+      why: "Čarapa počinje glasom č." },
+    { ok: "mačka", bad: ["maćka", "macka"], grupa: "cc", dio: "č",
+      sent: "___ vreba miša ispod stola.",
+      why: "Mačka se piše s č." },
+    { ok: "ključ", bad: ["kljuć", "kljuc"], grupa: "cc", dio: "č",
+      sent: "Vrata otvaramo ___em.",
+      why: "Ključ završava glasom č." },
+    { ok: "učiteljica", bad: ["ućiteljica", "uciteljica"], grupa: "cc", dio: "č",
+      sent: "Naša ___ čita priču.",
+      why: "Učiteljica se piše s č." },
+    { ok: "ručak", bad: ["rućak", "rucak"], grupa: "cc", dio: "č",
+      sent: "U podne jedemo ___.",
+      why: "Ručak se piše s č." },
+    { ok: "četiri", bad: ["ćetiri", "cetiri"], grupa: "cc", dio: "č",
+      sent: "Stol ima ___ noge.",
+      why: "Četiri počinje glasom č." },
+    { ok: "čitati", bad: ["ćitati", "citati"], grupa: "cc", dio: "č",
+      sent: "U prvom razredu naučili smo ___.",
+      why: "Čitati počinje glasom č." },
+    { ok: "čizme", bad: ["ćizme", "cizme"], grupa: "cc", dio: "č",
+      sent: "Kad pada kiša, obuci gumene ___.",
+      why: "Čizme počinju glasom č." },
+    // Napomena: „kolac“ je stvarna riječ (drveni štap), pa nije ponuđen kao
+    // pogrešan zapis — dijete bi ga s pravom moglo smatrati točnim.
+    { ok: "kolač", bad: ["kolać"], grupa: "cc", dio: "č",
+      sent: "Baka je ispekla veliki ___.",
+      why: "Kolač završava glasom č." },
+    { ok: "čekić", bad: ["ćekić", "čekič"], grupa: "cc", dio: "č",
+      sent: "Čavao zabijamo ___em.",
+      why: "Čekić počinje s č, a završava s ć." },
+    { ok: "kuća", bad: ["kuča"], grupa: "cc", dio: "ć",
+      sent: "Naša ___ ima crveni krov.",
+      why: "Kuća se piše s ć." },
+    { ok: "voće", bad: ["voče"], grupa: "cc", dio: "ć",
+      sent: "Jabuka, kruška i šljiva su ___.",
+      why: "Voće se piše s ć — kao i cvijeće." },
+    { ok: "noć", bad: ["noč"], grupa: "cc", dio: "ć",
+      sent: "Poslije dana dolazi ___.",
+      why: "Noć završava glasom ć." },
+    { ok: "sreća", bad: ["sreča"], grupa: "cc", dio: "ć",
+      sent: "Djetelina s četiri lista donosi ___u.",
+      why: "Sreća se piše s ć." },
+    { ok: "kći", bad: ["kči"], grupa: "cc", dio: "ć",
+      sent: "Ana je mamina ___.",
+      why: "Kći se piše s ć." },
+    { ok: "ptičica", bad: ["ptićica", "pticica"], grupa: "cc", dio: "č",
+      sent: "Na grani pjeva mala ___.",
+      why: "Od riječi ptica nastaje ptičica — s č." },
+    { ok: "cvjetić", bad: ["cvjetič", "cvijetić"], grupa: "cc", dio: "ć",
+      sent: "U travi se skriva sitni ___.",
+      why: "Umanjenice na -ić pišu se s ć: cvjetić, brodić, ključić." },
+
+    // --- dž / đ ---
+    { ok: "džem", bad: ["đem", "dzem"], grupa: "dzdj", dio: "dž",
+      sent: "Na kruh smo namazali slatki ___.",
+      why: "Džem počinje glasom dž — dva slova, jedan glas." },
+    { ok: "džep", bad: ["đep", "dzep"], grupa: "dzdj", dio: "dž",
+      sent: "Ključ mi je u ___u od hlača.",
+      why: "Džep počinje glasom dž." },
+    { ok: "džungla", bad: ["đungla", "dzungla"], grupa: "dzdj", dio: "dž",
+      sent: "U ___i žive majmuni i papige.",
+      why: "Džungla počinje glasom dž." },
+    { ok: "patlidžan", bad: ["patliđan", "patlidzan"], grupa: "dzdj", dio: "dž",
+      sent: "Ljubičasto povrće zove se ___.",
+      why: "Patlidžan se piše s dž." },
+    // „Džak“ je stvarna riječ (vreća) pa nije među ponudama; spominje se samo
+    // u objašnjenju, kao razlika koju vrijedi zapamtiti.
+    { ok: "đak", bad: ["dak", "dzak"], grupa: "dzdj", dio: "đ", bezPraznine: true,
+      sent: "Svaki ___ nosi torbu u školu.",
+      why: "Đak je učenik i piše se s đ. Džak je vreća — to je druga riječ!" },
+    { ok: "đurđica", bad: ["džurdžica", "đurdica"], grupa: "dzdj", dio: "đ",
+      sent: "U šumi u svibnju cvjeta bijela ___.",
+      why: "Đurđica ima dva slova đ." },
+    { ok: "rođak", bad: ["rodžak", "rodak"], grupa: "dzdj", dio: "đ",
+      sent: "Na proslavu je došao moj ___.",
+      why: "Rođak se piše s đ." },
+    // „Leda“ je stvarna riječ (od led) — zato „leđja“ kao druga ponuda.
+    { ok: "leđa", bad: ["ledža", "leđja"], grupa: "dzdj", dio: "đ", bezPraznine: true,
+      sent: "Ruksak nosim na ___ima.",
+      why: "Leđa se pišu s đ." },
+    { ok: "žeđ", bad: ["žedž", "žed"], grupa: "dzdj", dio: "đ",
+      sent: "Kad je vruće, imam veliku ___.",
+      why: "Žeđ završava glasom đ." },
+    { ok: "anđeo", bad: ["andžeo", "andeo"], grupa: "dzdj", dio: "đ",
+      sent: "Na vrhu bora stoji ___.",
+      why: "Anđeo se piše s đ." },
+
+    // --- glas h, lj i nj ---
+    { ok: "kruh", bad: ["kru", "kruv"], grupa: "ostalo",
+      sent: "Za doručak jedemo svježi ___.",
+      why: "Kruh na kraju ima glas h — izgovori ga jasno." },
+    { ok: "hlače", bad: ["lače", "hlaće"], grupa: "ostalo",
+      sent: "Obuci plave ___.",
+      why: "Hlače počinju glasom h i imaju č." },
+    { ok: "hrvatski", bad: ["rvatski", "hrvacki"], grupa: "ostalo",
+      sent: "U školi učimo ___ jezik.",
+      why: "Hrvatski počinje glasom h." },
+    { ok: "hrabar", bad: ["rabar", "hrabaar"], grupa: "ostalo",
+      sent: "Vitez u priči bio je jako ___.",
+      why: "Hrabar počinje glasom h." },
+    { ok: "njuška", bad: ["nuška", "njuvška"], grupa: "ostalo",
+      sent: "Pas ima hladnu i mokru ___.",
+      why: "Njuška počinje glasom nj — jedan glas, dva slova." },
+    { ok: "ljubav", bad: ["lubav", "ljubaf"], grupa: "ostalo",
+      sent: "Mama i tata daju nam puno ___i.",
+      why: "Ljubav počinje glasom lj." }
+  ];
+
+  var GAP_CHOICES = {
+    ije: ["ije", "je", "e"],
+    je: ["je", "ije", "e"],
+    cc: ["č", "ć", "c"],
+    dzdj: ["dž", "đ", "ž"]
+  };
+
+  var pravopis = [];
+
+  PRAVOPIS_RIJECI.forEach(function (entry, idx) {
+    var key = "prav-" + idx;
+    var choices = [entry.ok].concat(entry.bad);
+
+    // 1) Kako se piše? (izolirana riječ)
+    pravopis.push(
+      mcq(
+        key + "-pisi",
+        "Koja je riječ napisana točno?",
+        entry.ok,
+        choices.slice(),
+        entry.why,
+        1
+      )
+    );
+
+    // 2) Ista riječ u rečenici — pravopis u zadatku s riječima
+    if (entry.sent) {
+      pravopis.push(
+        mcq(
+          key + "-recenica",
+          "Dopuni rečenicu točno napisanom riječi.",
+          entry.ok,
+          choices.slice(),
+          entry.why,
+          { kind: "text", text: entry.sent },
+          2
+        )
+      );
+    }
+
+    // 3) Koje slovo/slova nedostaju
+    var group = entry.bezPraznine ? null : GAP_CHOICES[entry.grupa];
+    if (group && entry.dio && entry.ok.indexOf(entry.dio) !== -1) {
+      var at = entry.ok.indexOf(entry.dio);
+      var gap =
+        entry.ok.slice(0, at) + "__" + entry.ok.slice(at + entry.dio.length);
+      pravopis.push(
+        mcq(
+          key + "-slovo",
+          "Što nedostaje u riječi „" + gap + "“?",
+          entry.dio,
+          group.slice(),
+          "Točno je „" + entry.ok + "“. " + entry.why,
+          { kind: "text", text: gap },
+          2
+        )
+      );
+    }
+
+    // 4) Prepoznaj pogrešku — naizmjence pokaži točan i pogrešan zapis
+    // da odgovor „Netočno“ nikad ne postane navika.
+    if (idx % 2 === 0) {
+      pravopis.push(
+        tf(
+          key + "-tocno",
+          "Je li ovako napisano točno: „" + entry.bad[0] + "“?",
+          false,
+          "Nije — točno se piše „" + entry.ok + "“. " + entry.why,
+          2
+        )
+      );
+    } else {
+      pravopis.push(
+        tf(
+          key + "-tocno",
+          "Je li ovako napisano točno: „" + entry.ok + "“?",
+          true,
+          "Jest! " + entry.why,
+          2
+        )
+      );
+    }
+  });
+
+  // --- Pravilo: „ne“ uz glagol piše se odvojeno ---
+  [
+    ["Ne znam gdje mi je ključ.", "Neznam gdje mi je ključ.", "ne znam"],
+    ["Ja ne volim gorku čokoladu.", "Ja nevolim gorku čokoladu.", "ne volim"],
+    ["Danas ne mogu doći na igralište.", "Danas nemogu doći na igralište.", "ne mogu"],
+    ["Ne želim se svađati s prijateljem.", "Neželim se svađati s prijateljem.", "ne želim"],
+    ["Ne pišem po klupi.", "Nepišem po klupi.", "ne pišem"]
+  ].forEach(function (row, i) {
+    pravopis.push(
+      mcq(
+        "prav-ne-" + i,
+        "Koja je rečenica napisana točno?",
+        row[0],
+        [row[0], row[1]],
+        "Riječca „ne“ uz glagol piše se odvojeno: " + row[2] + ".",
+        2
+      )
+    );
+  });
+  pravopis.push(
+    tf(
+      "prav-ne-pravilo",
+      "Riječcu „ne“ uz glagol pišemo odvojeno (ne trčim, ne pjevam).",
+      true,
+      "Točno — „ne“ se odvaja od glagola.",
+      1
+    )
+  );
+
+  // --- Veliko početno slovo u imenima i mjestima ---
+  [
+    ["Ivana živi u Zagrebu.", "ivana živi u zagrebu.", "Imena ljudi i gradova pišu se velikim početnim slovom."],
+    ["Moj prijatelj Marko ima psa Rexa.", "moj prijatelj marko ima psa rexa.", "Imena ljudi i životinja pišu se velikim slovom."],
+    ["Ljeti idemo na more u Split.", "ljeti idemo na more u split.", "Split je ime grada — veliko slovo."],
+    ["Rijeka Sava teče kroz Hrvatsku.", "rijeka sava teče kroz hrvatsku.", "Sava i Hrvatska su imena — veliko slovo."]
+  ].forEach(function (row, i) {
+    pravopis.push(
+      mcq(
+        "prav-veliko-" + i,
+        "Koja je rečenica napisana točno?",
+        row[0],
+        [row[0], row[1]],
+        row[2],
+        2
+      )
+    );
+  });
+
+  // --- Spoji parove: ije ↔ je u istoj obitelji riječi ---
+  pravopis.push(
+    match(
+      "prav-match-jat1",
+      "Spoji riječ s njezinim parom.",
+      [["cvijet", "cvjetovi"], ["dijete", "djeca"], ["snijeg", "snjegović"]],
+      "U jednini ije, a u izvedenoj riječi je: cvijet–cvjetovi, dijete–djeca, snijeg–snjegović.",
+      3
+    )
+  );
+  pravopis.push(
+    match(
+      "prav-match-jat2",
+      "Spoji riječ s njezinim parom.",
+      [["mlijeko", "mliječni"], ["lijep", "ljepota"], ["riječ", "rječnik"]],
+      "Mlijeko–mliječni, lijep–ljepota, riječ–rječnik.",
+      3
+    )
+  );
+  pravopis.push(
+    match(
+      "prav-match-glas",
+      "Spoji riječ s glasom koji nedostaje.",
+      [["ku__a (dom)", "ć"], ["__arapa", "č"], ["__em (namaz)", "dž"], ["__ak (učenik)", "đ"]],
+      "Kuća – ć, čarapa – č, džem – dž, đak – đ.",
+      3
+    )
+  );
+  pravopis.push(
+    match(
+      "prav-match-um",
+      "Spoji riječ s umanjenicom.",
+      [["ključ", "ključić"], ["brod", "brodić"], ["cvijet", "cvjetić"]],
+      "Umanjenice na -ić uvijek se pišu s ć.",
+      3
+    )
+  );
+
+  // --- Pravila za pamćenje ---
+  [
+    ["prav-pravilo-ije", "U riječi „cvijet“ pišemo ije, a u riječi „cvjetovi“ pišemo je.", true, "Točno — duga ije u jednini, kratka je u izvedenici."],
+    ["prav-pravilo-ic", "Umanjenice na -ić (ključić, brodić) pišu se s ć.", true, "Točno — nastavak -ić uvijek ima ć."],
+    ["prav-pravilo-dz", "Slova dž i đ označavaju dva različita glasa.", true, "Točno — dž je tvrđi (džem), a đ mekši (đak)."],
+    ["prav-pravilo-djeca", "Riječ „djeca“ piše se s ije.", false, "Ne — piše se djeca, s je. S ije je samo dijete."],
+    ["prav-pravilo-kuca", "Riječ „kuća“ piše se s č.", false, "Ne — kuća se piše s ć."],
+    ["prav-pravilo-kruh", "Riječ „kruh“ na kraju ima glas h.", true, "Točno — kruh, a ne „kru“."]
+  ].forEach(function (row) {
+    pravopis.push(tf(row[0], row[1], row[2], row[3], 2));
+  });
+
   // Dopuna: nedostajuće slovo u riječi (Profil — slova / riječi)
   var nedostaje = [];
   for (i = 0; i < words.length; i++) {
@@ -1340,6 +1732,14 @@
       desc: "Trag: veliko slovo, točka, upitnik i razmak.",
       roundSize: 10,
       bank: recenica
+    },
+    {
+      id: "hrv-pravopis",
+      title: "Pravopis",
+      emoji: "🖋️",
+      desc: "Trag: ije/je, č/ć, dž/đ, glas h i „ne“ uz glagol.",
+      roundSize: 12,
+      bank: pravopis
     },
     {
       id: "hrv-citanje",

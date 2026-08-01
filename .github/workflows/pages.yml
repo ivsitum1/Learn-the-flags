@@ -44,6 +44,10 @@ jobs:
           if [ -d ljeto-1razred ]; then
             cp -r ljeto-1razred _site/
           fi
+          # Oznaka verzije za skočni gumb „Osvježi“ (js/update-notice.js).
+          # Otvorene kartice ju povremeno provjere i ponude osvježavanje.
+          printf '{\n  "version": "%s",\n  "builtAt": "%s"\n}\n' \
+            "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > _site/version.json
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

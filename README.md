@@ -70,6 +70,9 @@ obliku za jezike osim hrvatskog. Odabir jezika pamti se.
 - Svijetla i tamna tema (automatski prema sustavu + ručni prekidač).
 - Napredak i rezultati pamte se u pregledniku (localStorage).
 - Potpuno responzivno (mobitel / tablet / desktop).
+- **Obavijest o novoj verziji** — nakon objave (deploy) otvorene kartice pokažu
+  skočni gumb „Osvježi“. Stranica se ne osvježava sama jer korisnik može biti
+  usred kviza ili zadatka. Radi u obje aplikacije; vidi `js/update-notice.js`.
 
 ## 🚀 Pokretanje lokalno
 
@@ -84,10 +87,14 @@ Ili jednostavno otvori `index.html` u pregledniku.
 ## 📁 Struktura
 
 ```
-index.html         # sučelje
-css/styles.css     # stilovi (uklj. tamnu temu)
-js/countries.js    # baza od 197 država
-js/app.js          # logika (kartice, kviz, enciklopedija, multiplayer)
+index.html           # sučelje
+css/styles.css       # stilovi (uklj. tamnu temu)
+js/countries.js      # baza od 197 država
+js/app.js            # logika (kartice, kviz, enciklopedija, multiplayer)
+js/update-notice.js  # skočni gumb „Osvježi“ nakon deploya (dijele ga obje aplikacije)
+sw.js                # service worker (offline, network-first)
+version.json         # oznaka verzije; GitHub Actions ju prepiše pri objavi
+ljeto-1razred/       # Ljetni park — ponavljanje 1. razreda
 ```
 
 ## 📝 Napomena
