@@ -129,6 +129,22 @@ function checkQuestion(q, where) {
       if (seen[c]) fail(where + "/" + q.id + ": dvije jednake ponude („" + c + "“)");
       seen[c] = true;
     });
+    // Banka može biti uredna, a preglednik ipak nacrtati dvostruki gumb —
+    // zato se gleda točno ono što Engine šalje na ekran.
+    var shown = global.Engine.renderedChoices(q).map(String);
+    var seenShown = {};
+    shown.forEach(function (c) {
+      if (seenShown[c]) {
+        fail(where + "/" + q.id + ": ista ponuda prikazana dvaput („" + c + "“)");
+      }
+      seenShown[c] = true;
+    });
+    if (shown.length !== choices.length) {
+      fail(
+        where + "/" + q.id + ": prikazuje se " + shown.length +
+        " ponuda, a banka ih ima " + choices.length
+      );
+    }
   } else if (type === "order") {
     if (!Array.isArray(q.answer) || !q.answer.length) {
       fail(where + "/" + q.id + ": nedostaje redoslijed");

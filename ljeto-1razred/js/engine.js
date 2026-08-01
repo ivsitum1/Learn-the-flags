@@ -54,6 +54,30 @@
     return out;
   }
 
+  function hasValue(arr, v) {
+    var i;
+    for (i = 0; i < arr.length; i++) {
+      if (String(arr[i]) === String(v)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Uvijek uključi točan odgovor ako ga banka slučajno izgubi.
+   * Usporedba ide preko String-a: banke matematike drže brojeve, pa je
+   * `indexOf(String(answer))` uvijek promašio i dodavao točan odgovor još
+   * jednom — dijete je vidjelo isti broj dvaput i po tome ga prepoznalo.
+   */
+  function withAnswer(choices, answer) {
+    if (answer != null && !hasValue(choices, answer)) choices.push(answer);
+    return choices;
+  }
+
+  // Točno ono što će se prikazati kao gumbi — koristi i provjera sadržaja.
+  function renderedChoices(q) {
+    return withAnswer(uniqueStrings((q && q.choices) || []), q && q.answer);
+  }
+
   function pickRandom(arr, n) {
     if (n >= arr.length) return shuffle(arr);
     var copy = arr.slice();
@@ -349,11 +373,7 @@
     var type = q.type || "mcq";
 
     if (type === "mcq" || type === "truefalse" || type === "count") {
-      var choices = uniqueStrings(q.choices || []);
-      // Uvijek uključi točan odgovor ako ga banka slučajno izgubi.
-      if (q.answer != null && choices.indexOf(String(q.answer)) === -1) {
-        choices.push(String(q.answer));
-      }
+      var choices = renderedChoices(q);
       // Kod 3+ ponuđenih odgovora poredak nikad ne ostaje kakav je u banci;
       // kod dva (Točno/Netočno) ostaje čisti slučajni izbor 50:50.
       choices = choices.length > 2 ? shuffleUnlike(choices, choices) : shuffle(choices);
@@ -523,10 +543,7 @@
   function applyHint(q) {
     var type = (q && q.type) || "mcq";
     if (type === "mcq" || type === "truefalse" || type === "count") {
-      var choices = uniqueStrings((q.choices || []).slice());
-      if (q.answer != null && choices.indexOf(String(q.answer)) === -1) {
-        choices.push(String(q.answer));
-      }
+      var choices = renderedChoices(q);
       var wrong = choices.filter(function (c) {
         return String(c) !== String(q.answer);
       });
@@ -547,6 +564,7 @@
   global.Engine = {
     shuffle: shuffle,
     shuffleUnlike: shuffleUnlike,
+    renderedChoices: renderedChoices,
     pickRound: pickRound,
     starsFromScore: starsFromScore,
     mountQuestion: mountQuestion,
