@@ -68,6 +68,12 @@
     return out.slice(0, n || 4);
   }
 
+  // Susjedni brojevi s obje strane točnog odgovora. U fiksnom je redoslijedu
+  // točan odgovor uvijek ispadao drugi po veličini pa se pogađao bez brojanja.
+  function nearNums(n) {
+    return [n - 1, n + 1, n - 2, n + 2, n - 3, n + 3];
+  }
+
   function shuffleInPlace(arr) {
     var i;
     for (i = arr.length - 1; i > 0; i--) {
@@ -232,7 +238,7 @@
         "len-" + w[0],
         "Koliko slova ima riječ „" + w[0] + "“?",
         w[0].length,
-        uniqChoices(w[0].length, [w[0].length - 1, w[0].length + 1, w[0].length + 2, w[0].length - 2, 2, 3, 4, 5, 6, 7, 8].filter(function (n) { return n > 0; })),
+        uniqChoices(w[0].length, shuffleInPlace(nearNums(w[0].length)).concat([2, 3, 4, 5, 6, 7, 8]).filter(function (n) { return n > 0; })),
         "Riječ „" + w[0] + "“ ima " + w[0].length + " slova.",
         { kind: "text", text: w[0] },
         2
@@ -382,7 +388,7 @@
         "syl-" + w[0],
         "Koliko slogova ima riječ „" + w[0] + "“?",
         sylCount,
-        uniqChoices(sylCount, [1, 2, 3, 4, 5, sylCount - 1, sylCount + 1].filter(function (n) { return n >= 1; })),
+        uniqChoices(sylCount, shuffleInPlace(nearNums(sylCount)).concat([1, 2, 3, 4, 5]).filter(function (n) { return n >= 1; })),
         "Riječ „" + w[0] + "“ ima " + sylCount + " sloga/slogova.",
         { kind: "text", text: w[0] },
         sylCount >= 3 ? 3 : 2

@@ -3,25 +3,59 @@
 
   var MAX = 20;
 
+  /**
+   * Četiri ponuđena broja oko točnog odgovora.
+   *
+   * Distraktori se dijele ispod i iznad točnog odgovora, a koliko ih ide na
+   * koju stranu bira se nasumično. Prije su bili fiksno −3, −2 i −1, pa je
+   * točan odgovor uvijek bio najveći ponuđeni broj i dijete ga je pogađalo
+   * bez računanja.
+   */
   function uniqChoices(answer, extras) {
     var set = {};
     var out = [];
     // Dopusti točan odgovor i iznad MAX (npr. zbroj stranica oblika),
     // inače ponuda ostane bez točnog broja ili s nasumičnim 0–3.
     var lim = Math.max(MAX, Number(answer) || 0);
-    function add(v) {
-      if (typeof v !== "number" || !isFinite(v) || v < 0 || v > lim) return;
+    // Za distraktore gledamo malo iznad granice — inače kod rezultata na
+    // samom vrhu (npr. 20) svi ponuđeni brojevi padnu ispod točnoga.
+    var hi = lim + 3;
+    function add(v, cap) {
+      if (typeof v !== "number" || !isFinite(v) || v < 0 || v > cap) return;
       var k = String(v);
       if (set[k]) return;
       set[k] = true;
       out.push(v);
     }
-    add(answer);
-    (extras || []).forEach(add);
-    var deltas = [-3, -2, -1, 1, 2, 3, 4, -4, 5, -5];
+    add(answer, hi);
+    (extras || []).forEach(function (v) {
+      add(v, lim);
+    });
+
+    var need = 4 - out.length;
+    if (need > 0) {
+      var lows = [];
+      var highs = [];
+      var d;
+      for (d = 1; lows.length < need && answer - d >= 0; d++) lows.push(answer - d);
+      for (d = 1; highs.length < need && answer + d <= hi; d++) highs.push(answer + d);
+      // Koliko distraktora ide ispod točnog odgovora — nasumično, da mu
+      // mjesto po veličini bude ravnomjerno raspoređeno od najmanjeg do
+      // najvećeg. Krajevi se stisnu samo kad blizina 0 ili granice ne dopušta.
+      var below = Math.floor(Math.random() * (need + 1));
+      below = Math.min(below, lows.length);
+      var above = Math.min(need - below, highs.length);
+      below = Math.min(lows.length, need - above);
+      lows.slice(0, below).forEach(function (v) {
+        add(v, hi);
+      });
+      highs.slice(0, above).forEach(function (v) {
+        add(v, hi);
+      });
+    }
+
     var i;
-    for (i = 0; i < deltas.length && out.length < 4; i++) add(answer + deltas[i]);
-    for (i = 0; i <= lim && out.length < 4; i++) add(i);
+    for (i = 0; i <= lim && out.length < 4; i++) add(i, lim);
     return out.slice(0, 4);
   }
 
@@ -1135,7 +1169,7 @@
     lanac.push({
       id: id,
       type: "mcq",
-      prompt: "Izračunaj po redu (slijeva nadesno):",
+      prompt: "Izračunaj:",
       answer: acc,
       choices: uniqChoices(acc),
       explain: steps.join(", ") + ".",
