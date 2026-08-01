@@ -1210,7 +1210,6 @@
         id: "hrv-nt-glasovi",
         title: "Čujem, čujem",
         emoji: "👂",
-        desc: "Nina i Tino: glasovi, onomatopeja, tiho i glasno.",
         roundSize: 10,
         bank: glasovi
       },
@@ -1218,7 +1217,6 @@
         id: "hrv-nt-usporedbe",
         title: "Što ide zajedno",
         emoji: "🔗",
-        desc: "Nina i Tino: spoji, nizovi, što ne pripada, uredno/neuredno.",
         roundSize: 8,
         bank: usporedbe
       },
@@ -1226,7 +1224,6 @@
         id: "hrv-nt-rijeci",
         title: "Pročitaj slike",
         emoji: "🖼️",
-        desc: "Nina i Tino: IMA, JE, parovi i sastavljanje riječi.",
         roundSize: 8,
         bank: rijeci
       },
@@ -1234,7 +1231,6 @@
         id: "hrv-nt-recenice",
         title: "Ispravi i ispričaj",
         emoji: "💬",
-        desc: "Nina i Tino: zbrkane rečenice, hvala/oprosti, bon ton.",
         roundSize: 8,
         bank: recenice
       },
@@ -1242,7 +1238,6 @@
         id: "hrv-nt-slova",
         title: "Slova i glasovi",
         emoji: "🔤",
-        desc: "Nina i Tino: broj slova, početni glas, SREĆA.",
         roundSize: 8,
         bank: slova
       },
@@ -1250,7 +1245,6 @@
         id: "hrv-nt-skola",
         title: "Prvi dani",
         emoji: "🏫",
-        desc: "Nina i Tino: škola, lijepo ponašanje, jutarnje navike.",
         roundSize: 8,
         bank: skola
       }

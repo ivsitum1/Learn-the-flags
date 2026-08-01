@@ -1390,7 +1390,6 @@
         id: "mat-prostor",
         title: "Prostorni odnosi",
         emoji: "📐",
-        desc: "Trag: dulji/kraći, veći/manji, iznad/ispod, lijevo/desno.",
         roundSize: 10,
         bank: prostor
       },
@@ -1398,7 +1397,6 @@
         id: "mat-oblici",
         title: "Oblici i tijela",
         emoji: "🔷",
-        desc: "Trag: likovi, geometrijska tijela, točka i crta.",
         roundSize: 10,
         bank: oblici
       },
@@ -1406,7 +1404,6 @@
         id: "mat-brojevi",
         title: "Brojevi do 20",
         emoji: "🔢",
-        desc: "Trag: usporedi, desetice i jedinice, jedno-/dvoznamenkasti.",
         roundSize: 12,
         bank: brojevi
       },
@@ -1414,7 +1411,6 @@
         id: "mat-redni",
         title: "Redni brojevi",
         emoji: "🥇",
-        desc: "Trag: prvi do dvadeseti i snalaženje u redu.",
         roundSize: 10,
         bank: redniB
       },
@@ -1422,7 +1418,6 @@
         id: "mat-broj-rijeci",
         title: "Brojevne riječi",
         emoji: "✍️",
-        desc: "Trag: brojka ↔ riječ, pa i izračunaj i napiši riječima.",
         roundSize: 10,
         bank: brojRijeci
       },
@@ -1430,7 +1425,6 @@
         id: "mat-racun",
         title: "Zbrajanje i oduzimanje",
         emoji: "➕",
-        desc: "Trag: + i − do 20, zamjena pribrojnika i veza s oduzimanjem.",
         roundSize: 12,
         bank: racun
       },
@@ -1438,7 +1432,6 @@
         id: "mat-lanac",
         title: "Lančani računi",
         emoji: "🔗",
-        desc: "Trag: zbrajaj i oduzimaj po redu, s tri ili četiri broja.",
         roundSize: 10,
         bank: lanac
       },
@@ -1446,7 +1439,6 @@
         id: "mat-jednadzbe",
         title: "Jednačenja",
         emoji: "⚖️",
-        desc: "Trag: nađi x — npr. 7 + 3 = x + 5 ili x − 4 = 9.",
         roundSize: 12,
         bank: jednadzbe
       },
@@ -1454,7 +1446,6 @@
         id: "mat-rijeci",
         title: "Zadaci s riječima",
         emoji: "📝",
-        desc: "Trag: priče s brojevima + pravopis (ije/je, č/ć, dž/đ).",
         roundSize: 10,
         quota: { pravopis: 3 },
         bank: rijeci
@@ -1463,7 +1454,6 @@
         id: "mat-zadaci",
         title: "Zadaci i novac",
         emoji: "💶",
-        desc: "Trag: životni zadaci, cijene, ostatak novca i pravopis.",
         roundSize: 10,
         quota: { pravopis: 3 },
         bank: zadaci

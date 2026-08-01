@@ -402,7 +402,6 @@
         id: "gus-otok",
         title: "Skriveni gusarski otok",
         emoji: "🏴‍☠️",
-        desc: "12 zadataka iz sva 3 predmeta. Imaš 1 hint po pitanju.",
         roundSize: 12,
         bank: bank,
         allowHint: true

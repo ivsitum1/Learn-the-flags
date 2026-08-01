@@ -589,13 +589,6 @@ main {
   font-weight: 600;
 }
 
-.station-node p {
-  margin: 0.2rem 0 0;
-  color: var(--ink-soft);
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 .station-node.locked {
   opacity: 0.55;
   cursor: not-allowed;
@@ -826,7 +819,6 @@ main {
   font-size: 1.85rem;
 }
 
-.intro-desc,
 .result-msg {
   color: var(--ink-soft);
   font-weight: 600;
@@ -836,7 +828,7 @@ main {
 
 .intro-meta {
   font-weight: 800;
-  margin: 0 0 1.25rem;
+  margin: 0.8rem 0 1.25rem;
 }
 
 .result-stars {

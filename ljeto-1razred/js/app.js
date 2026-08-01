@@ -112,7 +112,6 @@
     gameGrid: document.getElementById("gameGrid"),
     introEmoji: document.getElementById("introEmoji"),
     introTitle: document.getElementById("introTitle"),
-    introDesc: document.getElementById("introDesc"),
     introCount: document.getElementById("introCount"),
     btnStart: document.getElementById("btnStart"),
     playProgress: document.getElementById("playProgress"),
@@ -362,9 +361,7 @@
         (unlocked ? game.emoji : "🔒") +
         "</span><div><h3>" +
         game.title +
-        "</h3><p>" +
-        game.desc +
-        '</p></div><span class="pill-stars">' +
+        '</h3></div><span class="pill-stars">' +
         starText(stars) +
         "</span>";
       if (unlocked) {
@@ -390,7 +387,6 @@
     state.game = game;
     els.introEmoji.textContent = game.emoji;
     els.introTitle.textContent = "Trag: " + game.title;
-    els.introDesc.textContent = game.desc;
     els.introCount.textContent = String(game.roundSize || 10);
     showView("intro");
   }

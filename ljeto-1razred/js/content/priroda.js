@@ -1690,7 +1690,6 @@
         id: "pid-godisnja",
         title: "Godišnja doba",
         emoji: "🌸",
-        desc: "Trag: proljeće–zima, selice/stanarice, zimski blagdani.",
         roundSize: 12,
         bank: bankDoba
       },
@@ -1698,7 +1697,6 @@
         id: "pid-mjeseci",
         title: "Mjeseci",
         emoji: "📅",
-        desc: "Trag: koji mjesec pripada kojem godišnjem dobu.",
         roundSize: 12,
         bank: bankMjeseci
       },
@@ -1706,7 +1704,6 @@
         id: "pid-vrijeme",
         title: "Vrijeme i odjeća",
         emoji: "☔",
-        desc: "Trag: kiša, sunce, snijeg, jesen/zima i što nosimo.",
         roundSize: 10,
         bank: bankVrijeme
       },
@@ -1714,7 +1711,6 @@
         id: "pid-zivo",
         title: "Živo i neživo",
         emoji: "✨",
-        desc: "Trag: što je živo biće, a što nije.",
         roundSize: 10,
         bank: bankZivo
       },
@@ -1722,7 +1718,6 @@
         id: "pid-zivotinje",
         title: "Životinje",
         emoji: "🐾",
-        desc: "Trag: domaće i divlje, stanište i noge.",
         roundSize: 12,
         bank: bankZivotinje
       },
@@ -1730,7 +1725,6 @@
         id: "pid-biljke",
         title: "Biljke",
         emoji: "🌱",
-        desc: "Trag: biljke, dijelovi i što trebaju za rast.",
         roundSize: 10,
         bank: bankBiljke
       },
@@ -1738,7 +1732,6 @@
         id: "pid-tijelo",
         title: "Moje tijelo",
         emoji: "🧍",
-        desc: "Trag: dijelovi tijela, osjetila i zdravlje.",
         roundSize: 10,
         bank: bankTijelo
       },
@@ -1746,7 +1739,6 @@
         id: "pid-dani",
         title: "Dani i doba dana",
         emoji: "🗓️",
-        desc: "Trag: tjedan, pozdravi, jučer–danas–sutra (Nina i Tino).",
         roundSize: 12,
         bank: bankDani
       },
@@ -1754,7 +1746,6 @@
         id: "pid-okolina",
         title: "Ja i okolina",
         emoji: "🏠",
-        desc: "Trag: škola, obitelj, promet (zebra, 112) i okolina.",
         roundSize: 12,
         bank: bankOkolina
       }

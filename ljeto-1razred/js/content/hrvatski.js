@@ -1681,7 +1681,6 @@
       id: "hrv-prvo-zadnje",
       title: "Prvo i zadnje slovo",
       emoji: "🔠",
-      desc: "Trag: koje slovo stoji na početku ili na kraju riječi.",
       roundSize: 12,
       bank: prvoZadnje
     },
@@ -1689,7 +1688,6 @@
       id: "hrv-duljina",
       title: "Broj slova",
       emoji: "🔢",
-      desc: "Trag: koliko slova ima riječ i koje nedostaje.",
       roundSize: 10,
       bank: duljina
     },
@@ -1697,7 +1695,6 @@
       id: "hrv-velika-mala",
       title: "Velika i mala slova",
       emoji: "🔤",
-      desc: "Trag: spoji veliko i malo slovo (i dijakritike).",
       roundSize: 12,
       bank: velikaMala
     },
@@ -1705,7 +1702,6 @@
       id: "hrv-abeceda",
       title: "Abeceda",
       emoji: "🔠",
-      desc: "Trag: što dolazi prije i poslije, poredaj slova.",
       roundSize: 12,
       bank: abeceda
     },
@@ -1713,7 +1709,6 @@
       id: "hrv-slogovi",
       title: "Broj slogova",
       emoji: "🧩",
-      desc: "Trag: koliko slogova ima riječ.",
       roundSize: 12,
       bank: slogBroj
     },
@@ -1721,7 +1716,6 @@
       id: "hrv-sastavi",
       title: "Sastavi riječ",
       emoji: "🧱",
-      desc: "Trag: spoji slogove i sastavi riječ.",
       roundSize: 10,
       bank: slogSastavi
     },
@@ -1729,7 +1723,6 @@
       id: "hrv-recenica",
       title: "Rečenica i pravopis",
       emoji: "✏️",
-      desc: "Trag: veliko slovo, točka, upitnik i razmak.",
       roundSize: 10,
       bank: recenica
     },
@@ -1737,7 +1730,6 @@
       id: "hrv-pravopis",
       title: "Pravopis",
       emoji: "🖋️",
-      desc: "Trag: ije/je, č/ć, dž/đ, glas h i „ne“ uz glagol.",
       roundSize: 12,
       bank: pravopis
     },
@@ -1745,7 +1737,6 @@
       id: "hrv-citanje",
       title: "Čitanje",
       emoji: "📚",
-      desc: "Trag: kratki tekst — tko, što, gdje, koja boja.",
       roundSize: 10,
       bank: citanjeKratko
     },
@@ -1753,7 +1744,6 @@
       id: "hrv-razumijevanje",
       title: "Razumijevanje",
       emoji: "🕵️",
-      desc: "Trag: duža priča — zaključuj iz teksta.",
       roundSize: 10,
       bank: razumijevanje
     }

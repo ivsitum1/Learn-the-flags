@@ -12,6 +12,36 @@
     return a;
   }
 
+  function sameOrder(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (String(a[i]) !== String(b[i])) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Promiješa niz tako da se poredak sigurno razlikuje od zadanoga.
+   * Koristi se ondje gdje bi „slučajno“ točan poredak pokvario zadatak
+   * (npr. „poredaj po veličini“ ne smije krenuti od mrav, pas, slon).
+   */
+  function shuffleUnlike(arr, reference) {
+    var src = (arr || []).slice();
+    var ref = reference && reference.length === src.length ? reference : src;
+    if (uniqueStrings(src).length < 2) return shuffle(src);
+    var out = shuffle(src);
+    var tries = 0;
+    while (sameOrder(out, ref) && tries < 24) {
+      out = shuffle(src);
+      tries++;
+    }
+    if (sameOrder(out, ref)) {
+      // Rotacija za jedno mjesto — mijenja poredak kad god ima 2+ različitih.
+      out = out.slice(1).concat(out.slice(0, 1));
+    }
+    return out;
+  }
+
   function uniqueStrings(arr) {
     var set = {};
     var out = [];
@@ -324,7 +354,9 @@
       if (q.answer != null && choices.indexOf(String(q.answer)) === -1) {
         choices.push(String(q.answer));
       }
-      choices = shuffle(choices);
+      // Kod 3+ ponuđenih odgovora poredak nikad ne ostaje kakav je u banci;
+      // kod dva (Točno/Netočno) ostaje čisti slučajni izbor 50:50.
+      choices = choices.length > 2 ? shuffleUnlike(choices, choices) : shuffle(choices);
       choices.forEach(function (c) {
         var btn = el("button", "btn choice", String(c));
         btn.type = "button";
@@ -344,7 +376,8 @@
     }
 
     if (type === "order") {
-      var items = shuffle((q.items || []).slice());
+      // Ponuđeni pojmovi ne smiju već biti u traženom poretku.
+      var items = shuffleUnlike((q.items || []).slice(), q.answer || []);
       var picked = [];
       var slots = el("div", "order-slots");
       var pool = el("div", "order-pool");
@@ -406,12 +439,16 @@
     }
 
     if (type === "match") {
-      var left = shuffle((q.pairs || []).map(function (p) { return p[0]; }));
-      var right = shuffle((q.pairs || []).map(function (p) { return p[1]; }));
       var map = {};
       (q.pairs || []).forEach(function (p) {
         map[String(p[0])] = String(p[1]);
       });
+      var left = shuffle((q.pairs || []).map(function (p) { return p[0]; }));
+      // Desni stupac ne smije stajati točno nasuprot svojim parovima.
+      var right = shuffleUnlike(
+        (q.pairs || []).map(function (p) { return p[1]; }),
+        left.map(function (l) { return map[String(l)]; })
+      );
       var selectedLeft = null;
       var matched = 0;
       var grid = el("div", "match-grid");
@@ -509,6 +546,7 @@
 
   global.Engine = {
     shuffle: shuffle,
+    shuffleUnlike: shuffleUnlike,
     pickRound: pickRound,
     starsFromScore: starsFromScore,
     mountQuestion: mountQuestion,
